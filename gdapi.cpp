@@ -172,10 +172,15 @@ bool getUserRank(GDuser& user) {
 
 	// testing shows its the 24st element, if its not valid there's going to be
 	// some checks lol
+	bool foundUser = false;
+	std::vector<std::string> seglist;
 
-	std::vector<std::string> seglist = explode(splitlist[24], ':');
+	if (splitlist.size() >= 24) {
+		seglist = explode(splitlist[24], ':');
+		foundUser = (atoi(seglist[16].c_str()) == user.accID);
+	}
 
-	if (atoi(seglist[16].c_str()) != user.accID) {  // hey look its the checks
+	if (!foundUser) {  // hey look its the checks
 
 	// so basically you look for
 	// :16:<id>:
@@ -183,7 +188,7 @@ bool getUserRank(GDuser& user) {
 
 	unsigned int i;
 
-	for (i = 0; i < splitlist.size(); i++) {
+	for (i = 0; i < splitlist.size()-1; i++) {
 		if (splitlist[i].find(idLookup) != std::string::npos) {
 			break;
 		}
@@ -197,19 +202,19 @@ bool getUserRank(GDuser& user) {
 	}
 
 	for (unsigned int i = 0; i < seglist.size(); i++) {
-		if (seglist[i] == "1") {
+		/*if (seglist[i] == "1") {
 			user.name = seglist[i + 1];
 		}
 		// else ifs seem to do weird things
 		if (seglist[i] == "16") {
 			user.accID = atoi(seglist[i + 1].c_str());
-		}
+		}*/
 		if ((seglist[i] == "6")) {
 			user.rank = atoi(seglist[i + 1].c_str());  // this one doesn't like string to integer conversion for some reason
 		}
-		if (seglist[i] == "2") {
+		/*if (seglist[i] == "2") {
 			user.ID = atoi(seglist[i + 1].c_str());
-		}
+		}*/
 		i++;
 	}
 
