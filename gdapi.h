@@ -63,6 +63,6 @@ bool getLevel(int levelid, GDlevel& level);
 void getOfficialInfo(int id, GDlevel& level);
 
 // splits a string by substring, much like in other languages
-std::vector<std::string> explode(std::string string, char separator);
+std::vector<std::string> explode(std::string& string, char separator);
 
 #endif  // !GDAPI_H

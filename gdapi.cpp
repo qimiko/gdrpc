@@ -37,7 +37,6 @@ demon_difficulty getDemonDiffValue(int diff) {
 	}
 }
 
-
 std::string getDifficultyName(GDlevel& level) {
 	// for some reason auto/demon levels don't have a proper difficulty
 	if (level.isAuto) {
@@ -114,7 +113,7 @@ DWORD makeRequest(std::string data, LPCWSTR url, std::string& response) {
 	::InternetCloseHandle(hSession); // we done
 
 	response = responseStringStream.str();
-	
+
 	return 0;
 }
 
@@ -227,11 +226,11 @@ bool getLevel(int levelid, GDlevel& level) {
   frmdata.append(std::to_string(levelid));
 
   std::string levelString;
-  
+
   DWORD responseCode = makeRequest(frmdata, L"/database/getGJLevels21.php", levelString);
   if (responseCode != 0) {
     return false;
-  } 
+  }
 
 
   // reset
@@ -251,12 +250,12 @@ bool getLevel(int levelid, GDlevel& level) {
   std::vector<std::string> splitlist = explode(levelString, '#');
 
   if (splitlist.size() == 1 || splitlist.size() == 0) {
-	  return false;
+		return false;
   }
 
   std::vector<std::string> seglist = explode(splitlist[0], ':');
   std::vector<std::string> seg2list = explode(splitlist[1], ':');
-  
+
 
 
   // reading the string
@@ -286,14 +285,14 @@ bool getLevel(int levelid, GDlevel& level) {
     }
     if (seglist[i] == "43") {
       if (level.isDemon) {
-		  level.demonDifficulty = getDemonDiffValue(atoi(seglist[i + 1].c_str()));
-	  }
+				level.demonDifficulty = getDemonDiffValue(atoi(seglist[i + 1].c_str()));
+		}
 	}
     i++;
   }
   if (seg2list.size() >
 	  0) {  // check to prevent any weird errors by id not existing
-	  level.author = seg2list[1].c_str();
+		level.author = seg2list[1].c_str();
   }
 
   return true;
@@ -419,7 +418,7 @@ void getOfficialInfo(int id, GDlevel& level) {
 }
 
 //helper function
-std::vector<std::string> explode(std::string string, char separator) {
+std::vector<std::string> explode(std::string& string, char separator) {
   std::stringstream segmentstream(string);
   std::string segmented;
   std::vector<std::string> splitlist;

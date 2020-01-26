@@ -8,6 +8,7 @@
 #include "gdapi.h"
 #include <ctime>
 #include "DRPWrap.h"
+#include <algorithm>
 
 #pragma message("gg!")
 
@@ -105,6 +106,23 @@ int getLevelLocation() {
 	return *part;
 }
 
+//insane_demon to Insane Demon
+std::string getTextFromKey(std::string key) {
+	key[0] = toupper(key[0]); // uppercase first letter
+	int index = 1; // start from 1 because we start string from 1, and also because you can't get an index at -1 like it'll try to do..
+	std::for_each(key.begin() + 1, key.end(), [&index, &key](char& letter) {
+		// in any case, this checks if it's a space before
+		if (key[index-1] == ' ') {
+			letter = toupper(letter); // then capitalizes
+		}
+		else if (letter == '_') { // if underscore it goes and remoes it
+			letter = ' ';
+		}
+		index++; // then we use this to count
+		});
+	return key;
+}
+
 DWORD WINAPI actualMain(LPVOID lpParam) {
    
 	#ifdef _DEBUG
@@ -114,12 +132,13 @@ DWORD WINAPI actualMain(LPVOID lpParam) {
 		freopen_s(&fp, "CONOUT$", "w", stdout);
 	#endif
 
-	printDebug("Developed", std::string(__TIME__));
+	printDebug("Developed", std::string(__DATE__) + " " + std::string(__TIME__));
 	printDebug("Info", "Please wait...");
 
 	DRP::InitDiscord();
 	Discord_RunCallbacks();
 
+	// guess this just waits for discord
 	Sleep(5000);
 
 	int* accountID = (int *)(*getBase(GDBaseP) + 0x1BC);
@@ -194,7 +213,7 @@ DWORD WINAPI actualMain(LPVOID lpParam) {
 				}
 				else {
 					smallImage = getDifficultyName(currentLevel);
-					smallText = std::to_string(currentLevel.stars) + "*";
+					smallText = std::to_string(currentLevel.stars) + "* " + getTextFromKey(getDifficultyName(currentLevel));
 					state = currentLevel.author + " - " + currentLevel.name + " (Best: " + std::to_string(getBestPercent()) + "%)";
 				}
 			}
@@ -203,7 +222,7 @@ DWORD WINAPI actualMain(LPVOID lpParam) {
 				getOfficialInfo(getCurrentID(), currentLevel);
 				state = currentLevel.name + " (Best: " + std::to_string(getBestPercent()) + "%)";
 				smallImage = getDifficultyName(currentLevel);
-				smallText = std::to_string(currentLevel.stars) + "*";
+				smallText = std::to_string(currentLevel.stars) + "* " + getTextFromKey(getDifficultyName(currentLevel));
 			}
 			if (getCurrentID() == 0 || getLevelLocation() == 2) {
 				// editing level but playing it
@@ -218,7 +237,7 @@ DWORD WINAPI actualMain(LPVOID lpParam) {
 				getOfficialInfo(3001, currentLevel);
 				state = currentLevel.name + " (Best: " + std::to_string(getBestPercent()) + "%)";
 				smallImage = getDifficultyName(currentLevel);
-				smallText = std::to_string(currentLevel.stars) + "*";
+				smallText = std::to_string(currentLevel.stars) + "* " + getTextFromKey(getDifficultyName(currentLevel));
 			}
 		}
 		else if(isInEditor()) {
