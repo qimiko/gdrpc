@@ -19,11 +19,13 @@
 #### Manually
 
 1. inject `gdrpc.dll` with DLL injector
+2. make sure `discord-rpc.dll` is in the GD directory
 
 #### Automatically
 
 1. copy `libcurl.dll` and `gdrpc.dll` to the Geometry Dash directory
-2. start GD
+2. put `discord-rpc.dll` into the GD directory
+3. start GD
 
 ### Compiling
 
