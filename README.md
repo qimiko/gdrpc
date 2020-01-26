@@ -25,6 +25,13 @@
 4. build dll
 5. add the assets in the `assets` folder to discord
 
+### Credits
+
+* Absolute for level pointer from mega hack
+* nekit for the level location thingy
+* cos8o for being cos8o
+* saya for some motivation
+
 ### TODOs
 
 * Autoloading on game start
