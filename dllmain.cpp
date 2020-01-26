@@ -124,8 +124,7 @@ std::string getTextFromKey(std::string key) {
 }
 
 DWORD WINAPI actualMain(LPVOID lpParam) {
-   
-	#ifdef _DEBUG
+   	#ifdef _DEBUG
 		AllocConsole();  // attaches console if ya want to do some debug stuff
 		SetConsoleTitleA("rpc");
 		FILE* fp;
