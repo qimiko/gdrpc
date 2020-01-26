@@ -128,7 +128,7 @@ bool getUserInfo(int playerID, GDuser& user) {
 	}
 	std::vector<std::string> splitlist = explode(playerString, ':');
 
-	if (splitlist.size() == 1) {
+	if (splitlist.size() == 1 || splitlist.size() == 0) {
 		user.name = "invalid";
 		user.ID = -1;
 		user.accID = -1;
@@ -165,6 +165,10 @@ bool getUserRank(GDuser& user) {
 	}
 
 	std::vector<std::string> splitlist = explode(leaderboardString, '|');
+
+	if (splitlist.size() == 1 || splitlist.size() == 0) {
+		return false;
+	}
 
 	// testing shows its the 24st element, if its not valid there's going to be
 	// some checks lol
