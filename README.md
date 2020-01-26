@@ -10,12 +10,22 @@
 * Editor
   * Designed to not display name
 * Menu state
+* Autoloads
 
 **Note**: This thing will probably crash if the servers go down, considering that there's many reasons for the servers to go down and many responses it will give.. Fixes will be made as time goes on...
 
 ### Using
 
-1. inject DLL with DLL injector
+#### Manually
+
+1. inject `gdrpc.dll` with DLL injector
+2. make sure `discord-rpc.dll` is in the GD directory
+
+#### Automatically
+
+1. copy `libcurl.dll` and `gdrpc.dll` to the Geometry Dash directory
+2. put `discord-rpc.dll` into the GD directory
+3. start GD
 
 ### Compiling
 
@@ -25,16 +35,21 @@
 4. build dll
 5. add the assets in the `assets` folder to discord
 
+#### Autoloader
+
+The autoloader can be found at [this repo](https://github.com/zmxhawrhbg/curl). Compile it like you would curl (make sure it is as DLL).  
+No libs were added to the build.
+
 ### Credits
 
 * Absolute for level pointer from mega hack
 * nekit for the level location thingy
 * cos8o for being cos8o
-* saya for some motivation
+* saya for motivation
+* silentzer for being smart
 
 ### TODOs
 
-* Autoloading on game start
 * Recoding main loop
 * Get info without requests in case of server failure
 * 🦀
