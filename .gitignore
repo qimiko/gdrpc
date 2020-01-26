@@ -348,3 +348,8 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+
+# i'd rather not manually exclude these every build so..
+discord_files/*
+discord-rpc.lib
+DiscordSecret.cpp
