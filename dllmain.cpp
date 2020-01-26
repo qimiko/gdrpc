@@ -126,8 +126,8 @@ std::string getTextFromKey(std::string key) {
 DWORD WINAPI actualMain(LPVOID lpParam) {
    
 	#ifdef _DEBUG
-		AllocConsole();  // attaches console	if ya want to do some debug
-						 // stuff
+		AllocConsole();  // attaches console if ya want to do some debug stuff
+		SetConsoleTitleA("rpc");
 		FILE* fp;
 		freopen_s(&fp, "CONOUT$", "w", stdout);
 	#endif
