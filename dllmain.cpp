@@ -31,17 +31,6 @@ bool isInLevel() {
 		/* printDebug("Level Check", "Step 1 fail"); */
 		return false;
 	} // don't return true though so
-	/*
-	part = (int*)(*part + 0x22C);
-	if (IsBadReadPtr((DWORD*)(*part + 0x114), 4) != 0) {
-		printDebug("Level Check", "Step 2 fail");
-		return false;
-	}
-	part = (int*)(*part + 0x114);
-	if (IsBadReadPtr((DWORD*)(*part), 4) != 0) {
-		printDebug("Level Check", "Step 3 fail");
-		return false;
-	}*/
 	return true;
 }
 
@@ -50,7 +39,7 @@ bool isInEditor() {
 	if (IsBadReadPtr((DWORD*)(*part + 0x354), 4) != 0) {
 		/* printDebug("Editor Check", "Step 1 fail"); */
 		return false;
-	} // don't return true though so
+	}
 	return true;
 }
 
@@ -140,15 +129,19 @@ DWORD WINAPI actualMain(LPVOID lpParam) {
 	// guess this just waits for discord
 	Sleep(5000);
 
-	int* accountID = (int *)(*getBase(GDBaseP) + 0x1BC);
-	//int* currentLevelID = (int*)(*getBase(0x3222D0) + 0x2A0);
-	//int* currentState = (int*)(*getBase(GDBaseP) + 0x1DC);
+	// this +8 behavior persists from 1.9, for some reason
+	int* accountID = (int *)(*getBase(GDBaseP+0x8) + 0x120);
 
 	printDebug("Account ID", std::to_string(*accountID));
 
 	GDuser user;
-	int accID = getUserInfo(*accountID, user);
-	getUserRank(user);
+	bool userInfoSuccess = getUserInfo(*accountID, user);
+	if (userInfoSuccess) {
+		getUserRank(user);
+	}
+	else {
+		printDebug("User", "Failure getting user rank!");
+	}
 
 	std::string details;
 	std::string state;
@@ -164,6 +157,7 @@ DWORD WINAPI actualMain(LPVOID lpParam) {
 
 	printDebug("largeText", largeText);
 
+	// small protection in case of thread stays open sometimes
 	HWND gd = FindWindow(0, L"Geometry Dash");
 	// get process
 	DWORD gdpid;

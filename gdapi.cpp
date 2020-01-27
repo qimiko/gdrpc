@@ -117,7 +117,41 @@ DWORD makeRequest(std::string data, LPCWSTR url, std::string& response) {
 	return 0;
 }
 
-bool getUserInfo(int playerID, GDuser& user) {
+bool getUserInfo(int accID, GDuser& user) {
+	std::string frmdata = "gameVersion=21&secret=Wmfd2893gb7&targetAccountID=";
+	frmdata.append(std::to_string(accID));
+
+	std::string userString;
+	DWORD responseCode = makeRequest(frmdata, L"/database/getGJUserInfo20.php", userString);
+	if (responseCode != 0) {
+		return false;
+	}
+	std::vector<std::string> splitlist = explode(userString, ':');
+
+	if (splitlist.size() == 1 || splitlist.size() == 0) {
+		user.name = "invalid";
+		user.ID = -1;
+		user.accID = -1;
+		return false;
+	}
+
+	for (unsigned int i = 0; i < splitlist.size(); i++) {
+		if (splitlist[i] == "1") {
+			user.name = splitlist[i + 1];
+		}
+		if (splitlist[i] == "2") {
+			user.ID = atoi(splitlist[i + 1].c_str());
+		}
+		if (splitlist[i] == "16") {
+			user.accID = atoi(splitlist[i + 1].c_str());
+		}
+		i++;
+	}
+
+	return true;
+}
+
+bool getPlayerInfo(int playerID, GDuser& user) {
 	std::string frmdata = "gameVersion=21&secret=Wmfd2893gb7&str=";
 	frmdata.append(std::to_string(playerID));
 
@@ -145,6 +179,7 @@ bool getUserInfo(int playerID, GDuser& user) {
 		if (splitlist[i] == "16") {
 			user.accID = atoi(splitlist[i + 1].c_str());
 		}
+		i++;
 	}
 
 	return true;
