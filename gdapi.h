@@ -56,7 +56,9 @@ std::string getDifficultyName(GDlevel& level);
 // returns 0 if succeed
 DWORD makeRequest(std::string data, LPCWSTR url, std::string& response);
 
-bool getUserInfo(int playerID, GDuser& user);
+bool getUserInfo(int accID, GDuser& user);
+bool getPlayerInfo(int playerID, GDuser& user);
+
 bool getUserRank(GDuser& user);
 bool getLevel(int levelid, GDlevel& level);
 
