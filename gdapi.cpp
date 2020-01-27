@@ -117,7 +117,7 @@ DWORD makeRequest(std::string data, LPCWSTR url, std::string& response) {
 	return 0;
 }
 
-bool getUserInfo(int accID, GDuser& user) {
+bool getUserInfo(int& accID, GDuser& user) {
 	std::string frmdata = "gameVersion=21&secret=Wmfd2893gb7&targetAccountID=";
 	frmdata.append(std::to_string(accID));
 
@@ -151,7 +151,7 @@ bool getUserInfo(int accID, GDuser& user) {
 	return true;
 }
 
-bool getPlayerInfo(int playerID, GDuser& user) {
+bool getPlayerInfo(int& playerID, GDuser& user) {
 	std::string frmdata = "gameVersion=21&secret=Wmfd2893gb7&str=";
 	frmdata.append(std::to_string(playerID));
 
@@ -343,6 +343,11 @@ bool getLevel(int levelid, GDlevel& level) {
 }
 
 void getOfficialInfo(int id, GDlevel& level) {
+	
+	if (id == level.levelID) { // don't redo this either
+		return;
+	}
+
 	// default attributes
 	level.levelID = id;
 	level.authorID = -1;

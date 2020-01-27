@@ -27,20 +27,12 @@ int* getBase(int pointer) {
 
 bool isInLevel() {
 	int* part = (int*)(*getBase(GDBaseP) + 0x164);
-	if (IsBadReadPtr((DWORD*)(*part + 0x22C), 4) != 0) {
-		/* printDebug("Level Check", "Step 1 fail"); */
-		return false;
-	} // don't return true though so
-	return true;
+	return !(IsBadReadPtr((DWORD*)(*part + 0x22C), 4) != 0);
 }
 
 bool isInEditor() {
 	int* part = (int*)(*getBase(GDBaseP) + 0x168);
-	if (IsBadReadPtr((DWORD*)(*part + 0x354), 4) != 0) {
-		/* printDebug("Editor Check", "Step 1 fail"); */
-		return false;
-	}
-	return true;
+	return !(IsBadReadPtr((DWORD*)(*part + 0x354), 4) != 0);
 }
 
 /* 
@@ -120,7 +112,7 @@ DWORD WINAPI actualMain(LPVOID lpParam) {
 		freopen_s(&fp, "CONOUT$", "w", stdout);
 	#endif
 
-	printDebug("Developed", std::string(__DATE__) + " " + std::string(__TIME__));
+	printDebug("Compiled", std::string(__DATE__) + " " + std::string(__TIME__));
 	printDebug("Info", "Please wait...");
 
 	DRP::InitDiscord();
@@ -132,16 +124,16 @@ DWORD WINAPI actualMain(LPVOID lpParam) {
 	// this +8 behavior persists from 1.9, for some reason
 	int* accountID = (int *)(*getBase(GDBaseP+0x8) + 0x120);
 
-	printDebug("Account ID", std::to_string(*accountID));
-
 	GDuser user;
 	bool userInfoSuccess = getUserInfo(*accountID, user);
 	if (userInfoSuccess) {
 		getUserRank(user);
 	}
+	#ifdef _DEBUG
 	else {
 		printDebug("User", "Failure getting user rank!");
 	}
+	#endif
 
 	std::string details;
 	std::string state;
@@ -173,6 +165,8 @@ DWORD WINAPI actualMain(LPVOID lpParam) {
 
 	time_t currentTimestamp = time(0);
 
+	int lastID = -1;
+
 	while (true) {
 
 		Discord_RunCallbacks();
@@ -193,66 +187,65 @@ DWORD WINAPI actualMain(LPVOID lpParam) {
 			return 0;
 		}
 
-		// this gets messy, so i'll probably redo it (probably in rust lol!)
-		// especially cause i reuse strings _a lot_
 		if (isInLevel()) {
-			if (getLevelLocation() != 1) { // official level check
-				details = "Playing a level";
-				bool levelStatus = getLevel(getCurrentID(), currentLevel);
-				if (!levelStatus) {
-					smallImage = "";
-					smallText = "";
-					state = "Best: " + std::to_string(getBestPercent()) + "%";
-				}
-				else {
+			if (lastID != getCurrentID()) { // avoid redoing string stuff every time the loop goes through
+				switch (getLevelLocation()) {
+				case 1:
+					details = "Playing an official level";
+					getOfficialInfo(getCurrentID(), currentLevel);
+					state = currentLevel.name + " (Best: " + std::to_string(getBestPercent()) + "%)";
 					smallImage = getDifficultyName(currentLevel);
 					smallText = std::to_string(currentLevel.stars) + "* " + getTextFromKey(getDifficultyName(currentLevel));
-					state = currentLevel.author + " - " + currentLevel.name + " (Best: " + std::to_string(getBestPercent()) + "%)";
+					break;
+				case 2: // editing level but playing it
+					details = "Editing a level";
+					state = "";
+					smallImage = "creator_point";
+					smallText = "";
+					break;
+				default:
+				case 3:
+					details = "Playing a level";
+					bool levelStatus = getLevel(getCurrentID(), currentLevel);
+					if (!levelStatus) {
+						smallImage = "";
+						smallText = "";
+						state = "Best: " + std::to_string(getBestPercent()) + "%";
+					}
+					else {
+						smallImage = getDifficultyName(currentLevel);
+						smallText = std::to_string(currentLevel.stars) + "* " + getTextFromKey(getDifficultyName(currentLevel));
+						state = currentLevel.author + " - " + currentLevel.name + " (Best: " + std::to_string(getBestPercent()) + "%)";
+					}
+					break;
 				}
-			}
-			else { // if official level
-				details = "Playing an official level";
-				getOfficialInfo(getCurrentID(), currentLevel);
-				state = currentLevel.name + " (Best: " + std::to_string(getBestPercent()) + "%)";
-				smallImage = getDifficultyName(currentLevel);
-				smallText = std::to_string(currentLevel.stars) + "* " + getTextFromKey(getDifficultyName(currentLevel));
-			}
-			if (getCurrentID() == 0 || getLevelLocation() == 2) {
-				// editing level but playing it
-				details = "Editing a level"; // currently broken
-				state = "";
-				smallImage = "creator_point";
-				smallText = "";
-			}
-			if (getCurrentID() == 3001 && getLevelLocation() == 1) {
-				// the challenge!!
-				details = "Playing an official level";
-				getOfficialInfo(3001, currentLevel);
-				state = currentLevel.name + " (Best: " + std::to_string(getBestPercent()) + "%)";
-				smallImage = getDifficultyName(currentLevel);
-				smallText = std::to_string(currentLevel.stars) + "* " + getTextFromKey(getDifficultyName(currentLevel));
+				lastID = getCurrentID();
 			}
 		}
 		else if(isInEditor()) {
+			if (details != "Editing a level") {
 				details = "Editing a level";
 				state = "";
 				smallImage = "creator_point";
 				smallText = "";
+			}
 		}
 		else {
+			if (details != "Idle") {
 				details = "Idle";
 				state = "";
 				smallImage = "";
 				smallText = "";
-				//printDebug("State", std::to_string(*currentState));
-				//printDebug("In level", std::to_string(isOnMenu()));
+			}
 		}
 		
 		if (oldDetails != details || oldState != state) { //update if details change
-			printDebug("Details", details);
-			printDebug("State", state);
-			printDebug("Small image", smallImage);
-			printDebug("Small text", smallText);
+			#ifdef _DEBUG
+				printDebug("Details", details);
+				printDebug("State", state);
+				printDebug("Small image", smallImage);
+				printDebug("Small text", smallText);
+			#endif
 			if (oldDetails != details) {
 				currentTimestamp = time(0);
 				printDebug("Timestamp", std::to_string(currentTimestamp));
@@ -263,7 +256,7 @@ DWORD WINAPI actualMain(LPVOID lpParam) {
 			oldState = state;
 		}
 
-		Sleep(1000);
+		Sleep(1500);
 	}
 
   return 0;
