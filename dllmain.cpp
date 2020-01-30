@@ -9,6 +9,7 @@
 #include <ctime>
 #include "DRPWrap.h"
 #include <algorithm>
+#include <thread>
 
 #pragma message("gg!")
 
@@ -24,6 +25,7 @@ void printDebug(std::string title, std::string message) {
 int* getBase(int pointer) {
   return (int *)((int)GetModuleHandle(L"GeometryDash.exe") + pointer); // why the heck did i make this
 }
+
 
 bool isInLevel() {
 	int* part = (int*)(*getBase(GDBaseP) + 0x164);
@@ -42,50 +44,55 @@ bool isOnMenu() {
 }
 */
 
-// if i made this into a  struct or something hmmm
-int *getCurrentLevelP() {
-	if (!isInLevel()) {
-		return 0;
-	}
-	int* part = (int*)(*getBase(GDBaseP) + 0x164);
-	part = (int*)(*part + 0x22C);
-	part = (int*)(*part + 0x114);
-	return part;
-}
+class currentLevel {
+	int* levelP;
 
-/* this is a superior check, beats all the checks
- why is this superior, you may ask
- as opposed to my last method of getting id, this gets the id of any level
- weekly, official level, etc.
-*/
-int getCurrentID() {
-	if (!isInLevel()) {
-		return -1;
+public:
+	currentLevel() {
+		updatePointer();
 	}
-	int* part = getCurrentLevelP();
-	part = (int*)(*part + 0xF8);
-	return *part;
-}
 
-int getBestPercent() {
-	if (!isInLevel()) {
-		return 0;
-	}
-	int* part = getCurrentLevelP();
-	part = (int*)(*part + 0x248);
-	return *part;
-}
+	void updatePointer() {
+		int* part = (int*)(*getBase(GDBaseP) + 0x164);
+		if (IsBadReadPtr((DWORD*)(*part + 0x22C), 4) != 0) {
+			levelP = 0;
+			return;
+		}
 
-// we only check for value 2, level in CCLocalLevels
-// and val 1, official level (val 3 is CCGameManager or saved)
-int getLevelLocation() {
-	if (!isInLevel()) {
-		return 0;
+		part = (int*)(*part + 0x22C);
+		part = (int*)(*part + 0x114);
+		levelP = part;
 	}
-	int* part = getCurrentLevelP();
-	part = (int*)(*part + 0x364);
-	return *part;
-}
+
+	bool checkLevelStatus() {
+		return (levelP == 0);
+	}
+
+	/* this is a superior check, beats all the checks
+	why is this superior, you may ask
+	as opposed to my last method of getting id, this gets the id of any level
+	weekly, official level, etc.
+	*/
+	int getID() {
+		return *(int*)(*levelP + 0xF8);
+	}
+
+	int getBestPercent() {
+		return *(int*)(*levelP + 0x248);
+	}
+
+	// we only check for value 2, level in CCLocalLevels
+	// and val 1, official level (val 3 is CCGameManager or saved)
+	int getLevelLocation() {
+		return *(int*)(*levelP + 0x364);
+	}
+};
+
+enum class playerState {
+	level,
+	editor,
+	menu,
+};
 
 //insane_demon to Insane Demon
 std::string getTextFromKey(std::string key) {
@@ -116,10 +123,23 @@ DWORD WINAPI actualMain(LPVOID lpParam) {
 	printDebug("Info", "Please wait...");
 
 	DRP::InitDiscord();
-	Discord_RunCallbacks();
 
 	// guess this just waits for discord
 	Sleep(5000);
+
+	// this messy thread thing should hopefully make stuff run better on the main loop
+	std::thread thread_object([&lpParam]() {
+		Discord_RunCallbacks();
+		if (DRP::getPresenceStatus() != -1 && DRP::getPresenceStatus() != 0) {
+			printDebug("Discord", std::to_string(DRP::getPresenceStatus()));
+			if (DRP::getPresenceStatus() != 1) {
+				MessageBoxA(0, "Discord broke lol...",
+					"rpcrpcrpcrcp", MB_ICONERROR | MB_OK);
+			}
+			FreeLibraryAndExitThread((HMODULE)lpParam, 0);
+		};
+		Sleep(2000);
+	});
 
 	// this +8 behavior persists from 1.9, for some reason
 	int* accountID = (int *)(*getBase(GDBaseP+0x8) + 0x120);
@@ -149,53 +169,37 @@ DWORD WINAPI actualMain(LPVOID lpParam) {
 
 	printDebug("largeText", largeText);
 
-	// small protection in case of thread stays open sometimes
-	HWND gd = FindWindow(0, L"Geometry Dash");
-	// get process
-	DWORD gdpid;
-	GetWindowThreadProcessId(gd, &gdpid);
-	HANDLE gdproc =
-		OpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, FALSE, gdpid);
-	DWORD appStatus;
-
-	GDlevel currentLevel;
-
 	std::string oldDetails;
 	std::string oldState;
 
 	time_t currentTimestamp = time(0);
 
+	bool updatePresence = true;
+	bool updateTimestamp = true;
+
+	playerState lastState = playerState::menu;
+
 	int lastID = -1;
+	int lastPercent = -1;
+
+	currentLevel currentLevelP;
+	GDlevel currentLevel;
 
 	while (true) {
-
-		Discord_RunCallbacks();
-
-		if (DRP::getPresenceStatus() != -1 && DRP::getPresenceStatus() != 0) {
-			printDebug("Discord", std::to_string(DRP::getPresenceStatus()));
-			if (DRP::getPresenceStatus() != 1) {
-				MessageBoxA(0, "Discord broke lol...",
-					"rpcrpcrpcrcp", MB_ICONERROR | MB_OK);
-			}
-			return 0;
-		};
-
-		bool getAppStatus = GetExitCodeProcess(gdproc, &appStatus);
-		if (!getAppStatus ||
-			appStatus != STILL_ACTIVE) {  // my guess is the dll never fully shuts down, it crashes so hopefully this helps in cases of dll never stopping
-			printDebug("Info", "DLL Shutdown...");
-			return 0;
-		}
-
 		if (isInLevel()) {
-			if (lastID != getCurrentID()) { // avoid redoing string stuff every time the loop goes through
-				switch (getLevelLocation()) {
+			currentLevelP.updatePointer();
+			if (lastID != currentLevelP.getID() || lastPercent != currentLevelP.getBestPercent()) { // avoid redoing string stuff every time the loop goes through
+				switch (currentLevelP.getLevelLocation()) {
 				case 1:
 					details = "Playing an official level";
-					getOfficialInfo(getCurrentID(), currentLevel);
-					state = currentLevel.name + " (Best: " + std::to_string(getBestPercent()) + "%)";
+					getOfficialInfo(currentLevelP.getID(), currentLevel);
+					state = currentLevel.name + " (Best: " + std::to_string(currentLevelP.getBestPercent()) + "%)";
 					smallImage = getDifficultyName(currentLevel);
 					smallText = std::to_string(currentLevel.stars) + "* " + getTextFromKey(getDifficultyName(currentLevel));
+					if (lastPercent != currentLevelP.getBestPercent()) {
+						updateTimestamp = true;
+						lastPercent = currentLevelP.getBestPercent();
+					}
 					break;
 				case 2: // editing level but playing it
 					details = "Editing a level";
@@ -206,53 +210,71 @@ DWORD WINAPI actualMain(LPVOID lpParam) {
 				default:
 				case 3:
 					details = "Playing a level";
-					bool levelStatus = getLevel(getCurrentID(), currentLevel);
+					bool levelStatus = getLevel(currentLevelP.getID(), currentLevel);
 					if (!levelStatus) {
 						smallImage = "";
 						smallText = "";
-						state = "Best: " + std::to_string(getBestPercent()) + "%";
+						state = "Best: " + std::to_string(currentLevelP.getBestPercent()) + "%";
 					}
 					else {
 						smallImage = getDifficultyName(currentLevel);
 						smallText = std::to_string(currentLevel.stars) + "* " + getTextFromKey(getDifficultyName(currentLevel));
-						state = currentLevel.author + " - " + currentLevel.name + " (Best: " + std::to_string(getBestPercent()) + "%)";
+						state = currentLevel.author + " - " + currentLevel.name + " (Best: " + std::to_string(currentLevelP.getBestPercent()) + "%)";
+						if (lastPercent != currentLevelP.getBestPercent()) {
+							updateTimestamp = true;
+							lastPercent = currentLevelP.getBestPercent();
+						}
 					}
 					break;
 				}
-				lastID = getCurrentID();
+				lastID = currentLevelP.getID();
+				if (lastState != playerState::level) {
+					updatePresence = true;
+					updateTimestamp = true;
+					lastState = playerState::level;
+				}
 			}
 		}
 		else if(isInEditor()) {
-			if (details != "Editing a level") {
+			if (lastState != playerState::editor) {
 				details = "Editing a level";
 				state = "";
 				smallImage = "creator_point";
 				smallText = "";
+
+				updatePresence = true;
+				updateTimestamp = true;
+				lastState = playerState::editor;
 			}
 		}
 		else {
-			if (details != "Idle") {
+			if (lastState != playerState::menu) {
 				details = "Idle";
 				state = "";
 				smallImage = "";
 				smallText = "";
+
+				updatePresence = true;
+				updateTimestamp = true;
+				lastState = playerState::menu;
 			}
 		}
 		
-		if (oldDetails != details || oldState != state) { //update if details change
+		if (updatePresence || updateTimestamp) { //update if details change
 			#ifdef _DEBUG
 				printDebug("Details", details);
 				printDebug("State", state);
 				printDebug("Small image", smallImage);
 				printDebug("Small text", smallText);
 			#endif
-			if (oldDetails != details) {
+			if (updateTimestamp) {
 				currentTimestamp = time(0);
 				printDebug("Timestamp", std::to_string(currentTimestamp));
+				updateTimestamp = false;
 			}
 			DRP::UpdatePresence(details.c_str(), largeText.c_str(), smallText.c_str(),
                      state.c_str(), smallImage.c_str(), currentTimestamp);
-			oldDetails = details;
+			updatePresence = false;
 			oldState = state;
 		}
 
@@ -272,7 +294,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     case DLL_PROCESS_ATTACH:
     case DLL_THREAD_ATTACH:
 		DisableThreadLibraryCalls(hModule);
-		CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)actualMain, NULL, NULL, NULL);
+		CreateThread(NULL, NULL, actualMain, hModule, NULL, NULL);
     case DLL_THREAD_DETACH:
     case DLL_PROCESS_DETACH:
         break;
