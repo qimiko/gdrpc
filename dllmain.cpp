@@ -78,6 +78,9 @@ public:
 	}
 
 	int getBestPercent() {
+		if (levelP == 0) {
+			return -1;
+		}
 		return *(int*)(*levelP + 0x248);
 	}
 
@@ -127,20 +130,6 @@ DWORD WINAPI actualMain(LPVOID lpParam) {
 	// guess this just waits for discord
 	Sleep(5000);
 
-	// this messy thread thing should hopefully make stuff run better on the main loop
-	std::thread thread_object([&lpParam]() {
-		Discord_RunCallbacks();
-		if (DRP::getPresenceStatus() != -1 && DRP::getPresenceStatus() != 0) {
-			printDebug("Discord", std::to_string(DRP::getPresenceStatus()));
-			if (DRP::getPresenceStatus() != 1) {
-				MessageBoxA(0, "Discord broke lol...",
-					"rpcrpcrpcrcp", MB_ICONERROR | MB_OK);
-			}
-			FreeLibraryAndExitThread((HMODULE)lpParam, 0);
-		};
-		Sleep(2000);
-	});
-
 	// this +8 behavior persists from 1.9, for some reason
 	int* accountID = (int *)(*getBase(GDBaseP+0x8) + 0x120);
 
@@ -160,7 +149,7 @@ DWORD WINAPI actualMain(LPVOID lpParam) {
 	std::string smallText;
 	std::string smallImage;
 	std::string largeText = "Invalid user...";
-	
+
 	if (user.rank != -1) {
 		largeText = user.name + " [Rank #" + std::to_string(user.rank) + "]";
 	} else {
@@ -186,6 +175,8 @@ DWORD WINAPI actualMain(LPVOID lpParam) {
 	GDlevel currentLevel;
 
 	while (true) {
+		Discord_RunCallbacks();
+
 		if (isInLevel()) {
 			currentLevelP.updatePointer();
 			if (lastID != currentLevelP.getID() || lastPercent != currentLevelP.getBestPercent()) { // avoid redoing string stuff every time the loop goes through
@@ -259,7 +250,7 @@ DWORD WINAPI actualMain(LPVOID lpParam) {
 				lastState = playerState::menu;
 			}
 		}
-		
+
 		if (updatePresence || updateTimestamp) { //update if details change
 			#ifdef _DEBUG
 				printDebug("Details", details);
@@ -273,21 +264,21 @@ DWORD WINAPI actualMain(LPVOID lpParam) {
 				updateTimestamp = false;
 			}
 			DRP::UpdatePresence(details.c_str(), largeText.c_str(), smallText.c_str(),
-                     state.c_str(), smallImage.c_str(), currentTimestamp);
+                    state.c_str(), smallImage.c_str(), currentTimestamp);
 			updatePresence = false;
 			oldState = state;
 		}
 
-		Sleep(1500);
+		Sleep(1000);
 	}
 
   return 0;
 }
 
 BOOL APIENTRY DllMain( HMODULE hModule,
-                       DWORD  ul_reason_for_call,
-                       LPVOID lpReserved
-                     )
+                      DWORD  ul_reason_for_call,
+                      LPVOID lpReserved
+                    )
 {
     switch (ul_reason_for_call)
     {
