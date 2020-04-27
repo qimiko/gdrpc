@@ -5,19 +5,21 @@
 #include <sstream>
 #include <tchar.h>
 #include <string>
-#include <WinInet.h>
+#include <wininet.h>
 #include <vector>
 
-enum class difficulty {
-  na,
-  easy,
-  normal,
-  hard,
-  harder,
-  insane,
+enum class difficulty
+{
+	na,
+	easy,
+	normal,
+	hard,
+	harder,
+	insane,
 }; // note that no demon difficulty exists
 
-enum class demon_difficulty { 
+enum class demon_difficulty
+{
 	none,
 	easy,
 	medium,
@@ -29,11 +31,12 @@ enum class demon_difficulty {
 // thinking about this a bit later
 // probably shouldn't have used structs lol
 
-struct GDlevel {
+struct GDlevel
+{
 	int levelID = -1;
-	std::string name;  
+	std::string name;
 	std::string author = "-";
-    int authorID = -1;
+	int authorID = -1;
 	int stars = 0;
 	difficulty difficulty = difficulty::na;
 	demon_difficulty demonDifficulty = demon_difficulty::none;
@@ -41,7 +44,8 @@ struct GDlevel {
 	bool isDemon = false;
 }; // this is a really barebones struct btw
 
-struct GDuser {
+struct GDuser
+{
 	int ID = -1;
 	int accID = -1;
 	std::string name;
@@ -50,21 +54,21 @@ struct GDuser {
 
 difficulty getDiffValue(int diff);
 demon_difficulty getDemonDiffValue(int diff);
-std::string getDifficultyName(GDlevel& level);
+std::string getDifficultyName(GDlevel &level);
 
 // makes an internet post request to boomlings.com
 // returns 0 if succeed
-DWORD makeRequest(std::string data, LPCWSTR url, std::string& response);
+DWORD makeRequest(std::string data, LPCWSTR url, std::string &response);
 
-bool getUserInfo(int& accID, GDuser& user);
-bool getPlayerInfo(int& playerID, GDuser& user);
+bool getUserInfo(int &accID, GDuser &user);
+bool getPlayerInfo(int &playerID, GDuser &user);
 
-bool getUserRank(GDuser& user);
-bool getLevel(int levelid, GDlevel& level);
+bool getUserRank(GDuser &user);
+bool getLevel(int levelid, GDlevel &level);
 
-void getOfficialInfo(int id, GDlevel& level);
+void getOfficialInfo(int id, GDlevel &level);
 
 // splits a string by substring, much like in other languages
-std::vector<std::string> explode(std::string& string, char separator);
+std::vector<std::string> explode(std::string &string, char separator);
 
-#endif  // !GDAPI_H
+#endif // !GDAPI_H
