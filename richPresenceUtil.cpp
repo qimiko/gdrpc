@@ -26,7 +26,7 @@ void updatePresenceS(std::string &details, std::string &largeText, std::string &
 		#ifdef __MINGW32__
 			MessageBoxA(0, ss.str().c_str(), "b", MB_OK);
 		#else
-			std::cout << ss.str();
+		std::cout << ss.str() << std::endl;
 		#endif
 	#endif
 	DRP::UpdatePresence(details.c_str(), largeText.c_str(), smallText.c_str(),
@@ -55,7 +55,6 @@ std::string getTextFromKey(std::string key)
 
 DWORD WINAPI mainThread(LPVOID lpParam)
 {
-	std::cout << "Discord init...";
 	DRP::InitDiscord();
 
 	updatePresence = false;

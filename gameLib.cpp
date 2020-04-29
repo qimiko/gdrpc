@@ -15,7 +15,7 @@ PlayLayerOnQuitF ploq;
 typedef void*(__thiscall *PlayLayerShowNewBestF)(void *playLayer, char, float, int, char, char, char);
 PlayLayerShowNewBestF plsnb;
 
-typedef void(__fastcall *EditorPauseLayerOnExitEditorF)(void *editorPauseLayer, void*p1);
+typedef void(__thiscall *EditorPauseLayerOnExitEditorF)(void *editorPauseLayer, void*);
 EditorPauseLayerOnExitEditorF eploee;
 
 typedef void(__fastcall *LevelEditorLayerCreateF)(int *gameLevel);
@@ -40,7 +40,7 @@ int __fastcall MenuLayerInitH(void *menuLayer)
 		CreateThread(NULL, 0, mainThread, GetCurrentModule(), 0, NULL);
 		setupDone = true;
 	}
-	std::cout << "MenuLayer::init";
+	std::cout << "MenuLayer::init" << std::endl;
 	return mli(menuLayer);
 }
 
@@ -50,7 +50,7 @@ void * __fastcall PlayLayerCreateH(int * gameLevel) {
 	std::stringstream ss;
 	ss << "PlayLayer::create - " << maybeLevelID << " {" << std::hex << "0x" << (int)gameLevel << "}";
 
-	std::cout << ss.str();
+	std::cout << ss.str() << std::endl;
 	SetConsoleTitleA(ss.str().c_str());
 #endif
 
@@ -64,7 +64,7 @@ void * __fastcall PlayLayerCreateH(int * gameLevel) {
 }
 
 void __fastcall PlayLayerOnQuitH(void *playLayer) {
-	std::cout << "PlayLayer::onQuit";
+	std::cout << "PlayLayer::onQuit" << std::endl;
 	SetConsoleTitleA("PlayLayer::onQuit");
 	currentPlayerState = playerState::menu;
 	updateTimestamp = true;
@@ -80,7 +80,7 @@ void * __fastcall PlayLayerShowNewBestH(void *playLayer, void * _edx, char p1, f
 	int maybeBest = *(int *)((int)currentGameLevel + 0x248);
 	std::stringstream ss;
 	ss << "PlayLayer::showNewBest - " << levelID << " (" << maybeBest << "%)";
-	std::cout << ss.str();
+	std::cout << ss.str() << std::endl;
 	SetConsoleTitleA(ss.str().c_str()); // i still cannot do std::cout for some really weird reason
 #endif
 	updatePresence = true;
@@ -89,9 +89,9 @@ void * __fastcall PlayLayerShowNewBestH(void *playLayer, void * _edx, char p1, f
 }
 
 // thanks blaze for the other argument
-void __fastcall EditorPauseLayerOnExitEditorH(void *editorPauseLayer, void *p1)
+void __fastcall EditorPauseLayerOnExitEditorH(void *editorPauseLayer, void* _edx, void* p1)
 {
-	std::cout << "EditorPauseLayer::onExitEditor";
+	std::cout << "EditorPauseLayer::onExitEditor" << std::endl;
 	SetConsoleTitleA("EditorPauseLayer::onExitEditor");
 	currentPlayerState = playerState::menu;
 	updateTimestamp = true;
@@ -102,7 +102,7 @@ void __fastcall EditorPauseLayerOnExitEditorH(void *editorPauseLayer, void *p1)
 
 void __fastcall LevelEditorLayerCreateH(int * gameLevel)
 {
-	std::cout << "LevelEditorLayer::create";
+	std::cout << "LevelEditorLayer::create" << std::endl;
 	SetConsoleTitleA("LevelEditorLayer::create");
 	currentPlayerState = playerState::editor;
 	updateTimestamp = true;
