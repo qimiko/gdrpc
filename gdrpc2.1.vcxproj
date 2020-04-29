@@ -165,6 +165,7 @@
     <ClCompile Include="DiscordSecret.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="DRPWrap.cpp" />
+    <ClCompile Include="gameLib.cpp" />
     <ClCompile Include="gdapi.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -172,6 +173,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="richPresenceUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DiscordSecret.h" />
@@ -179,8 +181,11 @@
     <ClInclude Include="discord_files\discord_rpc.h" />
     <ClInclude Include="DRPWrap.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="gameLib.h" />
     <ClInclude Include="gdapi.h" />
+    <ClInclude Include="MinHook.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="richPresenceUtil.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

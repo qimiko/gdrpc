@@ -30,6 +30,12 @@
     <ClCompile Include="DiscordSecret.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="gameLib.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="richPresenceUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -51,6 +57,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DiscordSecret.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gameLib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MinHook.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="richPresenceUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

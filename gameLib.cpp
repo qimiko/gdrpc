@@ -32,7 +32,7 @@ HMODULE GetCurrentModule()
 	return hModule;
 }
 
-int __thiscall MenuLayerInitH(void *menuLayer)
+int __fastcall MenuLayerInitH(void *menuLayer)
 {
 	// i have to test like this (idk why)
 	if (!setupDone) {
@@ -63,7 +63,7 @@ void * __fastcall PlayLayerCreateH(int * gameLevel) {
 	return plc(gameLevel);
 }
 
-void __thiscall PlayLayerOnQuitH(void *playLayer) {
+void __fastcall PlayLayerOnQuitH(void *playLayer) {
 	std::cout << "PlayLayer::onQuit";
 	SetConsoleTitleA("PlayLayer::onQuit");
 	currentPlayerState = playerState::menu;
@@ -89,7 +89,7 @@ void * __fastcall PlayLayerShowNewBestH(void *playLayer, void * _edx, char p1, f
 }
 
 // thanks blaze for the other argument
-void __thiscall EditorPauseLayerOnExitEditorH(void *editorPauseLayer, void *p1)
+void __fastcall EditorPauseLayerOnExitEditorH(void *editorPauseLayer, void *p1)
 {
 	std::cout << "EditorPauseLayer::onExitEditor";
 	SetConsoleTitleA("EditorPauseLayer::onExitEditor");
