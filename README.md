@@ -9,7 +9,7 @@
 * Saved levels
 * Editor
   * Designed to not display name
-* Idle
+* Idle state
 * Autoloads
 
 **Note**: This thing will probably crash if the servers go down, considering that there's many reasons for the servers to go down and many responses it will give.. Fixes will be made as time goes on...
@@ -32,13 +32,13 @@
 1. import files into Visual Studio and make sure it can build a dll
 2. edit `DiscordSecret.cpp` and make it yours
 3. include Discord files, make sure `discord-rpc.lib` is in main folder
-4. include minhook files, make sure `MinHook.lib` is in main folder
+4. include minhook files, make sure `LibMinHook.lib` is in main folder (you might have to recompile it for VS2019)
 5. build dll
 6. add the assets in the `assets` folder to discord
 
 #### Autoloader
 
-The autoloader is based on a modification of the import table of `zlib1.dll`. The old autoloader will work, however.
+The autoloader is based on a modification of the import table of `zlib1.dll`. If you want to do it yourself, just grab any generic PE header editor. 
 
 ### Credits
 
@@ -51,6 +51,5 @@ The autoloader is based on a modification of the import table of `zlib1.dll`. Th
 
 ### TODOs
 
-* test compilation on Windows
 * use the GJGameLevel for more information
 * don't have a loop go on forever
