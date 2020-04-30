@@ -26,11 +26,19 @@ void updatePresenceS(std::string &details, std::string &largeText, std::string &
 		#ifdef __MINGW32__
 			MessageBoxA(0, ss.str().c_str(), "b", MB_OK);
 		#else
-		std::cout << ss.str() << std::endl;
+			std::cout << ss.str() << std::endl;
 		#endif
 	#endif
 	DRP::UpdatePresence(details.c_str(), largeText.c_str(), smallText.c_str(),
 											state.c_str(), smallImage.c_str(), currentTimestamp);
+}
+
+void safeClose()
+{
+#ifdef _DEBUG
+	SetConsoleTitleA("close called");
+#endif
+	Discord_Shutdown();
 }
 
 //insane_demon to Insane Demon

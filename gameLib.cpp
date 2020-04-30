@@ -21,6 +21,24 @@ EditorPauseLayerOnExitEditorF eploee;
 typedef void(__fastcall *LevelEditorLayerCreateF)(int *gameLevel);
 LevelEditorLayerCreateF lelc;
 
+typedef void(__thiscall *CCDirectorEndF)(void *CCDirector);
+CCDirectorEndF ccde;
+
+// this handles x button close
+LONG_PTR oWindowProc;
+LRESULT CALLBACK nWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	switch (msg)
+	{
+	case WM_CLOSE:
+		// properly shutdown
+		// idk what the correct function for this is tbh
+		safeClose();
+		break;
+	}
+	return CallWindowProc((WNDPROC)oWindowProc, hwnd, msg, wparam, lparam);
+}
+
 HMODULE GetCurrentModule()
 {
 	HMODULE hModule = NULL;
@@ -113,6 +131,13 @@ void __fastcall LevelEditorLayerCreateH(int * gameLevel)
 	lelc(gameLevel);
 }
 
+void __fastcall CCDirectorEndH(void *CCDirector)
+{
+	std::cout << "CCDirector::End";
+	safeClose();
+	ccde(CCDirector);
+}
+
 void doTheHook()
 {
 	if (MH_Initialize() != MH_OK)
@@ -162,6 +187,22 @@ void doTheHook()
 	if (MH_EnableHook(lelcaddr) != MH_OK)
 	{
 		MessageBoxA(0, "LevelEditorLayer::create hook error!", "Error", MB_OK);
+	}
+
+	// setup closes
+	oWindowProc = SetWindowLongPtrA(GetForegroundWindow(), GWL_WNDPROC, (LONG_PTR)nWindowProc);
+
+	// close button calls this, x button calls wndproc
+	HMODULE hMod = LoadLibrary(L"libcocos2d.dll");
+	if (!hMod)
+	{
+		MessageBox(0, L"Failed to get libcocos!", L"Error", MB_OK);
+	}
+	int *ccdeaddr = (int *)GetProcAddress(hMod, "?end@CCDirector@cocos2d@@QAEXXZ");
+	MH_CreateHook(ccdeaddr, reinterpret_cast<LPVOID *>(&CCDirectorEndH), reinterpret_cast<LPVOID *>(&ccde));
+	if (MH_EnableHook(ccdeaddr) != MH_OK)
+	{
+		MessageBoxA(0, "CCDirector::end hook error!", "Error", MB_OK);
 	}
 }
 

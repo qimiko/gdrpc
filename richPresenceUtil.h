@@ -9,7 +9,6 @@
 #include "gdapi.h"
 #ifndef RICHPRESENCEUTIL_H
 #define RICHPRESENCEUTIL_H
-
 enum class playerState
 {
 	level,
@@ -22,5 +21,6 @@ extern int *currentGameLevel;
 extern bool updatePresence;
 extern bool updateTimestamp;
 
+void safeClose();
 DWORD WINAPI mainThread(LPVOID lpParam);
 #endif
