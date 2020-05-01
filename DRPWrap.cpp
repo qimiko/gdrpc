@@ -5,9 +5,11 @@ int rpcStatus = -1;  // -1 , not start
 
 static void handleDiscordReady(const DiscordUser* connectedUser) {
   rpcStatus = 0;  // success is code of 0
-  std::cout << "\nDiscord: connected to user " << connectedUser->username << "#"
+#ifdef _DEBUG
+	std::cout << "\nDiscord: connected to user " << connectedUser->username << "#"
 			<< connectedUser->discriminator << " (" << connectedUser->userId
 			<< ")\n";
+#endif
 }
 
 static void handleDiscordDisconnected(int errcode, const char* message) {
