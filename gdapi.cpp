@@ -293,6 +293,59 @@ bool getUserRank(GDuser &user)
 	return true;
 }
 
+// reads string at address
+// does proper length checks
+std::string readString(int * addr) {
+	int length = *(int *)((int)addr + 0x10);
+	if (length >= 16) {
+		return std::string((char *)(*addr));
+	} else {
+		return std::string((char *)addr);
+	}
+}
+
+// i was going to make a joke about this being the better thing like the id parsing
+// but this is _really_ messy
+// no error handling either. good luck
+bool parseGJGameLevel(int * gameLevel, GDlevel &level) {
+	int newID = *(int *)((int)gameLevel + 0xF8);
+
+	if (newID == level.levelID) { // don't calculate more than we have to
+		return true;
+	}
+
+	level.levelID = newID;
+	level.stars = *(int *)((int)gameLevel + 0x2AC);
+
+	level.name = readString((int *)((int)gameLevel + 0xFC));
+
+	int levelLocation = *(int *)((int)gameLevel + 0x364);
+	if (levelLocation == 1) {
+			level.author = "RobTop"; // author is "" on these
+			int diffValue = *(int *)((int)gameLevel + 0x1BC)*10;
+			if (diffValue == 60) {
+				level.isDemon = true;
+				level.difficulty = difficulty::insane;
+				level.demonDifficulty = demon_difficulty::easy;
+			} else {
+				level.isDemon = false;
+				level.difficulty = getDiffValue(diffValue);
+			}
+	} else {
+		level.author = readString((int *)((int)gameLevel + 0x144));
+		level.difficulty = getDiffValue(*(int *)((int)gameLevel + 0x1E4));
+
+		// don't have the proper booleans mapped
+		level.isDemon = (level.stars >= 10); // can't tell if this is more readable or not
+		level.isAuto = (level.stars == 1);
+
+		if (level.isDemon) {
+			level.demonDifficulty = getDemonDiffValue(*(int *)((int)gameLevel + 0x2A0));
+		}
+	}
+	return true;
+}
+
 bool getLevel(int levelid, GDlevel &level)
 {
 	// string splitting

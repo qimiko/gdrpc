@@ -104,41 +104,24 @@ DWORD WINAPI mainThread(LPVOID lpParam)
 			switch (currentPlayerState) {
 				case playerState::level:
 					levelLocation = *(int*)((int)currentGameLevel + 0x364);
-					levelID = *(int *)((int)currentGameLevel + 0xF8);
 					currentBest = *(int *)((int)currentGameLevel + 0x248);
-					switch (levelLocation)
-					{
-					case 1:
-						getOfficialInfo(levelID, currentLevel);
-						details = "Playing " + currentLevel.name;
-						state = "By " + currentLevel.author + " (" + std::to_string(currentBest) + "%)";
-						smallImage = getDifficultyName(currentLevel);
-						smallText = std::to_string(currentLevel.stars) + "* " + getTextFromKey(getDifficultyName(currentLevel));
-						break;
-					case 2: // editing level but playing it
+					if (levelLocation == 2) {
 						details = "Editing a level";
 						state = "";
 						smallImage = "creator_point";
 						smallText = "";
-						break;
-					default:
-					case 3:
-						bool levelStatus = getLevel(levelID, currentLevel);
-						if (!levelStatus)
-						{
+					} else {
+						if (!parseGJGameLevel(currentGameLevel, currentLevel)) {
 							details = "Playing a level";
+							state = "(" + std::to_string(currentBest) + "%)";
 							smallImage = "";
 							smallText = "";
-							state = "Best: " + std::to_string(currentBest) + "%";
-						}
-						else
-						{
+						} else {
 							details = "Playing " + currentLevel.name;
 							state = "By " + currentLevel.author + " (" + std::to_string(currentBest) + "%)";
 							smallImage = getDifficultyName(currentLevel);
 							smallText = std::to_string(currentLevel.stars) + "* " + getTextFromKey(getDifficultyName(currentLevel));
 						}
-						break;
 					}
 					break;
 				case playerState::editor:
