@@ -64,11 +64,8 @@ bool getUserInfo(int &accID, GDuser &user);
 bool getPlayerInfo(int &playerID, GDuser &user);
 
 bool getUserRank(GDuser &user);
-bool getLevel(int levelid, GDlevel &level);
 
 bool parseGJGameLevel(int * gameLevel, GDlevel &level);
-
-void getOfficialInfo(int id, GDlevel &level);
 
 // splits a string by substring, much like in other languages
 std::vector<std::string> explode(std::string &string, char separator);
