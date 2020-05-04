@@ -109,9 +109,9 @@ DWORD WINAPI mainThread(LPVOID lpParam)
 					switch (levelLocation)
 					{
 					case 1:
-						details = "Playing an official level";
 						getOfficialInfo(levelID, currentLevel);
-						state = currentLevel.name + " (Best: " + std::to_string(currentBest) + "%)";
+						details = "Playing " + currentLevel.name;
+						state = "By " + currentLevel.author + " (" + std::to_string(currentBest) + "%)";
 						smallImage = getDifficultyName(currentLevel);
 						smallText = std::to_string(currentLevel.stars) + "* " + getTextFromKey(getDifficultyName(currentLevel));
 						break;
@@ -123,19 +123,20 @@ DWORD WINAPI mainThread(LPVOID lpParam)
 						break;
 					default:
 					case 3:
-						details = "Playing a level";
 						bool levelStatus = getLevel(levelID, currentLevel);
 						if (!levelStatus)
 						{
+							details = "Playing a level";
 							smallImage = "";
 							smallText = "";
 							state = "Best: " + std::to_string(currentBest) + "%";
 						}
 						else
 						{
+							details = "Playing " + currentLevel.name;
+							state = "By " + currentLevel.author + " (" + std::to_string(currentBest) + "%)";
 							smallImage = getDifficultyName(currentLevel);
 							smallText = std::to_string(currentLevel.stars) + "* " + getTextFromKey(getDifficultyName(currentLevel));
-							state = currentLevel.author + " - " + currentLevel.name + " (Best: " + std::to_string(currentBest) + "%)";
 						}
 						break;
 					}
