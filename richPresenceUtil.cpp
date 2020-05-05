@@ -61,6 +61,15 @@ std::string getTextFromKey(std::string key)
 	return key;
 }
 
+std::string formatWithLevel(std::string s, GDlevel &level, int currentBest) {
+	return fmt::format(s,
+		fmt::arg("name", level.name),
+		fmt::arg("best", currentBest),
+		fmt::arg("diff", getTextFromKey(getDifficultyName(level))),
+		fmt::arg("author", level.author),
+		fmt::arg("stars", level.stars));
+}
+
 DWORD WINAPI mainThread(LPVOID lpParam)
 {
 	DRP::InitDiscord();
@@ -92,7 +101,7 @@ DWORD WINAPI mainThread(LPVOID lpParam)
 		largeText = user.name + " [Leaderboard Banned]";
 	}
 
-	int levelLocation, levelID, currentBest;
+	int levelLocation, currentBest;
 	GDlevel currentLevel;
 
 	updatePresence = true;
@@ -113,14 +122,14 @@ DWORD WINAPI mainThread(LPVOID lpParam)
 					} else {
 						if (!parseGJGameLevel(currentGameLevel, currentLevel)) {
 							details = "Playing a level";
-							state = "(" + std::to_string(currentBest) + "%)";
+							state = fmt::format("{best}%", fmt::arg("best", currentBest));
 							smallImage = "";
 							smallText = "";
 						} else {
-							details = "Playing " + currentLevel.name;
-							state = "By " + currentLevel.author + " (" + std::to_string(currentBest) + "%)";
+							details = formatWithLevel("Playing {name}", currentLevel, currentBest);
+							state = formatWithLevel("by {author} ({best}%)", currentLevel, currentBest);
+							smallText = formatWithLevel("{stars}* {diff}", currentLevel, currentBest);
 							smallImage = getDifficultyName(currentLevel);
-							smallText = std::to_string(currentLevel.stars) + "* " + getTextFromKey(getDifficultyName(currentLevel));
 						}
 					}
 					break;
