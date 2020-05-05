@@ -12,7 +12,7 @@
 * Idle state
 * Autoloads
 
-**Note**: This thing will probably crash if the servers go down, considering that there's many reasons for the servers to go down and many responses it will give.. Fixes will be made as time goes on...
+**Note**: This thing might crash if servers go down.
 
 ### Using
 
@@ -42,6 +42,7 @@ The autoloader is based on a modification of the import table of `zlib1.dll`. If
 
 ### Credits
 
+* absolute for figurative and literal pointers
 * smjs for some pointers
 * nekit for the level location thingy
 * cos8o for being cos8o
@@ -49,7 +50,7 @@ The autoloader is based on a modification of the import table of `zlib1.dll`. If
 * saya for motivation
 * silentzer for being smart
 
-### TODOs
+### Maybe
 
-* use the GJGameLevel for more information
+* configuration system
 * don't have a loop go on forever
