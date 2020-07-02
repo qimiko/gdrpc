@@ -1,0 +1,6 @@
+[submodule "libraries/fmt"]
+	path = libraries/fmt
+	url = https://github.com/fmtlib/fmt
+[submodule "libraries/toml11"]
+	path = libraries/toml11
+	url = https://github.com/ToruNiina/toml11
