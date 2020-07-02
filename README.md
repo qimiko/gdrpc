@@ -27,6 +27,10 @@
 1. copy `zlib1.dll`, `gdrpc.dll` and `discord-rpc.dll` to the Geometry Dash directory
 2. start GD
 
+#### Configuration
+
+The configuration file, `gdrpc.toml` is located in the Geometry Dash directory. It is created automatically on first run.
+
 ### Compiling
 
 1. import files into Visual Studio and make sure it can build a dll
@@ -38,7 +42,7 @@
 
 #### Autoloader
 
-The autoloader is based on a modification of the import table of `zlib1.dll`. If you want to do it yourself, just grab any generic PE header editor. 
+The autoloader is based on a modification of the import table of `zlib1.dll`. If you want to do it yourself, just grab any generic PE header editor.
 
 ### Credits
 
@@ -52,5 +56,5 @@ The autoloader is based on a modification of the import table of `zlib1.dll`. If
 
 ### Maybe
 
-* configuration system
-* don't have a loop go on forever
+* gjgamelevel parsing for editor levels
+* adopt cmake

@@ -1,0 +1,31 @@
+# default config for gdrpc - this should be automatically generated on first launch
+# this one will look nicer though :)
+
+[level]
+	[level.saved]
+		detail = "Playing {name}"
+		state = "by {author} ({best}%)"
+		smalltext = "{stars}* {diff}"
+	[level.playtesting]
+		# note - as for now the gamelevel isn't passed to the playtesting/editing
+		detail = "Editing a level"
+		state = ""
+		smalltext = ""
+	[level.error]
+		detail = "Playing a level"
+		state = "{best}%"
+		smalltext = ""
+
+[editor]
+	detail = "Editing a level"
+	state = ""
+	smalltext = ""
+
+[menu]
+	detail = "Idle"
+	state = ""
+	smalltext = ""
+
+[user]
+	ranked = "{name} [Rank #{rank}]"
+	default = ""

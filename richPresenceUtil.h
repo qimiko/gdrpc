@@ -7,9 +7,12 @@
 #include <sstream>
 #include "DRPWrap.h"
 #include "gdapi.h"
+#include "libraries/toml11/toml.hpp"
+#include <fstream>
 
 #define FMT_HEADER_ONLY
-#include "fmt/format.h"
+#include "libraries/fmt/format.h"
+
 #ifndef RICHPRESENCEUTIL_H
 #define RICHPRESENCEUTIL_H
 enum class playerState

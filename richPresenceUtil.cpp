@@ -61,7 +61,7 @@ std::string getTextFromKey(std::string key)
 	return key;
 }
 
-std::string formatWithLevel(std::string s, GDlevel &level, int currentBest) {
+std::string formatWithLevel(std::string s, GDlevel &level, int currentBest = 0) {
 	return fmt::format(s,
 		fmt::arg("name", level.name),
 		fmt::arg("best", currentBest),
@@ -74,11 +74,142 @@ DWORD WINAPI mainThread(LPVOID lpParam)
 {
 	DRP::InitDiscord();
 
+	// global variable stuff
 	updatePresence = false;
 	currentPlayerState = playerState::menu;
 
-	int *accountID = (int *)(*getBase(0x3222D0 + 0x8) + 0x120);
 
+	// config time!
+
+	// this must be in scope
+	std::string saved_level_detail, saved_level_state, saved_level_smalltext,
+			playtesting_level_detail, playtesting_level_state, playtesting_level_smalltext,
+			error_level_detail, error_level_state, error_level_smalltext,
+			editor_detail, editor_state, editor_smalltext,
+			menu_detail, menu_state, menu_smalltext,
+			user_ranked, user_default;
+
+	// next we fill in defaults, in case it errors
+	saved_level_detail = "Playing {name}";
+	saved_level_state = "by {author} ({best}%)";
+	saved_level_smalltext = "{stars}* {diff}";
+	playtesting_level_detail = "Editing a level";
+	playtesting_level_state = "";
+	playtesting_level_smalltext = "";
+	error_level_detail = "Playing a level";
+	error_level_state = "";
+	error_level_smalltext = "";
+	editor_detail = "Editing a level";
+	editor_state = "";
+	editor_smalltext = "";
+	menu_detail = "Idle";
+	menu_state = "";
+	menu_smalltext = "";
+	user_ranked = "{name} [Rank #{rank}]";
+	user_default = "";
+
+	try {
+		const std::string filename = "gdrpc.toml";
+		if (!std::ifstream(filename))
+		{
+			// create generic file
+			std::ofstream config_file(filename);
+
+			const toml::value user{
+				{"ranked", user_ranked},
+				{"default", user_default}};
+
+			const toml::value menu{
+					{"detail", menu_detail},
+					{"state", menu_state},
+					{"smalltext", menu_smalltext}};
+
+			const toml::value editor{
+					{"detail", editor_detail},
+					{"state", editor_state},
+					{"smalltext", editor_smalltext}};
+
+			const toml::value saved{
+					{"detail", saved_level_detail},
+					{"state", saved_level_state},
+					{"smalltext", saved_level_smalltext}};
+
+			const toml::value playtesting{
+					{"detail", playtesting_level_detail},
+					{"state", playtesting_level_state},
+					{"smalltext", playtesting_level_smalltext}};
+
+			const toml::value error{
+					{"detail", error_level_detail},
+					{"state", error_level_state},
+					{"smalltext", error_level_smalltext}};
+
+			const toml::value level{
+				{"saved", saved},
+				{"playtesting", playtesting},
+				{"error", error}};
+
+			const toml::value default_config{
+				{"level", level},
+				{"editor", editor},
+				{"menu", menu},
+				{"user", user}};
+
+			config_file << default_config;
+
+		}
+		const toml::value config = toml::parse(filename);
+
+		// setting up strings
+
+		// level
+		const auto level_table = toml::find(config, "level");
+
+		// saved
+		const auto saved_level_table = toml::find(level_table, "saved");
+		saved_level_detail = toml::find_or<std::string>(saved_level_table, "detail", saved_level_detail);
+		saved_level_state = toml::find_or<std::string>(saved_level_table, "state", saved_level_state);
+		saved_level_smalltext = toml::find_or<std::string>(saved_level_table, "smalltext", saved_level_smalltext);
+
+		// playtesting
+		const auto playtesting_level_table = toml::find(level_table, "playtesting");
+		playtesting_level_detail = toml::find_or<std::string>(playtesting_level_table, "detail", playtesting_level_detail);
+		playtesting_level_state = toml::find_or<std::string>(playtesting_level_table, "state", playtesting_level_state);
+		playtesting_level_smalltext = toml::find_or<std::string>(playtesting_level_table, "smalltext", playtesting_level_smalltext);
+
+		// error
+		const auto error_level_table = toml::find(level_table, "error");
+		error_level_detail = toml::find_or<std::string>(error_level_table, "detail", error_level_detail);
+		error_level_state = toml::find_or<std::string>(error_level_table, "state", error_level_state);
+		error_level_smalltext = toml::find_or<std::string>(error_level_table, "smalltext", error_level_smalltext);
+
+		// editor
+		const auto editor_table = toml::find(config, "editor");
+		editor_detail = toml::find_or<std::string>(editor_table, "detail", editor_detail);
+		editor_state = toml::find_or<std::string>(editor_table, "state", editor_state);
+		editor_smalltext = toml::find_or<std::string>(editor_table, "smalltext", editor_smalltext);
+
+		// menu
+		const auto menu_table = toml::find(config, "menu");
+		menu_detail = toml::find_or<std::string>(menu_table, "detail", menu_detail);
+		menu_state = toml::find_or<std::string>(menu_table, "state", menu_state);
+		menu_smalltext = toml::find_or<std::string>(menu_table, "smalltext", menu_smalltext);
+
+		// user (large text)
+		const auto user_table = toml::find(config, "user");
+		user_ranked = toml::find_or<std::string>(user_table, "ranked", user_ranked);
+		user_default = toml::find_or<std::string>(user_table, "default", user_default);
+	} catch (const std::exception& e) {
+			MessageBoxA(0, e.what(), "config parser error" , MB_OK);
+	} catch (...) {
+			MessageBoxA(0, "unhandled error\r\nthings should continue fine", "config parser" , MB_OK);
+	}
+
+	std::string details, state, smallText, smallImage;
+	std::string largeText = user_default;
+
+	// get user
+	int *accountID = (int *)(*getBase(0x3222D8) + 0x120);
 	GDuser user;
 	bool userInfoSuccess = getUserInfo(*accountID, user);
 	if (userInfoSuccess)
@@ -86,19 +217,17 @@ DWORD WINAPI mainThread(LPVOID lpParam)
 		getUserRank(user);
 	}
 
-	std::string details;
-	std::string state;
-	std::string smallText;
-	std::string smallImage;
-	std::string largeText = "Invalid user...";
-
 	if (user.rank != -1)
 	{
-		largeText = user.name + " [Rank #" + std::to_string(user.rank) + "]";
+		largeText = fmt::format(
+				user_ranked,
+				fmt::arg("name", user.name),
+				fmt::arg("rank", user.rank));
 	}
 	else
 	{
-		largeText = user.name + " [Leaderboard Banned]";
+		char *username = (char *)(*getBase(0x3222D8) + 0x108);
+		largeText = std::string(username); // hopeful fallback
 	}
 
 	int levelLocation, currentBest;
@@ -115,35 +244,37 @@ DWORD WINAPI mainThread(LPVOID lpParam)
 					levelLocation = *(int*)((int)currentGameLevel + 0x364);
 					currentBest = *(int *)((int)currentGameLevel + 0x248);
 					if (levelLocation == 2) {
-						details = "Editing a level";
-						state = "";
+						details = playtesting_level_detail;
+						state = playtesting_level_state;
+						smallText = playtesting_level_smalltext;
 						smallImage = "creator_point";
-						smallText = "";
 					} else {
 						if (!parseGJGameLevel(currentGameLevel, currentLevel)) {
-							details = "Playing a level";
-							state = fmt::format("{best}%", fmt::arg("best", currentBest));
+							details = fmt::format(error_level_detail, fmt::arg("best", currentBest));
+							state = fmt::format(error_level_state, fmt::arg("best", currentBest));
 							smallImage = "";
-							smallText = "";
-						} else {
-							details = formatWithLevel("Playing {name}", currentLevel, currentBest);
-							state = formatWithLevel("by {author} ({best}%)", currentLevel, currentBest);
-							smallText = formatWithLevel("{stars}* {diff}", currentLevel, currentBest);
+							smallText = error_level_smalltext;
+						}
+						else
+						{
+							details = formatWithLevel(saved_level_detail, currentLevel, currentBest);
+							state = formatWithLevel(saved_level_state, currentLevel, currentBest);
+							smallText = formatWithLevel(saved_level_smalltext, currentLevel, currentBest);
 							smallImage = getDifficultyName(currentLevel);
 						}
 					}
 					break;
 				case playerState::editor:
-					details = "Editing a level";
-					state = "";
+					details = editor_detail;
+					state = editor_state;
 					smallImage = "creator_point";
-					smallText = "";
+					smallText = editor_smalltext;
 					break;
 				case playerState::menu:
-					details = "Idle";
-					state = "";
+					details = menu_detail;
+					state = menu_state;
 					smallImage = "";
-					smallText = "";
+					smallText = menu_smalltext;
 					break;
 			}
 			updatePresenceS(details, largeText, smallText, state, smallImage);
