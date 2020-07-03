@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(gdrpc VERSION 0.1.0)
+project(gdrpc VERSION 2.0.3)
 
 add_definitions(-DUNICODE)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
