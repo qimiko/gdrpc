@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
-#include "discord_files/discord_rpc.h"
+#include <discord_rpc.h>
 #include "DiscordSecret.h"
 
 #ifndef DRPWRAP

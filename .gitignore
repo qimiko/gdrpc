@@ -350,6 +350,18 @@ MigrationBackup/
 .ionide/
 
 # i'd rather not manually exclude these every build so..
-discord_files/*
-discord-rpc.lib
 DiscordSecret.cpp
+
+# cmake
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+build/*

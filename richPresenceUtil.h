@@ -8,11 +8,10 @@
 #include "DRPWrap.h"
 #include "gdapi.h"
 
-#include "libraries/toml11/toml.hpp"
+#include <toml.hpp>
 #include <fstream>
 
-#define FMT_HEADER_ONLY
-#include "libraries/fmt/include/fmt/format.h"
+#include <fmt/format.h>
 
 #ifndef RICHPRESENCEUTIL_H
 #define RICHPRESENCEUTIL_H

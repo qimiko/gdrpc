@@ -4,3 +4,13 @@
 [submodule "libraries/toml11"]
 	path = libraries/toml11
 	url = https://github.com/ToruNiina/toml11
+[submodule "libraries/discord-rpc"]
+	path = libraries/discord-rpc
+	url = https://github.com/discord/discord-rpc/
+[submodule "libraries/rapidjson"]
+	path = libraries/rapidjson
+	url = https://github.com/Tencent/rapidjson
+	branch = v1.1.0
+[submodule "libraries/minhook"]
+	path = libraries/minhook
+	url = https://github.com/mumble-voip/minhook
