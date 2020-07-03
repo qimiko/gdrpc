@@ -8,9 +8,9 @@
   * Includes The Challenge
 * Saved levels
 * Editor
-  * Designed to not display name
 * Idle state
 * Autoloads
+* Configuration system
 
 **Note**: This thing might crash if servers go down.
 
@@ -34,8 +34,8 @@ The configuration file, `gdrpc.toml` is located in the Geometry Dash directory. 
 ### Compiling
 
 1. import files into Visual Studio as cmake project
-2. get git submodules, `git submodules update --init --recursive`
-3. edit `DiscordSecret.cpp` and add your application id
+2. download git submodules, `git submodules update --init --recursive`
+3. edit `src/DiscordSecret.cpp` and add your application id
 4. build dll
 5. add the assets in the `assets` folder to discord
 
