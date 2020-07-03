@@ -33,12 +33,11 @@ The configuration file, `gdrpc.toml` is located in the Geometry Dash directory. 
 
 ### Compiling
 
-1. import files into Visual Studio and make sure it can build a dll
-2. edit `DiscordSecret.cpp` and make it yours
-3. include Discord files, make sure `discord-rpc.lib` is in main folder
-4. include minhook files, make sure `LibMinHook.lib` is in main folder (you might have to recompile it for VS2019)
-5. build dll
-6. add the assets in the `assets` folder to discord
+1. import files into Visual Studio as cmake project
+2. get git submodules, `git submodules update --init --recursive`
+3. edit `DiscordSecret.cpp` and add your application id
+4. build dll
+5. add the assets in the `assets` folder to discord
 
 #### Autoloader
 
@@ -57,4 +56,3 @@ The autoloader is based on a modification of the import table of `zlib1.dll`. If
 ### Maybe
 
 * gjgamelevel parsing for editor levels
-* adopt cmake
