@@ -4,7 +4,8 @@ project(gdrpc VERSION 2.0.3)
 add_definitions(-DUNICODE)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 
-add_library(gdrpc SHARED dllmain.cpp gameLib.cpp richPresenceUtil.cpp DRPWrap.cpp gdapi.cpp DiscordSecret.cpp)
+file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
+add_library(gdrpc SHARED ${SOURCE_FILES})
 
 target_include_directories(gdrpc PRIVATE libraries/fmt/include libraries/toml11 libraries/discord-rpc/include libraries/minhook/include)
 target_link_libraries(gdrpc wininet)
