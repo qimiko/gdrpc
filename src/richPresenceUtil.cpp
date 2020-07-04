@@ -1,5 +1,5 @@
+#include "richPresenceUtil.hpp"
 #include "pch.h"
-#include "richPresenceUtil.h"
 
 playerState currentPlayerState = playerState::menu;
 int *currentGameLevel;
@@ -8,275 +8,257 @@ bool updateTimestamp;
 time_t currentTimestamp = time(0);
 bool editor_reset_timestamp = false;
 
-int *getBase(int pointer)
-{
-	return (int *)((int)GetModuleHandle(L"GeometryDash.exe") + pointer);
+int *getBase(int pointer) {
+  return (int *)((int)GetModuleHandle(L"GeometryDash.exe") + pointer);
 }
 
-void updatePresenceS(std::string &details, std::string &largeText, std::string &smallText,
-											std::string &state, std::string &smallImage)
-{
-	#ifdef _DEBUG
-		std::stringstream ss;
-		ss << "d: " << details << " s: " << state << "\nst: "<< smallText << " lt: " << largeText;
-		if (updateTimestamp) {
-			ss << "\ntimestamp update";
-		}
-		#ifdef __MINGW32__
-			MessageBoxA(0, ss.str().c_str(), "b", MB_OK);
-		#else
-			std::cout << ss.str() << std::endl;
-		#endif
-	#endif
-	if (updateTimestamp)
-	{
-		currentTimestamp = time(0);
-		updateTimestamp = false;
-	}
-	DRP::UpdatePresence(details.c_str(), largeText.c_str(), smallText.c_str(),
-											state.c_str(), smallImage.c_str(), currentTimestamp);
-}
-
-void safeClose()
-{
+void updatePresenceS(std::string &details, std::string &largeText,
+                     std::string &smallText, std::string &state,
+                     std::string &smallImage) {
 #ifdef _DEBUG
-	SetConsoleTitleA("close called");
+  std::stringstream ss;
+  ss << "d: " << details << " s: " << state << "\nst: " << smallText
+     << " lt: " << largeText;
+  if (updateTimestamp) {
+    ss << "\ntimestamp update";
+  }
+#ifdef __MINGW32__
+  MessageBoxA(0, ss.str().c_str(), "b", MB_OK);
+#else
+  std::cout << ss.str() << std::endl;
 #endif
-	Discord_Shutdown();
+#endif
+  if (updateTimestamp) {
+    currentTimestamp = time(0);
+    updateTimestamp = false;
+  }
+  DRP::UpdatePresence(details.c_str(), largeText.c_str(), smallText.c_str(),
+                      state.c_str(), smallImage.c_str(), currentTimestamp);
 }
 
-//insane_demon to Insane Demon
-std::string getTextFromKey(std::string key)
-{
-	key[0] = toupper(key[0]); // uppercase first letter
-	int index = 1;						// start from 1 because we start string from 1, and also because you can't get an index at -1 like it'll try to do..
-	std::for_each(key.begin() + 1, key.end(), [&index, &key](char &letter) {
-		// in any case, this checks if it's a space before
-		if (key[index - 1] == ' ')
-		{
-			letter = toupper(letter); // then capitalizes
-		}
-		else if (letter == '_')
-		{ // if underscore it goes and remoes it
-			letter = ' ';
-		}
-		index++; // then we use this to count
-	});
-	return key;
+void safeClose() {
+#ifdef _DEBUG
+  SetConsoleTitleA("close called");
+#endif
+  Discord_Shutdown();
 }
 
-std::string formatWithLevel(std::string& s, GDlevel &level, int currentBest = 0) {
-	std::string f;
-	try {
-		f = fmt::format(s,
-			fmt::arg("id", level.levelID),
-			fmt::arg("name", level.name),
-			fmt::arg("best", currentBest),
-			fmt::arg("diff", getTextFromKey(getDifficultyName(level))),
-			fmt::arg("author", level.author),
-			fmt::arg("stars", level.stars));
-	}
-	catch (const fmt::format_error &e)
-	{
-		std::string error_string = fmt::format("error found while parsing {}\n{}", s, e.what());
-		MessageBoxA(0, error_string.c_str(), "formatter error", MB_OK);
-		f = s;
-	}
-	catch (...)
-	{
-		MessageBoxA(0, "idk", "generic error", MB_OK);
-		f = s;
-	}
-	return f;
+// insane_demon to Insane Demon
+std::string getTextFromKey(std::string key) {
+  key[0] = toupper(key[0]); // uppercase first letter
+  int index = 1; // start from 1 because we start string from 1, and also
+                 // because you can't get an index at -1 like it'll try to do..
+  std::for_each(key.begin() + 1, key.end(), [&index, &key](char &letter) {
+    // in any case, this checks if it's a space before
+    if (key[index - 1] == ' ') {
+      letter = toupper(letter); // then capitalizes
+    } else if (letter == '_') { // if underscore it goes and remoes it
+      letter = ' ';
+    }
+    index++; // then we use this to count
+  });
+  return key;
+}
+
+std::string formatWithLevel(std::string &s, GDlevel &level,
+                            int currentBest = 0) {
+  std::string f;
+  try {
+    f = fmt::format(s, fmt::arg("id", level.levelID),
+                    fmt::arg("name", level.name), fmt::arg("best", currentBest),
+                    fmt::arg("diff", getTextFromKey(getDifficultyName(level))),
+                    fmt::arg("author", level.author),
+                    fmt::arg("stars", level.stars));
+  } catch (const fmt::format_error &e) {
+    std::string error_string =
+        fmt::format("error found while parsing {}\n{}", s, e.what());
+    MessageBoxA(0, error_string.c_str(), "formatter error", MB_OK);
+    f = s;
+  } catch (...) {
+    MessageBoxA(0, "idk", "generic error", MB_OK);
+    f = s;
+  }
+  return f;
 }
 
 struct configPresence {
-	std::string detail;
-	std::string state;
-	std::string smalltext;
+  std::string detail;
+  std::string state;
+  std::string smalltext;
 
-	void from_toml(const toml::value &table)
-	{
-		this->detail = toml::find<std::string>(table, "detail");
-		this->state = toml::find<std::string>(table, "state");
-		this->smalltext = toml::find<std::string>(table, "smalltext");
-	}
+  void from_toml(const toml::value &table) {
+    this->detail = toml::find<std::string>(table, "detail");
+    this->state = toml::find<std::string>(table, "state");
+    this->smalltext = toml::find<std::string>(table, "smalltext");
+  }
 
-	toml::table into_toml() const
-	{
-		return toml::table{{"detail", this->detail}, {"state", this->state}, {"smalltext", this->smalltext}};
-	}
+  toml::table into_toml() const {
+    return toml::table{{"detail", this->detail},
+                       {"state", this->state},
+                       {"smalltext", this->smalltext}};
+  }
 };
 
+DWORD WINAPI mainThread(LPVOID lpParam) {
+  DRP::InitDiscord();
 
-DWORD WINAPI mainThread(LPVOID lpParam)
-{
-	DRP::InitDiscord();
+  // global variable stuff
+  updatePresence = false;
+  currentPlayerState = playerState::menu;
 
-	// global variable stuff
-	updatePresence = false;
-	currentPlayerState = playerState::menu;
+  // config time!
 
+  // these must be in scope
+  std::string user_ranked, user_default;
 
-	// config time!
+  // next we fill in defaults to aid in creation
+  configPresence saved_level = {"Playing {name}", "by {author} ({best}%)",
+                                "{stars}* {diff}"},
+                 playtesting_level = {"Editing a level", "", ""},
+                 error_level = {"Playing a level", "", ""},
+                 editor_status = {"Editing a level", "", ""},
+                 menu_status = {"Idle", "", ""};
 
-	// these must be in scope
-	std::string user_ranked, user_default;
+  user_ranked = "{name} [Rank #{rank}]";
+  user_default = "";
+  bool get_rank = true;
 
-	// next we fill in defaults to aid in creation
-	configPresence
-		saved_level = {"Playing {name}", "by {author} ({best}%)", "{stars}* {diff}"},
-		playtesting_level = {"Editing a level", "", ""},
-		error_level = {"Playing a level", "", ""},
-		editor_status = {"Editing a level", "", ""},
-		menu_status = {"Idle", "", ""};
+  try {
+    const std::string filename = "gdrpc.toml";
+    if (!std::ifstream(filename)) {
+      // create generic file
+      std::ofstream config_file(filename);
 
-	user_ranked = "{name} [Rank #{rank}]";
-	user_default = "";
-	bool get_rank = true;
+      const toml::value user{{"ranked", user_ranked},
+                             {"default", user_default},
+                             {"get_rank", get_rank}};
 
-	try {
-		const std::string filename = "gdrpc.toml";
-		if (!std::ifstream(filename))
-		{
-			// create generic file
-			std::ofstream config_file(filename);
+      const toml::value menu(menu_status);
 
-			const toml::value user{
-				{"ranked", user_ranked},
-				{"default", user_default},
-				{"get_rank", get_rank}};
+      // can't use const here due to timestamp
+      toml::value editor(editor_status);
+      editor.as_table()["reset_timestamp"] = editor_reset_timestamp;
 
-			const toml::value menu(menu_status);
+      const toml::value saved(saved_level);
+      const toml::value playtesting(playtesting_level);
+      const toml::value error(error_level);
 
-			// can't use const here due to timestamp
-			toml::value editor(editor_status);
-			editor.as_table()["reset_timestamp"] = editor_reset_timestamp;
+      const toml::value level{
+          {"saved", saved}, {"playtesting", playtesting}, {"error", error}};
 
-			const toml::value saved(saved_level);
-			const toml::value playtesting(playtesting_level);
-			const toml::value error(error_level);
+      const toml::value default_config{
+          {"level", level}, {"editor", editor}, {"menu", menu}, {"user", user}};
 
-			const toml::value level{
-				{"saved", saved},
-				{"playtesting", playtesting},
-				{"error", error}};
+      config_file << "# autogenerated config\n" << default_config << std::endl;
+    }
+    const toml::value config = toml::parse(filename);
 
-			const toml::value default_config{
-				{"level", level},
-				{"editor", editor},
-				{"menu", menu},
-				{"user", user}};
+    // setting up strings
 
-			config_file << "# autogenerated config\n" << default_config << std::endl;
+    // level
+    const auto level_table = toml::find(config, "level");
 
-		}
-		const toml::value config = toml::parse(filename);
+    saved_level = toml::find<configPresence>(level_table, "saved");
+    playtesting_level = toml::find<configPresence>(level_table, "playtesting");
+    error_level = toml::find<configPresence>(level_table, "error");
 
-		// setting up strings
+    // editor
+    const auto editor_table = toml::find(config, "editor");
+    editor_status = toml::find<configPresence>(config, "editor");
+    editor_reset_timestamp = toml::find_or<bool>(
+        editor_table, "reset_timestamp", editor_reset_timestamp);
 
-		// level
-		const auto level_table = toml::find(config, "level");
+    // menu
+    menu_status = toml::find<configPresence>(config, "menu");
 
-		saved_level = toml::find<configPresence>(level_table, "saved");
-		playtesting_level = toml::find<configPresence>(level_table, "playtesting");
-		error_level = toml::find<configPresence>(level_table, "error");
+    // user (large text)
+    const auto user_table = toml::find(config, "user");
+    user_ranked = toml::find_or<std::string>(user_table, "ranked", user_ranked);
+    user_default =
+        toml::find_or<std::string>(user_table, "default", user_default);
+    get_rank = toml::find_or<bool>(user_table, "get_rank", get_rank);
+  } catch (const std::exception &e) {
+    MessageBoxA(0, e.what(), "config parser error", MB_OK);
+  } catch (...) {
+    MessageBoxA(0, "unhandled error\r\nthings should continue fine",
+                "config parser", MB_OK);
+  }
 
-		// editor
-		const auto editor_table = toml::find(config, "editor");
-		editor_status = toml::find<configPresence>(config, "editor");
-		editor_reset_timestamp = toml::find_or<bool>(editor_table, "reset_timestamp", editor_reset_timestamp);
+  std::string details, state, smallText, smallImage;
+  std::string largeText = user_default;
 
-		// menu
-		menu_status = toml::find<configPresence>(config, "menu");
+  // get user
+  int *accountID = (int *)(*getBase(0x3222D8) + 0x120);
+  GDuser user;
+  if (get_rank) {
+    bool userInfoSuccess = getUserInfo(*accountID, user);
+    if (userInfoSuccess) {
+      getUserRank(user);
+    }
+  }
 
-		// user (large text)
-		const auto user_table = toml::find(config, "user");
-		user_ranked = toml::find_or<std::string>(user_table, "ranked", user_ranked);
-		user_default = toml::find_or<std::string>(user_table, "default", user_default);
-		get_rank = toml::find_or<bool>(user_table, "get_rank", get_rank);
-	} catch (const std::exception& e) {
-			MessageBoxA(0, e.what(), "config parser error" , MB_OK);
-	} catch (...) {
-			MessageBoxA(0, "unhandled error\r\nthings should continue fine", "config parser" , MB_OK);
-	}
+  if (user.rank != -1) {
+    largeText = fmt::format(user_ranked, fmt::arg("name", user.name),
+                            fmt::arg("rank", user.rank));
+  } else {
+    char *username = (char *)(*getBase(0x3222D8) + 0x108);
+    largeText = std::string(username); // hopeful fallback
+  }
 
-	std::string details, state, smallText, smallImage;
-	std::string largeText = user_default;
+  int levelLocation, currentBest;
+  GDlevel currentLevel;
 
-	// get user
-	int *accountID = (int *)(*getBase(0x3222D8) + 0x120);
-	GDuser user;
-	if (get_rank) {
-		bool userInfoSuccess = getUserInfo(*accountID, user);
-		if (userInfoSuccess)
-		{
-			getUserRank(user);
-		}
-	}
+  updatePresence = true;
 
-	if (user.rank != -1)
-	{
-		largeText = fmt::format(
-				user_ranked,
-				fmt::arg("name", user.name),
-				fmt::arg("rank", user.rank));
-	}
-	else
-	{
-		char *username = (char *)(*getBase(0x3222D8) + 0x108);
-		largeText = std::string(username); // hopeful fallback
-	}
+  while (true) {
+    // run discord calls
+    Discord_RunCallbacks();
+    if (updatePresence) {
+      switch (currentPlayerState) {
+      case playerState::level:
+        levelLocation = *(int *)((int)currentGameLevel + 0x364);
+        currentBest = *(int *)((int)currentGameLevel + 0x248);
+        if (!parseGJGameLevel(currentGameLevel, currentLevel)) {
+          details =
+              fmt::format(error_level.detail, fmt::arg("best", currentBest));
+          state = fmt::format(error_level.state, fmt::arg("best", currentBest));
+          smallText = error_level.smalltext;
+          smallImage = "";
+        } else if (levelLocation == 2) {
+          details = formatWithLevel(playtesting_level.detail, currentLevel,
+                                    currentBest);
+          state = formatWithLevel(playtesting_level.state, currentLevel,
+                                  currentBest);
+          smallText = formatWithLevel(playtesting_level.smalltext, currentLevel,
+                                      currentBest);
+          smallImage = "creator_point";
+        } else {
+          details =
+              formatWithLevel(saved_level.detail, currentLevel, currentBest);
+          state = formatWithLevel(saved_level.state, currentLevel, currentBest);
+          smallText =
+              formatWithLevel(saved_level.smalltext, currentLevel, currentBest);
+          smallImage = getDifficultyName(currentLevel);
+        }
+        break;
+      case playerState::editor:
+        details = editor_status.detail;
+        state = editor_status.state;
+        smallText = editor_status.smalltext;
+        smallImage = "creator_point";
+        break;
+      case playerState::menu:
+        details = menu_status.detail;
+        state = menu_status.state;
+        smallText = menu_status.smalltext;
+        smallImage = "";
+        break;
+      }
+      updatePresenceS(details, largeText, smallText, state, smallImage);
+      updatePresence = false;
+    }
+    Sleep(1000);
+  }
 
-	int levelLocation, currentBest;
-	GDlevel currentLevel;
-
-	updatePresence = true;
-
-	while (true) {
-		// run discord calls
-		Discord_RunCallbacks();
-		if (updatePresence) {
-			switch (currentPlayerState) {
-				case playerState::level:
-					levelLocation = *(int*)((int)currentGameLevel + 0x364);
-					currentBest = *(int *)((int)currentGameLevel + 0x248);
-					if (!parseGJGameLevel(currentGameLevel, currentLevel)) {
-						details = fmt::format(error_level.detail, fmt::arg("best", currentBest));
-						state = fmt::format(error_level.state, fmt::arg("best", currentBest));
-						smallText = error_level.smalltext;
-						smallImage = "";
-					} else if (levelLocation == 2) {
-						details = formatWithLevel(playtesting_level.detail, currentLevel, currentBest);
-						state = formatWithLevel(playtesting_level.state, currentLevel, currentBest);
-						smallText = formatWithLevel(playtesting_level.smalltext, currentLevel, currentBest);
-						smallImage = "creator_point";
-					} else {
-						details = formatWithLevel(saved_level.detail, currentLevel, currentBest);
-						state = formatWithLevel(saved_level.state, currentLevel, currentBest);
-						smallText = formatWithLevel(saved_level.smalltext, currentLevel, currentBest);
-						smallImage = getDifficultyName(currentLevel);
-					}
-					break;
-				case playerState::editor:
-					details = editor_status.detail;
-					state = editor_status.state;
-					smallText = editor_status.smalltext;
-					smallImage = "creator_point";
-					break;
-				case playerState::menu:
-					details = menu_status.detail;
-					state = menu_status.state;
-					smallText = menu_status.smalltext;
-					smallImage = "";
-					break;
-			}
-			updatePresenceS(details, largeText, smallText, state, smallImage);
-			updatePresence = false;
-		}
-		Sleep(1000);
-	}
-
-	return 0;
+  return 0;
 }
-

@@ -3,53 +3,42 @@
 #define GDAPI_H
 #include "pch.h"
 #include <sstream>
-#include <tchar.h>
 #include <string>
-#include <wininet.h>
+#include <tchar.h>
 #include <vector>
+#include <wininet.h>
 
-enum class difficulty
-{
-	na,
-	easy,
-	normal,
-	hard,
-	harder,
-	insane,
+enum class difficulty {
+  na,
+  easy,
+  normal,
+  hard,
+  harder,
+  insane,
 }; // note that no demon difficulty exists
 
-enum class demon_difficulty
-{
-	none,
-	easy,
-	medium,
-	hard,
-	insane,
-	extreme
-};
+enum class demon_difficulty { none, easy, medium, hard, insane, extreme };
 
 // thinking about this a bit later
 // probably shouldn't have used structs lol
 
-struct GDlevel
-{
-	int levelID = -1;
-	std::string name;
-	std::string author = "-";
-	int authorID = -1;
-	int stars = 0;
-	difficulty difficulty = difficulty::na;
-	demon_difficulty demonDifficulty = demon_difficulty::none;
-	bool isAuto = false;
-	bool isDemon = false;
+struct GDlevel {
+  int levelID = -1;
+  std::string name;
+  std::string author = "-";
+  int authorID = -1;
+  int stars = 0;
+  difficulty difficulty = difficulty::na;
+  demon_difficulty demonDifficulty = demon_difficulty::none;
+  bool isAuto = false;
+  bool isDemon = false;
 }; // this is a really barebones struct btw
 
-struct GDuser
-{
-	int ID = -1;
-	int accID = -1;
-	std::string name;
-	int rank = -1;
+struct GDuser {
+  int ID = -1;
+  int accID = -1;
+  std::string name;
+  int rank = -1;
 };
 
 difficulty getDiffValue(int diff);
@@ -65,7 +54,7 @@ bool getPlayerInfo(int &playerID, GDuser &user);
 
 bool getUserRank(GDuser &user);
 
-bool parseGJGameLevel(int * gameLevel, GDlevel &level);
+bool parseGJGameLevel(int *gameLevel, GDlevel &level);
 
 // splits a string by substring, much like in other languages
 std::vector<std::string> explode(std::string &string, char separator);

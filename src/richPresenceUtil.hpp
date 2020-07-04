@@ -1,25 +1,23 @@
 #pragma once
+#include "DRPWrap.hpp"
+#include "gdapi.hpp"
 #include "pch.h"
-#include <stdio.h>
-#include <sstream>
-#include <ctime>
 #include <algorithm>
+#include <ctime>
 #include <sstream>
-#include "DRPWrap.h"
-#include "gdapi.h"
+#include <stdio.h>
 
-#include <toml.hpp>
 #include <fstream>
+#include <toml.hpp>
 
 #include <fmt/format.h>
 
 #ifndef RICHPRESENCEUTIL_H
 #define RICHPRESENCEUTIL_H
-enum class playerState
-{
-	level,
-	editor,
-	menu,
+enum class playerState {
+  level,
+  editor,
+  menu,
 };
 
 extern playerState currentPlayerState;

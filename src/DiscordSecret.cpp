@@ -1,5 +1,5 @@
+#include "DiscordSecret.hpp"
 #include "pch.h"
-#include "DiscordSecret.h"
 
 // fill this out .. or else
-const char* APPLICATION_ID = "";
+const char *APPLICATION_ID = "";
