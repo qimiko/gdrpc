@@ -120,8 +120,12 @@ void __fastcall EditorPauseLayerOnExitEditorH(void *editorPauseLayer, void* _edx
 
 void * __fastcall LevelEditorLayerCreateH(int * gameLevel)
 {
-	std::cout << "LevelEditorLayer::create" << std::endl;
-	SetConsoleTitleA("LevelEditorLayer::create");
+#ifdef _DEBUG
+	std::stringstream ss;
+	ss << "LevelEditorLayer::create - {" << std::hex << "0x" << (int)gameLevel << "}";
+	std::cout << ss.str() << std::endl;
+	SetConsoleTitleA(ss.str().c_str());
+#endif
 	currentPlayerState = playerState::editor;
 	updateTimestamp = true;
 	updatePresence = true;

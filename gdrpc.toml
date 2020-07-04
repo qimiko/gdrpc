@@ -7,7 +7,6 @@
 		state = "by {author} ({best}%)"
 		smalltext = "{stars}* {diff}"
 	[level.playtesting]
-		# note - as for now the gamelevel isn't passed to the playtesting/editing
 		detail = "Editing a level"
 		state = ""
 		smalltext = ""
