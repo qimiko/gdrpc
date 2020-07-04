@@ -30,6 +30,7 @@
 #### Configuration
 
 The configuration file, `gdrpc.toml` is located in the Geometry Dash directory. It is created automatically on first run.
+For more details on how to configurate, there is a `gdrpc.toml` file located in the root of this repository that details each of the arguments.
 
 ### Compiling
 
