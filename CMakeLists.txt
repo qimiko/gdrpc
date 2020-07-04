@@ -22,8 +22,8 @@ target_link_libraries(gdrpc minhook)
 
 set(BUILD_SHARED_LIBS ON)
 set(BUILD_EXAMPLES OFF CACHE BOOL "prevent building discord-rpc examples" FORCE)
-include_directories(libraries/rapidjson/include) # discord compilation will fail without this
 add_subdirectory(libraries/discord-rpc)
+target_include_directories(discord-rpc PRIVATE libraries/rapidjson/include) # discord compilation will fail without this
 target_link_libraries(gdrpc discord-rpc)
 
 set_target_properties(gdrpc PROPERTIES PREFIX "")

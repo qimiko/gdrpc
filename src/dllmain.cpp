@@ -3,7 +3,6 @@
 
 void setupConsole() {
 #ifdef _DEBUG
-#pragma message("debug build enabled!")
 	AllocConsole();
 	SetConsoleTitleA("generic name");
 	FILE *fp;
