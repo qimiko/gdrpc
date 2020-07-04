@@ -75,7 +75,7 @@ std::string formatWithLevel(std::string &s, GDlevel &level,
     MessageBoxA(0, error_string.c_str(), "formatter error", MB_OK);
     f = s;
   } catch (...) {
-    MessageBoxA(0, "idk", "generic error", MB_OK);
+    MessageBoxA(0, "idk", "unknown format error", MB_OK);
     f = s;
   }
   return f;
@@ -113,7 +113,7 @@ DWORD WINAPI mainThread(LPVOID lpParam) {
 
   // next we fill in defaults to aid in creation
   configPresence saved_level = {"Playing {name}", "by {author} ({best}%)",
-                                "{stars}* {diff}"},
+                                "{stars}* {diff} ({id})"},
                  playtesting_level = {"Editing a level", "", ""},
                  error_level = {"Playing a level", "", ""},
                  editor_status = {"Editing a level", "", ""},
