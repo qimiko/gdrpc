@@ -18,7 +18,7 @@ PlayLayerShowNewBestF plsnb;
 typedef void(__thiscall *EditorPauseLayerOnExitEditorF)(void *editorPauseLayer, void*);
 EditorPauseLayerOnExitEditorF eploee;
 
-typedef void(__fastcall *LevelEditorLayerCreateF)(int *gameLevel);
+typedef void*(__fastcall *LevelEditorLayerCreateF)(int *gameLevel);
 LevelEditorLayerCreateF lelc;
 
 typedef void(__thiscall *CCDirectorEndF)(void *CCDirector);
@@ -118,7 +118,7 @@ void __fastcall EditorPauseLayerOnExitEditorH(void *editorPauseLayer, void* _edx
 	return eploee(editorPauseLayer, p1);
 }
 
-void __fastcall LevelEditorLayerCreateH(int * gameLevel)
+void * __fastcall LevelEditorLayerCreateH(int * gameLevel)
 {
 	std::cout << "LevelEditorLayer::create" << std::endl;
 	SetConsoleTitleA("LevelEditorLayer::create");
@@ -128,7 +128,7 @@ void __fastcall LevelEditorLayerCreateH(int * gameLevel)
 
 	currentGameLevel = gameLevel;
 
-	lelc(gameLevel);
+	return lelc(gameLevel);
 }
 
 void __fastcall CCDirectorEndH(void *CCDirector)
