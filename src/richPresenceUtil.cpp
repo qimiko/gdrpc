@@ -16,20 +16,23 @@ int *getBase(int pointer)
 void updatePresenceS(std::string &details, std::string &largeText, std::string &smallText,
 											std::string &state, std::string &smallImage)
 {
-	if (updateTimestamp)
-	{
-		currentTimestamp = time(0);
-		updateTimestamp = false;
-	}
 	#ifdef _DEBUG
 		std::stringstream ss;
 		ss << "d: " << details << " s: " << state << "\nst: "<< smallText << " lt: " << largeText;
+		if (updateTimestamp) {
+			ss << "\ntimestamp update";
+		}
 		#ifdef __MINGW32__
 			MessageBoxA(0, ss.str().c_str(), "b", MB_OK);
 		#else
 			std::cout << ss.str() << std::endl;
 		#endif
 	#endif
+	if (updateTimestamp)
+	{
+		currentTimestamp = time(0);
+		updateTimestamp = false;
+	}
 	DRP::UpdatePresence(details.c_str(), largeText.c_str(), smallText.c_str(),
 											state.c_str(), smallImage.c_str(), currentTimestamp);
 }
@@ -62,14 +65,49 @@ std::string getTextFromKey(std::string key)
 	return key;
 }
 
-std::string formatWithLevel(std::string s, GDlevel &level, int currentBest = 0) {
-	return fmt::format(s,
-		fmt::arg("name", level.name),
-		fmt::arg("best", currentBest),
-		fmt::arg("diff", getTextFromKey(getDifficultyName(level))),
-		fmt::arg("author", level.author),
-		fmt::arg("stars", level.stars));
+std::string formatWithLevel(std::string& s, GDlevel &level, int currentBest = 0) {
+	std::string f;
+	try {
+		f = fmt::format(s,
+			fmt::arg("id", level.levelID),
+			fmt::arg("name", level.name),
+			fmt::arg("best", currentBest),
+			fmt::arg("diff", getTextFromKey(getDifficultyName(level))),
+			fmt::arg("author", level.author),
+			fmt::arg("stars", level.stars));
+	}
+	catch (const fmt::format_error &e)
+	{
+		std::string error_string = fmt::format("error found while parsing {}\n{}", s, e.what());
+		MessageBoxA(0, error_string.c_str(), "formatter error", MB_OK);
+		f = s;
+	}
+	catch (...)
+	{
+		MessageBoxA(0, "idk", "generic error", MB_OK);
+		f = s;
+	}
+	return f;
 }
+
+struct configPresence {
+	std::string detail;
+	std::string state;
+	std::string smalltext;
+
+	void from_toml(const toml::value &table)
+	{
+		this->detail = toml::find<std::string>(table, "detail");
+		this->state = toml::find<std::string>(table, "state");
+		this->smalltext = toml::find<std::string>(table, "smalltext");
+	}
+
+	toml::table into_toml() const
+	{
+		return toml::table{{"detail", this->detail}, {"state", this->state}, {"smalltext", this->smalltext}};
+	}
+};
+
 
 DWORD WINAPI mainThread(LPVOID lpParam)
 {
@@ -82,30 +120,17 @@ DWORD WINAPI mainThread(LPVOID lpParam)
 
 	// config time!
 
-	// this must be in scope
-	std::string saved_level_detail, saved_level_state, saved_level_smalltext,
-			playtesting_level_detail, playtesting_level_state, playtesting_level_smalltext,
-			error_level_detail, error_level_state, error_level_smalltext,
-			editor_detail, editor_state, editor_smalltext,
-			menu_detail, menu_state, menu_smalltext,
-			user_ranked, user_default;
+	// these must be in scope
+	std::string user_ranked, user_default;
 
 	// next we fill in defaults to aid in creation
-	saved_level_detail = "Playing {name}";
-	saved_level_state = "by {author} ({best}%)";
-	saved_level_smalltext = "{stars}* {diff}";
-	playtesting_level_detail = "Editing a level";
-	playtesting_level_state = "";
-	playtesting_level_smalltext = "";
-	error_level_detail = "Playing a level";
-	error_level_state = "";
-	error_level_smalltext = "";
-	editor_detail = "Editing a level";
-	editor_state = "";
-	editor_smalltext = "";
-	menu_detail = "Idle";
-	menu_state = "";
-	menu_smalltext = "";
+	configPresence
+		saved_level = {"Playing {name}", "by {author} ({best}%)", "{stars}* {diff}"},
+		playtesting_level = {"Editing a level", "", ""},
+		error_level = {"Playing a level", "", ""},
+		editor_status = {"Editing a level", "", ""},
+		menu_status = {"Idle", "", ""};
+
 	user_ranked = "{name} [Rank #{rank}]";
 	user_default = "";
 	bool get_rank = true;
@@ -122,31 +147,15 @@ DWORD WINAPI mainThread(LPVOID lpParam)
 				{"default", user_default},
 				{"get_rank", get_rank}};
 
-			const toml::value menu{
-					{"detail", menu_detail},
-					{"state", menu_state},
-					{"smalltext", menu_smalltext}};
+			const toml::value menu(menu_status);
 
-			const toml::value editor{
-					{"detail", editor_detail},
-					{"state", editor_state},
-					{"smalltext", editor_smalltext},
-					{"reset_timestamp", editor_reset_timestamp}};
+			// can't use const here due to timestamp
+			toml::value editor(editor_status);
+			editor.as_table()["reset_timestamp"] = editor_reset_timestamp;
 
-			const toml::value saved{
-					{"detail", saved_level_detail},
-					{"state", saved_level_state},
-					{"smalltext", saved_level_smalltext}};
-
-			const toml::value playtesting{
-					{"detail", playtesting_level_detail},
-					{"state", playtesting_level_state},
-					{"smalltext", playtesting_level_smalltext}};
-
-			const toml::value error{
-					{"detail", error_level_detail},
-					{"state", error_level_state},
-					{"smalltext", error_level_smalltext}};
+			const toml::value saved(saved_level);
+			const toml::value playtesting(playtesting_level);
+			const toml::value error(error_level);
 
 			const toml::value level{
 				{"saved", saved},
@@ -169,36 +178,17 @@ DWORD WINAPI mainThread(LPVOID lpParam)
 		// level
 		const auto level_table = toml::find(config, "level");
 
-		// saved
-		const auto saved_level_table = toml::find(level_table, "saved");
-		saved_level_detail = toml::find_or<std::string>(saved_level_table, "detail", saved_level_detail);
-		saved_level_state = toml::find_or<std::string>(saved_level_table, "state", saved_level_state);
-		saved_level_smalltext = toml::find_or<std::string>(saved_level_table, "smalltext", saved_level_smalltext);
-
-		// playtesting
-		const auto playtesting_level_table = toml::find(level_table, "playtesting");
-		playtesting_level_detail = toml::find_or<std::string>(playtesting_level_table, "detail", playtesting_level_detail);
-		playtesting_level_state = toml::find_or<std::string>(playtesting_level_table, "state", playtesting_level_state);
-		playtesting_level_smalltext = toml::find_or<std::string>(playtesting_level_table, "smalltext", playtesting_level_smalltext);
-
-		// error
-		const auto error_level_table = toml::find(level_table, "error");
-		error_level_detail = toml::find_or<std::string>(error_level_table, "detail", error_level_detail);
-		error_level_state = toml::find_or<std::string>(error_level_table, "state", error_level_state);
-		error_level_smalltext = toml::find_or<std::string>(error_level_table, "smalltext", error_level_smalltext);
+		saved_level = toml::find<configPresence>(level_table, "saved");
+		playtesting_level = toml::find<configPresence>(level_table, "playtesting");
+		error_level = toml::find<configPresence>(level_table, "error");
 
 		// editor
 		const auto editor_table = toml::find(config, "editor");
-		editor_detail = toml::find_or<std::string>(editor_table, "detail", editor_detail);
-		editor_state = toml::find_or<std::string>(editor_table, "state", editor_state);
-		editor_smalltext = toml::find_or<std::string>(editor_table, "smalltext", editor_smalltext);
-		editor_reset_timestamp = toml::find_or<bool>(editor_table, "reset_timestamp", get_rank);
+		editor_status = toml::find<configPresence>(config, "editor");
+		editor_reset_timestamp = toml::find_or<bool>(editor_table, "reset_timestamp", editor_reset_timestamp);
 
 		// menu
-		const auto menu_table = toml::find(config, "menu");
-		menu_detail = toml::find_or<std::string>(menu_table, "detail", menu_detail);
-		menu_state = toml::find_or<std::string>(menu_table, "state", menu_state);
-		menu_smalltext = toml::find_or<std::string>(menu_table, "smalltext", menu_smalltext);
+		menu_status = toml::find<configPresence>(config, "menu");
 
 		// user (large text)
 		const auto user_table = toml::find(config, "user");
@@ -252,33 +242,33 @@ DWORD WINAPI mainThread(LPVOID lpParam)
 					levelLocation = *(int*)((int)currentGameLevel + 0x364);
 					currentBest = *(int *)((int)currentGameLevel + 0x248);
 					if (!parseGJGameLevel(currentGameLevel, currentLevel)) {
-						details = fmt::format(error_level_detail, fmt::arg("best", currentBest));
-						state = fmt::format(error_level_state, fmt::arg("best", currentBest));
+						details = fmt::format(error_level.detail, fmt::arg("best", currentBest));
+						state = fmt::format(error_level.state, fmt::arg("best", currentBest));
+						smallText = error_level.smalltext;
 						smallImage = "";
-						smallText = error_level_smalltext;
 					} else if (levelLocation == 2) {
-						details = formatWithLevel(playtesting_level_detail, currentLevel, currentBest);
-						state = formatWithLevel(playtesting_level_state, currentLevel, currentBest);
-						smallText = formatWithLevel(playtesting_level_smalltext, currentLevel, currentBest);
+						details = formatWithLevel(playtesting_level.detail, currentLevel, currentBest);
+						state = formatWithLevel(playtesting_level.state, currentLevel, currentBest);
+						smallText = formatWithLevel(playtesting_level.smalltext, currentLevel, currentBest);
 						smallImage = "creator_point";
 					} else {
-						details = formatWithLevel(saved_level_detail, currentLevel, currentBest);
-						state = formatWithLevel(saved_level_state, currentLevel, currentBest);
-						smallText = formatWithLevel(saved_level_smalltext, currentLevel, currentBest);
+						details = formatWithLevel(saved_level.detail, currentLevel, currentBest);
+						state = formatWithLevel(saved_level.state, currentLevel, currentBest);
+						smallText = formatWithLevel(saved_level.smalltext, currentLevel, currentBest);
 						smallImage = getDifficultyName(currentLevel);
 					}
 					break;
 				case playerState::editor:
-					details = editor_detail;
-					state = editor_state;
+					details = editor_status.detail;
+					state = editor_status.state;
+					smallText = editor_status.smalltext;
 					smallImage = "creator_point";
-					smallText = editor_smalltext;
 					break;
 				case playerState::menu:
-					details = menu_detail;
-					state = menu_state;
+					details = menu_status.detail;
+					state = menu_status.state;
+					smallText = menu_status.smalltext;
 					smallImage = "";
-					smallText = menu_smalltext;
 					break;
 			}
 			updatePresenceS(details, largeText, smallText, state, smallImage);

@@ -2,10 +2,11 @@
 # this one will look nicer though :)
 
 [level]
+	# parameters - id, name, best, diff, author, stars
 	[level.saved]
 		detail = "Playing {name}"
 		state = "by {author} ({best}%)"
-		smalltext = "{stars}* {diff}"
+		smalltext = "{stars}* {diff} ({id})"
 	[level.playtesting]
 		detail = "Editing a level"
 		state = ""
@@ -16,6 +17,7 @@
 		smalltext = ""
 
 [editor]
+	# no parameters are supported for the editor
 	detail = "Editing a level"
 	state = ""
 	smalltext = ""
@@ -27,6 +29,7 @@
 	smalltext = ""
 
 [user]
+	# parameters - name, rank
 	ranked = "{name} [Rank #{rank}]"
 	default = ""
 	get_rank = true
