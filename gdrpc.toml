@@ -12,12 +12,13 @@
 		state = ""
 		smalltext = ""
 	[level.error]
+		# parsing error - only parameter supported is best
 		detail = "Playing a level"
 		state = "{best}%"
 		smalltext = ""
 
 [editor]
-	# no parameters are supported for the editor
+	# no parameters are supported for the editor yet
 	detail = "Editing a level"
 	state = ""
 	smalltext = ""
