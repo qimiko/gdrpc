@@ -19,6 +19,7 @@
 	detail = "Editing a level"
 	state = ""
 	smalltext = ""
+	reset_timestamp = false # resets timestamp between going from editor to playtest
 
 [menu]
 	detail = "Idle"

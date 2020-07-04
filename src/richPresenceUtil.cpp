@@ -6,6 +6,7 @@ int *currentGameLevel;
 bool updatePresence;
 bool updateTimestamp;
 time_t currentTimestamp = time(0);
+bool editor_reset_timestamp = false;
 
 int *getBase(int pointer)
 {
@@ -129,7 +130,8 @@ DWORD WINAPI mainThread(LPVOID lpParam)
 			const toml::value editor{
 					{"detail", editor_detail},
 					{"state", editor_state},
-					{"smalltext", editor_smalltext}};
+					{"smalltext", editor_smalltext},
+					{"reset_timestamp", editor_reset_timestamp}};
 
 			const toml::value saved{
 					{"detail", saved_level_detail},
@@ -190,6 +192,7 @@ DWORD WINAPI mainThread(LPVOID lpParam)
 		editor_detail = toml::find_or<std::string>(editor_table, "detail", editor_detail);
 		editor_state = toml::find_or<std::string>(editor_table, "state", editor_state);
 		editor_smalltext = toml::find_or<std::string>(editor_table, "smalltext", editor_smalltext);
+		editor_reset_timestamp = toml::find_or<bool>(editor_table, "reset_timestamp", get_rank);
 
 		// menu
 		const auto menu_table = toml::find(config, "menu");

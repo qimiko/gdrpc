@@ -26,7 +26,7 @@ extern playerState currentPlayerState;
 extern int *currentGameLevel;
 extern bool updatePresence;
 extern bool updateTimestamp;
-
+extern bool editor_reset_timestamp;
 void safeClose();
 DWORD WINAPI mainThread(LPVOID lpParam);
 #endif

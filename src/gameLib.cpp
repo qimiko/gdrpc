@@ -71,11 +71,13 @@ void * __fastcall PlayLayerCreateH(int * gameLevel) {
 	std::cout << ss.str() << std::endl;
 	SetConsoleTitleA(ss.str().c_str());
 #endif
-
+	if (currentPlayerState != playerState::editor || editor_reset_timestamp)
+	{
+		updateTimestamp = true;
+	}
 	currentGameLevel = gameLevel;
 
 	currentPlayerState = playerState::level;
-	updateTimestamp = true;
 	updatePresence = true;
 
 	return plc(gameLevel);
@@ -126,8 +128,10 @@ void * __fastcall LevelEditorLayerCreateH(int * gameLevel)
 	std::cout << ss.str() << std::endl;
 	SetConsoleTitleA(ss.str().c_str());
 #endif
+	if (currentPlayerState != playerState::level || editor_reset_timestamp) {
+		updateTimestamp = true;
+	}
 	currentPlayerState = playerState::editor;
-	updateTimestamp = true;
 	updatePresence = true;
 
 	currentGameLevel = gameLevel;
