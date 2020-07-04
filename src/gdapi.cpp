@@ -309,8 +309,10 @@ std::string readString(int * addr) {
 // no error handling either. good luck
 bool parseGJGameLevel(int * gameLevel, GDlevel &level) {
 	int newID = *(int *)((int)gameLevel + 0xF8);
+	int levelLocation = *(int *)((int)gameLevel + 0x364);
 
-	if (newID == level.levelID) { // don't calculate more than we have to
+	// don't calculate more than we have to, but the editor keeps id 0
+	if (newID == level.levelID && levelLocation != 2) {
 		return true;
 	}
 
@@ -319,7 +321,6 @@ bool parseGJGameLevel(int * gameLevel, GDlevel &level) {
 
 	level.name = readString((int *)((int)gameLevel + 0xFC));
 
-	int levelLocation = *(int *)((int)gameLevel + 0x364);
 	if (levelLocation == 1) {
 			level.author = "RobTop"; // author is "" on these
 			int diffValue = *(int *)((int)gameLevel + 0x1BC)*10;

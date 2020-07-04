@@ -248,25 +248,21 @@ DWORD WINAPI mainThread(LPVOID lpParam)
 				case playerState::level:
 					levelLocation = *(int*)((int)currentGameLevel + 0x364);
 					currentBest = *(int *)((int)currentGameLevel + 0x248);
-					if (levelLocation == 2) {
-						details = playtesting_level_detail;
-						state = playtesting_level_state;
-						smallText = playtesting_level_smalltext;
+					if (!parseGJGameLevel(currentGameLevel, currentLevel)) {
+						details = fmt::format(error_level_detail, fmt::arg("best", currentBest));
+						state = fmt::format(error_level_state, fmt::arg("best", currentBest));
+						smallImage = "";
+						smallText = error_level_smalltext;
+					} else if (levelLocation == 2) {
+						details = formatWithLevel(playtesting_level_detail, currentLevel, currentBest);
+						state = formatWithLevel(playtesting_level_state, currentLevel, currentBest);
+						smallText = formatWithLevel(playtesting_level_smalltext, currentLevel, currentBest);
 						smallImage = "creator_point";
 					} else {
-						if (!parseGJGameLevel(currentGameLevel, currentLevel)) {
-							details = fmt::format(error_level_detail, fmt::arg("best", currentBest));
-							state = fmt::format(error_level_state, fmt::arg("best", currentBest));
-							smallImage = "";
-							smallText = error_level_smalltext;
-						}
-						else
-						{
-							details = formatWithLevel(saved_level_detail, currentLevel, currentBest);
-							state = formatWithLevel(saved_level_state, currentLevel, currentBest);
-							smallText = formatWithLevel(saved_level_smalltext, currentLevel, currentBest);
-							smallImage = getDifficultyName(currentLevel);
-						}
+						details = formatWithLevel(saved_level_detail, currentLevel, currentBest);
+						state = formatWithLevel(saved_level_state, currentLevel, currentBest);
+						smallText = formatWithLevel(saved_level_smalltext, currentLevel, currentBest);
+						smallImage = getDifficultyName(currentLevel);
 					}
 					break;
 				case playerState::editor:
