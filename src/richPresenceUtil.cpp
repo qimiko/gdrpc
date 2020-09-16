@@ -8,6 +8,8 @@ bool updateTimestamp;
 time_t currentTimestamp = time(0);
 bool editor_reset_timestamp = false;
 
+Discord_Presence *discord = get_discord();
+
 int *getBase(int pointer) {
   return (int *)((int)GetModuleHandle(L"GeometryDash.exe") + pointer);
 }
@@ -32,8 +34,8 @@ void updatePresenceS(std::string &details, std::string &largeText,
     currentTimestamp = time(0);
     updateTimestamp = false;
   }
-  DRP::UpdatePresence(details.c_str(), largeText.c_str(), smallText.c_str(),
-                      state.c_str(), smallImage.c_str(), currentTimestamp);
+  discord->update(details.c_str(), largeText.c_str(), smallText.c_str(), state.c_str(),
+  smallImage.c_str(), currentTimestamp);
 }
 
 void safeClose() {
@@ -100,7 +102,8 @@ struct configPresence {
 };
 
 DWORD WINAPI mainThread(LPVOID lpParam) {
-  DRP::InitDiscord();
+
+  discord->initialize();
 
   // global variable stuff
   updatePresence = false;
@@ -212,7 +215,7 @@ DWORD WINAPI mainThread(LPVOID lpParam) {
 
   while (true) {
     // run discord calls
-    Discord_RunCallbacks();
+    discord->run_callbacks();
     if (updatePresence) {
       switch (currentPlayerState) {
       case playerState::level:

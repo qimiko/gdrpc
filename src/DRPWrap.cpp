@@ -1,26 +1,23 @@
 #include "DRPWrap.hpp"
 #include "pch.h"
 
-int rpcStatus = -1; // -1 , not start
+Discord_Presence global_discord = Discord_Presence();
 
+Discord_Presence *get_discord() {
+  return &global_discord;
+}
+
+// this weird structure is necessary thanks to how discord-rpc handles this stuff
 static void handleDiscordReady(const DiscordUser *connectedUser) {
-  rpcStatus = 0; // success is code of 0
-#ifdef _DEBUG
-  std::cout << "\nDiscord: connected to user " << connectedUser->username << "#"
-            << connectedUser->discriminator << " (" << connectedUser->userId
-            << ")\n";
-#endif
+  get_discord()->set_status(0); // success is code of 0
 }
 
 static void handleDiscordDisconnected(int errcode, const char *message) {
-  rpcStatus = errcode;
-  std::cout << "\nDiscord: disconnected (" << errcode << " : " << message
-            << ")\n";
+  get_discord()->set_status(errcode);
 }
 
 static void handleDiscordError(int errcode, const char *message) {
-  rpcStatus = errcode;
-  std::cout << "\nDiscord: error (" << errcode << " : " << message << ")\n";
+  get_discord()->set_status(errcode);
 }
 
 static void handleDiscordJoinGame(const char *secret) { return; }
@@ -30,11 +27,33 @@ static void handleDiscordSpectateGame(const char *secret) { return; }
 static void handleDiscordJoinRequest(const DiscordUser *request) {
   Discord_Respond(request->userId, DISCORD_REPLY_NO);
 }
-namespace DRP {
 
-int getPresenceStatus() { return rpcStatus; }
+Discord_Presence::Discord_Presence() {
+  status = -1;
+}
 
-void UpdatePresence(const char *details, const char *largeText,
+void Discord_Presence::initialize() {
+  DiscordEventHandlers handlers;
+  memset(&handlers, 0, sizeof(handlers));
+  handlers.ready = handleDiscordReady;
+  handlers.errored = handleDiscordError;
+  handlers.disconnected = handleDiscordDisconnected;
+  handlers.joinGame = handleDiscordJoinGame;
+  handlers.spectateGame = handleDiscordSpectateGame;
+  handlers.joinRequest = handleDiscordJoinRequest;
+
+  Discord_Initialize(APPLICATION_ID, &handlers, 1, "322170");
+}
+
+int Discord_Presence::get_status() {
+  return status;
+}
+
+void Discord_Presence::set_status(int n_status) {
+  status = n_status;
+}
+
+void Discord_Presence::update(const char *details, const char *largeText,
                     const char *smallText, const char *statetext,
                     const char *smallImage, time_t timestamp) {
   DiscordRichPresence discordPresence;
@@ -56,18 +75,10 @@ void UpdatePresence(const char *details, const char *largeText,
   Discord_UpdatePresence(&discordPresence);
 }
 
-void InitDiscord() {
-  DiscordEventHandlers handlers;
-  memset(&handlers, 0, sizeof(handlers));
-  handlers.ready = handleDiscordReady;
-  handlers.errored = handleDiscordError;
-  handlers.disconnected = handleDiscordDisconnected;
-  handlers.joinGame = handleDiscordJoinGame;
-  handlers.spectateGame = handleDiscordSpectateGame;
-  handlers.joinRequest = handleDiscordJoinRequest;
-
-  // Discord_Initialize(const char* applicationId, DiscordEventHandlers*
-  // handlers, int autoRegister, const char* optionalSteamId)
-  Discord_Initialize(APPLICATION_ID, &handlers, 1, "322170");
+void Discord_Presence::run_callbacks() {
+  Discord_RunCallbacks();
 }
-} // namespace DRP
+
+void Discord_Presence::shutdown() {
+  Discord_Shutdown();
+}
