@@ -2,6 +2,6 @@
 #ifndef DISCORDID
 #define DISCORDID
 
-extern const char *APPLICATION_ID;
+constexpr const char *APPLICATION_ID = "";
 
 #endif // !DISCORDID

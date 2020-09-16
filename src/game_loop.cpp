@@ -1,4 +1,4 @@
-#include "richPresenceUtil.hpp"
+#include "game_loop.hpp"
 #include "pch.h"
 
 Game_Loop game_loop = Game_Loop();

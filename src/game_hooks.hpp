@@ -1,6 +1,6 @@
 #pragma once
 #include "pch.h"
-#include "richPresenceUtil.hpp"
+#include "game_loop.hpp"
 #include <MinHook.h>
 #include <sstream>
 #include <stdio.h>

@@ -1,4 +1,4 @@
-#include "gameLib.hpp"
+#include "game_hooks.hpp"
 #include "pch.h"
 
 void setupConsole() {

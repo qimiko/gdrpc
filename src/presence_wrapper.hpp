@@ -1,7 +1,7 @@
 #pragma once
 #pragma comment(lib, "discord-rpc.lib")
 
-#include "DiscordSecret.hpp"
+#include "discord_secret.hpp"
 #include <cstdint>
 #include <cstdlib>
 #include <discord_rpc.h>

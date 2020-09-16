@@ -36,7 +36,7 @@ For more details on how to configurate, there is a `gdrpc.toml` file located in 
 
 1. import files into Visual Studio as cmake project
 2. download git submodules, `git submodules update --init --recursive`
-3. edit `src/DiscordSecret.cpp` and add your application id
+3. edit `src/discord_secret.hpp` and add your application id between the quotes
 4. build dll
 5. add the assets in the `assets` folder to discord
 

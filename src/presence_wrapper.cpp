@@ -1,4 +1,4 @@
-#include "DRPWrap.hpp"
+#include "presence_wrapper.hpp"
 #include "pch.h"
 
 Discord_Presence global_discord = Discord_Presence();
