@@ -3,33 +3,10 @@
 
 bool setupDone = false;
 
-typedef int(__thiscall *MenuLayerInitF)(void *menuLayer);
-MenuLayerInitF mli;
-
-typedef void *(__fastcall *PlayLayerCreateF)(int *gameLevel);
-PlayLayerCreateF plc;
-
-typedef void(__fastcall *PlayLayerOnQuitF)(void *playLayer);
-PlayLayerOnQuitF ploq;
-
-typedef void *(__thiscall *PlayLayerShowNewBestF)(void *playLayer, char, float,
-                                                  int, char, char, char);
-PlayLayerShowNewBestF plsnb;
-
-typedef void(__thiscall *EditorPauseLayerOnExitEditorF)(void *editorPauseLayer,
-                                                        void *);
-EditorPauseLayerOnExitEditorF eploee;
-
-typedef void *(__fastcall *LevelEditorLayerCreateF)(int *gameLevel);
-LevelEditorLayerCreateF lelc;
-
-typedef void(__thiscall *CCDirectorEndF)(void *CCDirector);
-CCDirectorEndF ccde;
-
 // this handles x button close
 LONG_PTR oWindowProc;
 LRESULT CALLBACK nWindowProc(HWND hwnd, UINT msg, WPARAM wparam,
-                             LPARAM lparam) {
+                            LPARAM lparam) {
   switch (msg) {
   case WM_CLOSE:
     // properly shutdown
@@ -49,6 +26,9 @@ HMODULE GetCurrentModule() {
   return hModule;
 }
 
+typedef int(__thiscall *MenuLayerInitF)(void *menuLayer);
+MenuLayerInitF mli;
+
 int __fastcall MenuLayerInitH(void *menuLayer) {
   // i have to test like this (idk why)
   if (!setupDone) {
@@ -60,12 +40,15 @@ int __fastcall MenuLayerInitH(void *menuLayer) {
   return mli(menuLayer);
 }
 
+typedef void *(__fastcall *PlayLayerCreateF)(int *gameLevel);
+PlayLayerCreateF plc;
+
 void *__fastcall PlayLayerCreateH(int *gameLevel) {
 #ifdef _DEBUG
   int maybeLevelID = *(int *)((int)gameLevel + 0xF8);
   std::stringstream ss;
   ss << "PlayLayer::create - " << maybeLevelID << " {" << std::hex << "0x"
-     << (int)gameLevel << "}";
+    << (int)gameLevel << "}";
 
   std::cout << ss.str() << std::endl;
   SetConsoleTitleA(ss.str().c_str());
@@ -81,6 +64,9 @@ void *__fastcall PlayLayerCreateH(int *gameLevel) {
   return plc(gameLevel);
 }
 
+typedef void(__fastcall *PlayLayerOnQuitF)(void *playLayer);
+PlayLayerOnQuitF ploq;
+
 void __fastcall PlayLayerOnQuitH(void *playLayer) {
   std::cout << "PlayLayer::onQuit" << std::endl;
   SetConsoleTitleA("PlayLayer::onQuit");
@@ -90,10 +76,14 @@ void __fastcall PlayLayerOnQuitH(void *playLayer) {
   return ploq(playLayer);
 }
 
+typedef void *(__thiscall *PlayLayerShowNewBestF)(void *playLayer, char, float,
+                                                  int, char, char, char);
+PlayLayerShowNewBestF plsnb;
+
 // to heck with your calling conventions
 void *__fastcall PlayLayerShowNewBestH(void *playLayer, void *_edx, char p1,
-                                       float p2, int p3, char p4, char p5,
-                                       char p6) {
+                                      float p2, int p3, char p4, char p5,
+                                      char p6) {
 #ifdef _DEBUG
   int levelID = *(int *)((int)currentGameLevel + 0xF8);
   int maybeBest = *(int *)((int)currentGameLevel + 0x248);
@@ -109,6 +99,10 @@ void *__fastcall PlayLayerShowNewBestH(void *playLayer, void *_edx, char p1,
   return plsnb(playLayer, p1, p2, p3, p4, p5, p6);
 }
 
+typedef void(__thiscall *EditorPauseLayerOnExitEditorF)(void *editorPauseLayer,
+                                                        void *);
+EditorPauseLayerOnExitEditorF eploee;
+
 // thanks blaze for the other argument
 void __fastcall EditorPauseLayerOnExitEditorH(void *editorPauseLayer,
                                               void *_edx, void *p1) {
@@ -121,11 +115,14 @@ void __fastcall EditorPauseLayerOnExitEditorH(void *editorPauseLayer,
   return eploee(editorPauseLayer, p1);
 }
 
+typedef void *(__fastcall *LevelEditorLayerCreateF)(int *gameLevel);
+LevelEditorLayerCreateF lelc;
+
 void *__fastcall LevelEditorLayerCreateH(int *gameLevel) {
 #ifdef _DEBUG
   std::stringstream ss;
   ss << "LevelEditorLayer::create - {" << std::hex << "0x" << (int)gameLevel
-     << "}";
+    << "}";
   std::cout << ss.str() << std::endl;
   SetConsoleTitleA(ss.str().c_str());
 #endif
@@ -139,6 +136,9 @@ void *__fastcall LevelEditorLayerCreateH(int *gameLevel) {
 
   return lelc(gameLevel);
 }
+
+typedef void(__thiscall *CCDirectorEndF)(void *CCDirector);
+CCDirectorEndF ccde;
 
 void __fastcall CCDirectorEndH(void *CCDirector) {
   std::cout << "CCDirector::End";
