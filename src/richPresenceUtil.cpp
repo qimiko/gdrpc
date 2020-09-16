@@ -1,48 +1,10 @@
 #include "richPresenceUtil.hpp"
 #include "pch.h"
 
-playerState currentPlayerState = playerState::menu;
-int *currentGameLevel;
-bool updatePresence;
-bool updateTimestamp;
-time_t currentTimestamp = time(0);
-bool editor_reset_timestamp = false;
-
-Discord_Presence *discord = get_discord();
+Game_Loop game_loop = Game_Loop();
 
 int *getBase(int pointer) {
   return (int *)((int)GetModuleHandle(L"GeometryDash.exe") + pointer);
-}
-
-void updatePresenceS(std::string &details, std::string &largeText,
-                     std::string &smallText, std::string &state,
-                     std::string &smallImage) {
-#ifdef _DEBUG
-  std::stringstream ss;
-  ss << "d: " << details << " s: " << state << "\nst: " << smallText
-     << " lt: " << largeText;
-  if (updateTimestamp) {
-    ss << "\ntimestamp update";
-  }
-#ifdef __MINGW32__
-  MessageBoxA(0, ss.str().c_str(), "b", MB_OK);
-#else
-  std::cout << ss.str() << std::endl;
-#endif
-#endif
-  if (updateTimestamp) {
-    currentTimestamp = time(0);
-    updateTimestamp = false;
-  }
-  discord->update(details.c_str(), largeText.c_str(), smallText.c_str(), state.c_str(),
-  smallImage.c_str(), currentTimestamp);
-}
-
-void safeClose() {
-#ifdef _DEBUG
-  SetConsoleTitleA("close called");
-#endif
-  Discord_Shutdown();
 }
 
 // insane_demon to Insane Demon
@@ -83,44 +45,65 @@ std::string formatWithLevel(std::string &s, GDlevel &level,
   return f;
 }
 
-struct configPresence {
-  std::string detail;
-  std::string state;
-  std::string smalltext;
+Game_Loop *get_game_loop() {
+  return &game_loop;
+}
 
-  void from_toml(const toml::value &table) {
-    this->detail = toml::find<std::string>(table, "detail");
-    this->state = toml::find<std::string>(table, "state");
-    this->smalltext = toml::find<std::string>(table, "smalltext");
+void Game_Loop::update_presence_w(std::string &details, std::string &largeText,
+                          std::string &smallText, std::string &state,
+                          std::string &smallImage) {
+#ifdef _DEBUG
+  std::stringstream ss;
+  ss << "d: " << details << " s: " << state << "\nst: " << smallText
+     << " lt: " << largeText;
+  if (update_timestamp) {
+    ss << "\ntimestamp update";
   }
-
-  toml::table into_toml() const {
-    return toml::table{{"detail", this->detail},
-                       {"state", this->state},
-                       {"smalltext", this->smalltext}};
+#ifdef __MINGW32__
+  MessageBoxA(0, ss.str().c_str(), "b", MB_OK);
+#else
+  std::cout << ss.str() << std::endl;
+#endif
+#endif
+  if (update_timestamp) {
+    current_timestamp = time(0);
+    update_timestamp = false;
   }
-};
+  discord->update(details.c_str(), largeText.c_str(), smallText.c_str(),
+                  state.c_str(), smallImage.c_str(), current_timestamp);
+}
 
-DWORD WINAPI mainThread(LPVOID lpParam) {
+void Game_Loop::close() {
+#ifdef _DEBUG
+  SetConsoleTitleA("close called");
+#endif
+  Discord_Shutdown();
+}
 
+Game_Loop::Game_Loop() {
+  player_state = playerState::menu;
+
+  update_presence = false;
+  update_timestamp = false;
+  current_timestamp = time(0);
+  editor_reset_timestamp = false;
+
+  discord = get_discord();
+}
+
+void Game_Loop::initialize() {
   discord->initialize();
-
-  // global variable stuff
-  updatePresence = false;
-  currentPlayerState = playerState::menu;
-
   // config time!
 
   // these must be in scope
   std::string user_ranked, user_default;
 
   // next we fill in defaults to aid in creation
-  configPresence saved_level = {"Playing {name}", "by {author} ({best}%)",
-                                "{stars}* {diff} ({id})"},
-                 playtesting_level = {"Editing a level", "", ""},
-                 error_level = {"Playing a level", "", ""},
-                 editor_status = {"Editing a level", "", ""},
-                 menu_status = {"Idle", "", ""};
+  saved_level = {"Playing {name}", "by {author} ({best}%)", "{stars}* {diff} ({id})"};
+  playtesting_level = {"Editing a level", "", ""};
+  error_level = {"Playing a level", "", ""};
+  editor_status = {"Editing a level", "", ""};
+  menu_status = {"Idle", "", ""};
 
   user_ranked = "{name} [Rank #{rank}]";
   user_default = "";
@@ -187,8 +170,7 @@ DWORD WINAPI mainThread(LPVOID lpParam) {
                 "config parser", MB_OK);
   }
 
-  std::string details, state, smallText, smallImage;
-  std::string largeText = user_default;
+  large_text = user_default;
 
   // get user
   int *accountID = (int *)(*getBase(0x3222D8) + 0x120);
@@ -201,65 +183,102 @@ DWORD WINAPI mainThread(LPVOID lpParam) {
   }
 
   if (user.rank != -1) {
-    largeText = fmt::format(user_ranked, fmt::arg("name", user.name),
+    large_text = fmt::format(user_ranked, fmt::arg("name", user.name),
                             fmt::arg("rank", user.rank));
   } else {
     char *username = (char *)(*getBase(0x3222D8) + 0x108);
-    largeText = std::string(username); // hopeful fallback
+    large_text = std::string(username); // hopeful fallback
   }
 
-  int levelLocation, currentBest;
-  GDlevel currentLevel;
+  update_presence = true;
+}
 
-  updatePresence = true;
+void Game_Loop::on_loop() {
+  discord->run_callbacks();
+  if (update_presence) {
+    // we don't need to keep this in the class, every time presence updates it gets remade anyways
+    std::string details, state, small_text, small_image;
 
-  while (true) {
-    // run discord calls
-    discord->run_callbacks();
-    if (updatePresence) {
-      switch (currentPlayerState) {
-      case playerState::level:
-        levelLocation = *(int *)((int)currentGameLevel + 0x364);
-        currentBest = *(int *)((int)currentGameLevel + 0x248);
-        if (!parseGJGameLevel(currentGameLevel, currentLevel)) {
-          details =
-              fmt::format(error_level.detail, fmt::arg("best", currentBest));
-          state = fmt::format(error_level.state, fmt::arg("best", currentBest));
-          smallText = error_level.smalltext;
-          smallImage = "";
-        } else if (levelLocation == 2) {
-          details = formatWithLevel(playtesting_level.detail, currentLevel,
-                                    currentBest);
-          state = formatWithLevel(playtesting_level.state, currentLevel,
-                                  currentBest);
-          smallText = formatWithLevel(playtesting_level.smalltext, currentLevel,
-                                      currentBest);
-          smallImage = "creator_point";
-        } else {
-          details =
-              formatWithLevel(saved_level.detail, currentLevel, currentBest);
-          state = formatWithLevel(saved_level.state, currentLevel, currentBest);
-          smallText =
-              formatWithLevel(saved_level.smalltext, currentLevel, currentBest);
-          smallImage = getDifficultyName(currentLevel);
-        }
-        break;
-      case playerState::editor:
-        details = editor_status.detail;
-        state = editor_status.state;
-        smallText = editor_status.smalltext;
-        smallImage = "creator_point";
-        break;
-      case playerState::menu:
-        details = menu_status.detail;
-        state = menu_status.state;
-        smallText = menu_status.smalltext;
-        smallImage = "";
-        break;
+    switch (player_state) {
+    case playerState::level:
+    {
+      int level_location = *(int *)((int)gamelevel + 0x364);
+      int current_best = *(int *)((int)gamelevel + 0x248);
+      if (!parseGJGameLevel(gamelevel, level)) {
+        details =
+            fmt::format(error_level.detail, fmt::arg("best", current_best));
+        state = fmt::format(error_level.state, fmt::arg("best", current_best));
+        small_text = error_level.smalltext;
+        small_image = "";
+      } else if (level_location == 2) {
+        details = formatWithLevel(playtesting_level.detail, level, current_best);
+        state = formatWithLevel(playtesting_level.state, level, current_best);
+        small_text =
+            formatWithLevel(playtesting_level.smalltext, level, current_best);
+        small_image = "creator_point";
+      } else {
+        details = formatWithLevel(saved_level.detail, level, current_best);
+        state = formatWithLevel(saved_level.state, level, current_best);
+        small_text =
+            formatWithLevel(saved_level.smalltext, level, current_best);
+        small_image = getDifficultyName(level);
       }
-      updatePresenceS(details, largeText, smallText, state, smallImage);
-      updatePresence = false;
+      break;
     }
+    case playerState::editor:
+    {
+      details = editor_status.detail;
+      state = editor_status.state;
+      small_text = editor_status.smalltext;
+      small_image = "creator_point";
+      break;
+    }
+    case playerState::menu:
+    {
+      details = menu_status.detail;
+      state = menu_status.state;
+      small_text = menu_status.smalltext;
+      small_image = "";
+      break;
+    }
+    }
+    update_presence_w(details, large_text, small_text, state, small_image);
+    update_presence = false;
+  }
+}
+
+void Game_Loop::set_update_presence(bool n_presence) {
+  update_presence = n_presence;
+}
+
+void Game_Loop::set_update_timestamp(bool n_timestamp) {
+  update_timestamp = n_timestamp;
+}
+
+void Game_Loop::set_gamelevel(int *n_gamelevel) {
+  gamelevel = n_gamelevel;
+}
+
+int *Game_Loop::get_gamelevel() {
+  return gamelevel;
+}
+
+void Game_Loop::set_state(playerState n_state) {
+  player_state = n_state;
+}
+
+playerState Game_Loop::get_state() {
+  return player_state;
+}
+
+bool Game_Loop::get_reset_timestamp() {
+  return editor_reset_timestamp;
+}
+
+DWORD WINAPI mainThread(LPVOID lpParam) {
+  game_loop.initialize();
+  while (true) {
+    game_loop.on_loop();
     Sleep(1000);
   }
 

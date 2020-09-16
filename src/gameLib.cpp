@@ -11,7 +11,7 @@ LRESULT CALLBACK nWindowProc(HWND hwnd, UINT msg, WPARAM wparam,
   case WM_CLOSE:
     // properly shutdown
     // idk what the correct function for this is tbh
-    safeClose();
+    get_game_loop()->close();
     break;
   }
   return CallWindowProc((WNDPROC)oWindowProc, hwnd, msg, wparam, lparam);
@@ -53,13 +53,15 @@ void *__fastcall PlayLayerCreateH(int *gameLevel) {
   std::cout << ss.str() << std::endl;
   SetConsoleTitleA(ss.str().c_str());
 #endif
-  if (currentPlayerState != playerState::editor || editor_reset_timestamp) {
-    updateTimestamp = true;
-  }
-  currentGameLevel = gameLevel;
+  Game_Loop *game_loop = get_game_loop();
 
-  currentPlayerState = playerState::level;
-  updatePresence = true;
+  if (game_loop->get_state() != playerState::editor || game_loop->get_reset_timestamp()) {
+    game_loop->set_update_timestamp(true);
+  }
+
+  game_loop->set_state(playerState::level);
+  game_loop->set_update_presence(true);
+  game_loop->set_gamelevel(gameLevel);
 
   return plc(gameLevel);
 }
@@ -70,9 +72,12 @@ PlayLayerOnQuitF ploq;
 void __fastcall PlayLayerOnQuitH(void *playLayer) {
   std::cout << "PlayLayer::onQuit" << std::endl;
   SetConsoleTitleA("PlayLayer::onQuit");
-  currentPlayerState = playerState::menu;
-  updateTimestamp = true;
-  updatePresence = true;
+
+  Game_Loop *game_loop = get_game_loop();
+  game_loop->set_state(playerState::menu);
+  game_loop->set_update_timestamp(true);
+  game_loop->set_update_presence(true);
+
   return ploq(playLayer);
 }
 
@@ -85,8 +90,11 @@ void *__fastcall PlayLayerShowNewBestH(void *playLayer, void *_edx, char p1,
                                       float p2, int p3, char p4, char p5,
                                       char p6) {
 #ifdef _DEBUG
-  int levelID = *(int *)((int)currentGameLevel + 0xF8);
-  int maybeBest = *(int *)((int)currentGameLevel + 0x248);
+
+  int *current_gamelevel = get_game_loop()->get_gamelevel();
+
+  int levelID = *(int *)((int)current_gamelevel + 0xF8);
+  int maybeBest = *(int *)((int)current_gamelevel + 0x248);
   std::stringstream ss;
   ss << "PlayLayer::showNewBest - " << levelID << " (" << maybeBest << "%)";
   std::cout << ss.str() << std::endl;
@@ -94,7 +102,7 @@ void *__fastcall PlayLayerShowNewBestH(void *playLayer, void *_edx, char p1,
       ss.str()
           .c_str()); // i still cannot do std::cout for some really weird reason
 #endif
-  updatePresence = true;
+  get_game_loop()->set_update_presence(true);
 
   return plsnb(playLayer, p1, p2, p3, p4, p5, p6);
 }
@@ -106,11 +114,14 @@ EditorPauseLayerOnExitEditorF eploee;
 // thanks blaze for the other argument
 void __fastcall EditorPauseLayerOnExitEditorH(void *editorPauseLayer,
                                               void *_edx, void *p1) {
+
   std::cout << "EditorPauseLayer::onExitEditor" << std::endl;
   SetConsoleTitleA("EditorPauseLayer::onExitEditor");
-  currentPlayerState = playerState::menu;
-  updateTimestamp = true;
-  updatePresence = true;
+
+  Game_Loop *game_loop = get_game_loop();
+  game_loop->set_state(playerState::menu);
+  game_loop->set_update_timestamp(true);
+  game_loop->set_update_presence(true);
 
   return eploee(editorPauseLayer, p1);
 }
@@ -126,13 +137,16 @@ void *__fastcall LevelEditorLayerCreateH(int *gameLevel) {
   std::cout << ss.str() << std::endl;
   SetConsoleTitleA(ss.str().c_str());
 #endif
-  if (currentPlayerState != playerState::level || editor_reset_timestamp) {
-    updateTimestamp = true;
-  }
-  currentPlayerState = playerState::editor;
-  updatePresence = true;
 
-  currentGameLevel = gameLevel;
+  Game_Loop * game_loop = get_game_loop();
+
+  if (game_loop->get_state() != playerState::level || game_loop->get_reset_timestamp()) {
+    game_loop->set_update_timestamp(true);
+  }
+  game_loop->set_state(playerState::editor);
+  game_loop->set_update_presence(true);
+
+  game_loop->set_gamelevel(gameLevel);
 
   return lelc(gameLevel);
 }
@@ -142,7 +156,7 @@ CCDirectorEndF ccde;
 
 void __fastcall CCDirectorEndH(void *CCDirector) {
   std::cout << "CCDirector::End";
-  safeClose();
+  get_game_loop()->close();
   ccde(CCDirector);
 }
 
