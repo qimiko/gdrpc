@@ -40,6 +40,14 @@ For more details on how to configurate, there is a `gdrpc.toml` file located in 
 4. build dll
 5. add the assets in the `assets` folder to discord
 
+### Private servers
+
+Private servers _might_ be supported by this, however it hasn't been actually tested.
+If you want to try, in `src/game_hooks.cpp` change `"GeometryDash.exe"` to the executable name of the private server.
+The stock binary won't work due to executable name differences breaking the module handle getting.
+
+Feel free to use this rich presence on a Geometry Dash private server if wanted, but please don't distribute this rich presence and claim it as yours.
+
 #### Autoloader
 
 The autoloader is based on a modification of the import table of `zlib1.dll`. If you want to do it yourself, just grab any generic PE header editor.
