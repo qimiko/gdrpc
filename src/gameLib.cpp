@@ -146,73 +146,63 @@ void __fastcall CCDirectorEndH(void *CCDirector) {
   ccde(CCDirector);
 }
 
+// no need to export this, not putting in .h
+struct game_hook {
+  int * orig_addr;
+  void * hook_fn;
+  void ** orig_fn;
+  std::string fn_name;
+};
+
 void doTheHook() {
   if (MH_Initialize() != MH_OK) {
     MessageBoxA(0, "Hook init error!", "Error", MB_OK);
     return;
   }
-  // menu layer test function thingy
-  int *mladdr = (int *)((int)GetModuleHandleA("GeometryDash.exe") + 0x1907B0);
-  MH_CreateHook(mladdr, reinterpret_cast<LPVOID *>(&MenuLayerInitH),
-                reinterpret_cast<LPVOID *>(&mli));
-  if (MH_EnableHook(mladdr) != MH_OK) {
-    MessageBoxA(0, "MenuLayer::init hook error!", "Error", MB_OK);
-  }
 
-  // still a mess, i might redo this one day but i doubt it
-  int *plcaddr = (int *)((int)GetModuleHandleA("GeometryDash.exe") + 0x1FB6D0);
-  MH_CreateHook(plcaddr, reinterpret_cast<LPVOID *>(&PlayLayerCreateH),
-                reinterpret_cast<LPVOID *>(&plc));
-  if (MH_EnableHook(plcaddr) != MH_OK) {
-    MessageBoxA(0, "PlayLayer::create hook error!", "Error", MB_OK);
-  }
+  HMODULE gd_handle = GetModuleHandleA("GeometryDash.exe");
+  HMODULE cocos_handle = LoadLibrary(L"libcocos2d.dll");
 
-  int *ploqaddr = (int *)((int)GetModuleHandleA("GeometryDash.exe") + 0x20D810);
-  MH_CreateHook(ploqaddr, reinterpret_cast<LPVOID *>(&PlayLayerOnQuitH),
-                reinterpret_cast<LPVOID *>(&ploq));
-  if (MH_EnableHook(ploqaddr) != MH_OK) {
-    MessageBoxA(0, "PlayLayer::onQuit hook error!", "Error", MB_OK);
-  }
-
-  int *plsnbaddr =
-      (int *)((int)GetModuleHandleA("GeometryDash.exe") + 0x1FE3A0);
-  MH_CreateHook(plsnbaddr, reinterpret_cast<LPVOID *>(&PlayLayerShowNewBestH),
-                reinterpret_cast<LPVOID *>(&plsnb));
-  if (MH_EnableHook(plsnbaddr) != MH_OK) {
-    MessageBoxA(0, "PlayLayer::showNewBest hook error!", "Error", MB_OK);
-  }
-
-  int *eploeeaddr =
-      (int *)((int)GetModuleHandleA("GeometryDash.exe") + 0x75660);
-  MH_CreateHook(eploeeaddr,
-                reinterpret_cast<LPVOID *>(&EditorPauseLayerOnExitEditorH),
-                reinterpret_cast<LPVOID *>(&eploee));
-  if (MH_EnableHook(eploeeaddr) != MH_OK) {
-    MessageBoxA(0, "EditorPauseLayer::onExitEditor hook error!", "Error",
-                MB_OK);
-  }
-
-  int *lelcaddr = (int *)((int)GetModuleHandleA("GeometryDash.exe") + 0x76270);
-  MH_CreateHook(lelcaddr, reinterpret_cast<LPVOID *>(&LevelEditorLayerCreateH),
-                reinterpret_cast<LPVOID *>(&lelc));
-  if (MH_EnableHook(lelcaddr) != MH_OK) {
-    MessageBoxA(0, "LevelEditorLayer::create hook error!", "Error", MB_OK);
+  // close button calls this, x button calls wndproc
+  if (!cocos_handle) {
+    MessageBox(0, L"Failed to get libcocos!", L"Error", MB_OK);
   }
 
   // setup closes
   oWindowProc = SetWindowLongPtrA(GetForegroundWindow(), GWL_WNDPROC,
                                   (LONG_PTR)nWindowProc);
 
-  // close button calls this, x button calls wndproc
-  HMODULE hMod = LoadLibrary(L"libcocos2d.dll");
-  if (!hMod) {
-    MessageBox(0, L"Failed to get libcocos!", L"Error", MB_OK);
-  }
-  int *ccdeaddr =
-      (int *)GetProcAddress(hMod, "?end@CCDirector@cocos2d@@QAEXXZ");
-  MH_CreateHook(ccdeaddr, reinterpret_cast<LPVOID *>(&CCDirectorEndH),
-                reinterpret_cast<LPVOID *>(&ccde));
-  if (MH_EnableHook(ccdeaddr) != MH_OK) {
-    MessageBoxA(0, "CCDirector::end hook error!", "Error", MB_OK);
+  // wall of hooks
+  std::vector<game_hook> hooks{
+      {(int *)((int)gd_handle + 0x1907B0),
+       reinterpret_cast<void *>(&MenuLayerInitH),
+       reinterpret_cast<void **>(&mli), "MenuLayer::init"},
+      {(int *)((int)gd_handle + 0x1FB6D0),
+       reinterpret_cast<void *>(&PlayLayerCreateH),
+       reinterpret_cast<void **>(&plc), "PlayLayer::create"},
+      {(int *)((int)gd_handle + 0x20D810),
+       reinterpret_cast<void *>(&PlayLayerOnQuitH),
+       reinterpret_cast<void **>(&ploq), "PlayLayer::onQuit"},
+      {(int *)((int)gd_handle + 0x1FE3A0),
+       reinterpret_cast<void *>(&PlayLayerShowNewBestH),
+       reinterpret_cast<void **>(&plsnb), "PlayLayer::showNewBest"},
+      {(int *)((int)gd_handle + 0x75660),
+       reinterpret_cast<void *>(&EditorPauseLayerOnExitEditorH),
+       reinterpret_cast<void **>(&eploee), "EditorPauseLayer::onExitEditor"},
+      {(int *)((int)gd_handle + 0x76270),
+       reinterpret_cast<void *>(&LevelEditorLayerCreateH),
+       reinterpret_cast<void **>(&lelc), "LevelEditorLayer::create"},
+      {(int *)GetProcAddress(cocos_handle, "?end@CCDirector@cocos2d@@QAEXXZ"),
+       reinterpret_cast<void *>(&CCDirectorEndH),
+       reinterpret_cast<void **>(&ccde), "CCDirector::end"},
+  };
+
+  for (const auto& hook: hooks) {
+    MH_CreateHook(hook.orig_addr, hook.hook_fn, hook.orig_fn);
+    if (MH_EnableHook(hook.orig_addr) != MH_OK) {
+      std::stringstream ss;
+      ss << hook.fn_name << " hook error!"; // inefficient tbh
+      MessageBoxA(0, ss.str().c_str(), "Error", MB_OK);
+    }
   }
 }
