@@ -294,7 +294,11 @@ bool parseGJGameLevel(int *gameLevel, GDlevel &level) {
   level.levelID = newID;
   level.stars = *(int *)((int)gameLevel + 0x2AC);
 
-  level.name = readString((int *)((int)gameLevel + 0xFC));
+  try {
+    level.name = readString((int *)((int)gameLevel + 0xFC));
+  } catch (std::exception &e) {
+    return false;
+  }
 
   if (levelLocation == 1) {
     level.author = "RobTop"; // author is "" on these
