@@ -30,13 +30,22 @@ typedef int(__thiscall *MenuLayerInitF)(void *menuLayer);
 MenuLayerInitF mli;
 
 int __fastcall MenuLayerInitH(void *menuLayer) {
-  // i have to test like this (idk why)
   if (!setupDone) {
-    std::cout << "Running setup!";
+    // logger isn't initialized at this point, all calls go to console
+    get_game_loop()->register_on_initialize([] {
+      // now we can log
+      auto logger = get_game_loop()->get_logger();
+
+      logger->info(FMT_STRING("initialized:\n\
+GD Handle: {:#x}\n\
+MenuLayer::init: {:#x}"),
+                  (int)GetModuleHandleA("GeometryDash.exe"),
+                  reinterpret_cast<int>(&mli));
+    });
+
     CreateThread(NULL, 0, mainThread, GetCurrentModule(), 0, NULL);
     setupDone = true;
   }
-  std::cout << "MenuLayer::init" << std::endl;
   return mli(menuLayer);
 }
 
@@ -44,16 +53,16 @@ typedef void *(__fastcall *PlayLayerCreateF)(int *gameLevel);
 PlayLayerCreateF plc;
 
 void *__fastcall PlayLayerCreateH(int *gameLevel) {
-#ifdef _DEBUG
-  int maybeLevelID = *(int *)((int)gameLevel + 0xF8);
-  std::stringstream ss;
-  ss << "PlayLayer::create - " << maybeLevelID << " {" << std::hex << "0x"
-    << (int)gameLevel << "}";
+  int levelID = *(int *)((int)gameLevel + 0xF8);
 
-  std::cout << ss.str() << std::endl;
-  SetConsoleTitleA(ss.str().c_str());
-#endif
   Game_Loop *game_loop = get_game_loop();
+
+// funny conversion because fmt likes to just not send the message
+  game_loop->get_logger()->debug(FMT_STRING("PlayLayer::create ({:#x}) called:\n\
+levelID: {} @ {:#x}"),
+    reinterpret_cast<int>(&plc),
+    levelID,
+    reinterpret_cast<int>(gameLevel));
 
   if (game_loop->get_state() != playerState::editor || game_loop->get_reset_timestamp()) {
     game_loop->set_update_timestamp(true);
@@ -70,10 +79,10 @@ typedef void(__fastcall *PlayLayerOnQuitF)(void *playLayer);
 PlayLayerOnQuitF ploq;
 
 void __fastcall PlayLayerOnQuitH(void *playLayer) {
-  std::cout << "PlayLayer::onQuit" << std::endl;
-  SetConsoleTitleA("PlayLayer::onQuit");
-
   Game_Loop *game_loop = get_game_loop();
+
+  game_loop->get_logger()->debug(FMT_STRING("PlayLayer::onQuit ({:#x}) called"),
+    reinterpret_cast<int>(&ploq));
   game_loop->set_state(playerState::menu);
   game_loop->set_update_timestamp(true);
   game_loop->set_update_presence(true);
@@ -89,20 +98,19 @@ PlayLayerShowNewBestF plsnb;
 void *__fastcall PlayLayerShowNewBestH(void *playLayer, void *_edx, char p1,
                                       float p2, int p3, char p4, char p5,
                                       char p6) {
-#ifdef _DEBUG
+  Game_Loop *game_loop = get_game_loop();
 
-  int *current_gamelevel = get_game_loop()->get_gamelevel();
-
+  int *current_gamelevel = game_loop->get_gamelevel();
   int levelID = *(int *)((int)current_gamelevel + 0xF8);
-  int maybeBest = *(int *)((int)current_gamelevel + 0x248);
-  std::stringstream ss;
-  ss << "PlayLayer::showNewBest - " << levelID << " (" << maybeBest << "%)";
-  std::cout << ss.str() << std::endl;
-  SetConsoleTitleA(
-      ss.str()
-          .c_str()); // i still cannot do std::cout for some really weird reason
-#endif
-  get_game_loop()->set_update_presence(true);
+  int new_best = *(int *)((int)current_gamelevel + 0x248);
+
+  game_loop->get_logger()->debug(FMT_STRING("PlayLayer::showNewBest ({:#x}) called\n\
+levelID: {}, got {}%"),
+    reinterpret_cast<int>(&plsnb),
+    levelID,
+    new_best);
+
+  game_loop->set_update_presence(true);
 
   return plsnb(playLayer, p1, p2, p3, p4, p5, p6);
 }
@@ -115,10 +123,12 @@ EditorPauseLayerOnExitEditorF eploee;
 void __fastcall EditorPauseLayerOnExitEditorH(void *editorPauseLayer,
                                               void *_edx, void *p1) {
 
-  std::cout << "EditorPauseLayer::onExitEditor" << std::endl;
-  SetConsoleTitleA("EditorPauseLayer::onExitEditor");
-
   Game_Loop *game_loop = get_game_loop();
+
+  game_loop->get_logger()->debug(
+      FMT_STRING("EditorPauseLayer::onExitEditor ({:#x}) called"),
+      reinterpret_cast<int>(&eploee));
+
   game_loop->set_state(playerState::menu);
   game_loop->set_update_timestamp(true);
   game_loop->set_update_presence(true);
@@ -130,15 +140,10 @@ typedef void *(__fastcall *LevelEditorLayerCreateF)(int *gameLevel);
 LevelEditorLayerCreateF lelc;
 
 void *__fastcall LevelEditorLayerCreateH(int *gameLevel) {
-#ifdef _DEBUG
-  std::stringstream ss;
-  ss << "LevelEditorLayer::create - {" << std::hex << "0x" << (int)gameLevel
-    << "}";
-  std::cout << ss.str() << std::endl;
-  SetConsoleTitleA(ss.str().c_str());
-#endif
-
   Game_Loop * game_loop = get_game_loop();
+
+  game_loop->get_logger()->debug("LevelEditorLayer::create ({:#x}) called",
+    reinterpret_cast<int>(&lelc));
 
   if (game_loop->get_state() != playerState::level || game_loop->get_reset_timestamp()) {
     game_loop->set_update_timestamp(true);
@@ -155,8 +160,11 @@ typedef void(__thiscall *CCDirectorEndF)(void *CCDirector);
 CCDirectorEndF ccde;
 
 void __fastcall CCDirectorEndH(void *CCDirector) {
-  std::cout << "CCDirector::End";
-  get_game_loop()->close();
+  Game_Loop *game_loop = get_game_loop();
+  game_loop->get_logger()->debug("CCDirector::end ({:#x}) called",
+    reinterpret_cast<int>(&ccde));
+  game_loop->close();
+
   ccde(CCDirector);
 }
 
@@ -214,9 +222,8 @@ void doTheHook() {
   for (const auto& hook: hooks) {
     MH_CreateHook(hook.orig_addr, hook.hook_fn, hook.orig_fn);
     if (MH_EnableHook(hook.orig_addr) != MH_OK) {
-      std::stringstream ss;
-      ss << hook.fn_name << " hook error!"; // inefficient tbh
-      MessageBoxA(0, ss.str().c_str(), "Error", MB_OK);
+      auto s = fmt::format(FMT_STRING("error hooking function {}"), hook.fn_name);
+      MessageBoxA(0, s.c_str(), "gdrpc error", MB_OK);
     }
   }
 }

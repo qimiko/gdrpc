@@ -1,17 +1,6 @@
 #include "game_hooks.hpp"
 #include "pch.h"
 
-void setupConsole() {
-#ifdef _DEBUG
-  AllocConsole();
-  SetConsoleTitleA("generic name");
-  FILE *fp;
-  freopen_s(&fp, "CONOUT$", "w", stdout);
-  freopen_s(&fp, "CONOUT$", "w", stderr);
-  freopen_s(&fp, "CONIN$", "r", stdin);
-#endif
-}
-
 bool hookDone = false;
 
 // this function is included to allow adding dll to import address table
@@ -24,9 +13,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call,
   case DLL_PROCESS_ATTACH:
   case DLL_THREAD_ATTACH:
     DisableThreadLibraryCalls(hModule);
-#ifdef _DEBUG
-    setupConsole();
-#endif
     if (!hookDone) {
       hookDone = true;
       doTheHook();
