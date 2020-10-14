@@ -6,7 +6,7 @@ bool setupDone = false;
 // this handles x button close
 LONG_PTR oWindowProc;
 LRESULT CALLBACK nWindowProc(HWND hwnd, UINT msg, WPARAM wparam,
-                            LPARAM lparam) {
+                             LPARAM lparam) {
   switch (msg) {
   case WM_CLOSE:
     // properly shutdown
@@ -39,8 +39,8 @@ int __fastcall MenuLayerInitH(void *menuLayer) {
       logger->info(FMT_STRING("initialized:\n\
 GD Handle: {:#x}\n\
 MenuLayer::init: {:#x}"),
-                  (int)GetModuleHandleA("GeometryDash.exe"),
-                  reinterpret_cast<int>(&mli));
+                   (int)GetModuleHandleA("GeometryDash.exe"),
+                   reinterpret_cast<int>(&mli));
     });
 
     CreateThread(NULL, 0, mainThread, GetCurrentModule(), 0, NULL);
@@ -57,14 +57,14 @@ void *__fastcall PlayLayerCreateH(int *gameLevel) {
 
   Game_Loop *game_loop = get_game_loop();
 
-// funny conversion because fmt likes to just not send the message
-  game_loop->get_logger()->debug(FMT_STRING("PlayLayer::create ({:#x}) called:\n\
+  // funny conversion because fmt likes to just not send the message
+  game_loop->get_logger()->debug(
+      FMT_STRING("PlayLayer::create ({:#x}) called:\n\
 levelID: {} @ {:#x}"),
-    reinterpret_cast<int>(&plc),
-    levelID,
-    reinterpret_cast<int>(gameLevel));
+      reinterpret_cast<int>(&plc), levelID, reinterpret_cast<int>(gameLevel));
 
-  if (game_loop->get_state() != playerState::editor || game_loop->get_reset_timestamp()) {
+  if (game_loop->get_state() != playerState::editor ||
+      game_loop->get_reset_timestamp()) {
     game_loop->set_update_timestamp(true);
   }
 
@@ -82,7 +82,7 @@ void __fastcall PlayLayerOnQuitH(void *playLayer) {
   Game_Loop *game_loop = get_game_loop();
 
   game_loop->get_logger()->debug(FMT_STRING("PlayLayer::onQuit ({:#x}) called"),
-    reinterpret_cast<int>(&ploq));
+                                 reinterpret_cast<int>(&ploq));
   game_loop->set_state(playerState::menu);
   game_loop->set_update_timestamp(true);
   game_loop->set_update_presence(true);
@@ -96,19 +96,18 @@ PlayLayerShowNewBestF plsnb;
 
 // to heck with your calling conventions
 void *__fastcall PlayLayerShowNewBestH(void *playLayer, void *_edx, char p1,
-                                      float p2, int p3, char p4, char p5,
-                                      char p6) {
+                                       float p2, int p3, char p4, char p5,
+                                       char p6) {
   Game_Loop *game_loop = get_game_loop();
 
   int *current_gamelevel = game_loop->get_gamelevel();
   int levelID = *(int *)((int)current_gamelevel + 0xF8);
   int new_best = *(int *)((int)current_gamelevel + 0x248);
 
-  game_loop->get_logger()->debug(FMT_STRING("PlayLayer::showNewBest ({:#x}) called\n\
+  game_loop->get_logger()->debug(
+      FMT_STRING("PlayLayer::showNewBest ({:#x}) called\n\
 levelID: {}, got {}%"),
-    reinterpret_cast<int>(&plsnb),
-    levelID,
-    new_best);
+      reinterpret_cast<int>(&plsnb), levelID, new_best);
 
   game_loop->set_update_presence(true);
 
@@ -140,12 +139,13 @@ typedef void *(__fastcall *LevelEditorLayerCreateF)(int *gameLevel);
 LevelEditorLayerCreateF lelc;
 
 void *__fastcall LevelEditorLayerCreateH(int *gameLevel) {
-  Game_Loop * game_loop = get_game_loop();
+  Game_Loop *game_loop = get_game_loop();
 
   game_loop->get_logger()->debug("LevelEditorLayer::create ({:#x}) called",
-    reinterpret_cast<int>(&lelc));
+                                 reinterpret_cast<int>(&lelc));
 
-  if (game_loop->get_state() != playerState::level || game_loop->get_reset_timestamp()) {
+  if (game_loop->get_state() != playerState::level ||
+      game_loop->get_reset_timestamp()) {
     game_loop->set_update_timestamp(true);
   }
   game_loop->set_state(playerState::editor);
@@ -162,7 +162,7 @@ CCDirectorEndF ccde;
 void __fastcall CCDirectorEndH(void *CCDirector) {
   Game_Loop *game_loop = get_game_loop();
   game_loop->get_logger()->debug("CCDirector::end ({:#x}) called",
-    reinterpret_cast<int>(&ccde));
+                                 reinterpret_cast<int>(&ccde));
   game_loop->close();
 
   ccde(CCDirector);
@@ -170,9 +170,9 @@ void __fastcall CCDirectorEndH(void *CCDirector) {
 
 // no need to export this, not putting in .h
 struct game_hook {
-  int * orig_addr;
-  void * hook_fn;
-  void ** orig_fn;
+  int *orig_addr;
+  void *hook_fn;
+  void **orig_fn;
   std::string fn_name;
 };
 
@@ -195,7 +195,7 @@ void doTheHook() {
                                   (LONG_PTR)nWindowProc);
 
   // wall of hooks
-  std::array<game_hook, 7> hooks { {
+  std::array<game_hook, 7> hooks{{
       {(int *)((int)gd_handle + 0x1907B0),
        reinterpret_cast<void *>(&MenuLayerInitH),
        reinterpret_cast<void **>(&mli), "MenuLayer::init"},
@@ -217,12 +217,13 @@ void doTheHook() {
       {(int *)GetProcAddress(cocos_handle, "?end@CCDirector@cocos2d@@QAEXXZ"),
        reinterpret_cast<void *>(&CCDirectorEndH),
        reinterpret_cast<void **>(&ccde), "CCDirector::end"},
-  } };
+  }};
 
-  for (const auto& hook: hooks) {
+  for (const auto &hook : hooks) {
     MH_CreateHook(hook.orig_addr, hook.hook_fn, hook.orig_fn);
     if (MH_EnableHook(hook.orig_addr) != MH_OK) {
-      auto s = fmt::format(FMT_STRING("error hooking function {}"), hook.fn_name);
+      auto s =
+          fmt::format(FMT_STRING("error hooking function {}"), hook.fn_name);
       MessageBoxA(0, s.c_str(), "gdrpc error", MB_OK);
     }
   }

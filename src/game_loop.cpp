@@ -42,30 +42,27 @@ std::string formatWithLevel(std::string &s, GDlevel &level,
     MessageBoxA(0, error_string.c_str(), "formatter error", MB_OK);
     f = s;
   } catch (...) {
-    get_game_loop()->get_logger()->critical("unknown error found while trying to parse {}", s);
+    get_game_loop()->get_logger()->critical(
+        "unknown error found while trying to parse {}", s);
     MessageBoxA(0, "idk", "unknown format error", MB_OK);
     f = s;
   }
   return f;
 }
 
-Game_Loop *get_game_loop() {
-  return &game_loop;
-}
+Game_Loop *get_game_loop() { return &game_loop; }
 
 void Game_Loop::update_presence_w(std::string &details, std::string &largeText,
-                          std::string &smallText, std::string &state,
-                          std::string &smallImage) {
+                                  std::string &smallText, std::string &state,
+                                  std::string &smallImage) {
 
-if (output_logging) {
-  logger->info("setting presence:\n\
+  if (output_logging) {
+    logger->info("setting presence:\n\
 details: `{}` | state: `{}`\n\
 small_text: `{}` | large_text: `{}`\n\
 timestamp_update: {}",
-  details, state,
-  smallText, largeText,
-  update_timestamp);
-}
+                 details, state, smallText, largeText, update_timestamp);
+  }
 
   if (update_timestamp) {
     current_timestamp = time(0);
@@ -94,7 +91,8 @@ Game_Loop::Game_Loop() {
   discord = get_discord();
   logger = spdlog::stdout_logger_mt("console");
 
-  on_initialize = [] {}; // blank function so it doesn't complain about how i don't initialize
+  on_initialize = [] {
+  }; // blank function so it doesn't complain about how i don't initialize
 }
 
 void Game_Loop::initialize() {
@@ -105,7 +103,8 @@ void Game_Loop::initialize() {
   std::string user_ranked, user_default;
 
   // next we fill in defaults to aid in creation
-  saved_level = {"Playing {name}", "by {author} ({best}%)", "{stars}* {diff} ({id})"};
+  saved_level = {"Playing {name}", "by {author} ({best}%)",
+                 "{stars}* {diff} ({id})"};
   playtesting_level = {"Editing a level", "", ""};
   error_level = {"Playing a level", "", ""};
   editor_status = {"Editing a level", "", ""};
@@ -135,10 +134,8 @@ void Game_Loop::initialize() {
       const toml::value playtesting(playtesting_level);
       const toml::value error(error_level);
 
-      const toml::value settings{
-        { "file_version", 2 },
-        { "logging", output_logging }
-      };
+      const toml::value settings{{"file_version", 2},
+                                 {"logging", output_logging}};
 
       const toml::value level{
           {"saved", saved}, {"playtesting", playtesting}, {"error", error}};
@@ -182,8 +179,8 @@ void Game_Loop::initialize() {
     if (config.contains("settings")) {
       // don't parse the file version just yet, it's a just in case thing
       const auto settings_table = toml::find(config, "settings");
-      output_logging = toml::find_or<bool>(
-          settings_table, "logging", output_logging);
+      output_logging =
+          toml::find_or<bool>(settings_table, "logging", output_logging);
     }
 
   } catch (const std::exception &e) {
@@ -219,7 +216,7 @@ void Game_Loop::initialize() {
 
   if (user.rank != -1) {
     large_text = fmt::format(user_ranked, fmt::arg("name", user.name),
-                            fmt::arg("rank", user.rank));
+                             fmt::arg("rank", user.rank));
   } else {
     char *username = (char *)(*getBase(0x3222D8) + 0x108);
     large_text = std::string(username); // hopeful fallback
@@ -232,12 +229,12 @@ void Game_Loop::initialize() {
 void Game_Loop::on_loop() {
   discord->run_callbacks();
   if (update_presence) {
-    // we don't need to keep this in the class, every time presence updates it gets remade anyways
+    // we don't need to keep this in the class, every time presence updates it
+    // gets remade anyways
     std::string details, state, small_text, small_image;
 
     switch (player_state) {
-    case playerState::level:
-    {
+    case playerState::level: {
       int level_location = *(int *)((int)gamelevel + 0x364);
       int current_best = *(int *)((int)gamelevel + 0x248);
       if (!parseGJGameLevel(gamelevel, level)) {
@@ -248,7 +245,8 @@ void Game_Loop::on_loop() {
         small_text = error_level.smalltext;
         small_image = "";
       } else if (level_location == 2) {
-        details = formatWithLevel(playtesting_level.detail, level, current_best);
+        details =
+            formatWithLevel(playtesting_level.detail, level, current_best);
         state = formatWithLevel(playtesting_level.state, level, current_best);
         small_text =
             formatWithLevel(playtesting_level.smalltext, level, current_best);
@@ -262,16 +260,14 @@ void Game_Loop::on_loop() {
       }
       break;
     }
-    case playerState::editor:
-    {
+    case playerState::editor: {
       details = editor_status.detail;
       state = editor_status.state;
       small_text = editor_status.smalltext;
       small_image = "creator_point";
       break;
     }
-    case playerState::menu:
-    {
+    case playerState::menu: {
       details = menu_status.detail;
       state = menu_status.state;
       small_text = menu_status.smalltext;
@@ -292,29 +288,17 @@ void Game_Loop::set_update_timestamp(bool n_timestamp) {
   update_timestamp = n_timestamp;
 }
 
-void Game_Loop::set_gamelevel(int *n_gamelevel) {
-  gamelevel = n_gamelevel;
-}
+void Game_Loop::set_gamelevel(int *n_gamelevel) { gamelevel = n_gamelevel; }
 
-int *Game_Loop::get_gamelevel() {
-  return gamelevel;
-}
+int *Game_Loop::get_gamelevel() { return gamelevel; }
 
-void Game_Loop::set_state(playerState n_state) {
-  player_state = n_state;
-}
+void Game_Loop::set_state(playerState n_state) { player_state = n_state; }
 
-playerState Game_Loop::get_state() {
-  return player_state;
-}
+playerState Game_Loop::get_state() { return player_state; }
 
-bool Game_Loop::get_reset_timestamp() {
-  return editor_reset_timestamp;
-}
+bool Game_Loop::get_reset_timestamp() { return editor_reset_timestamp; }
 
-std::shared_ptr<spdlog::logger> Game_Loop::get_logger() {
-  return logger;
-}
+std::shared_ptr<spdlog::logger> Game_Loop::get_logger() { return logger; }
 
 void Game_Loop::register_on_initialize(std::function<void()> callback) {
   on_initialize = callback;
