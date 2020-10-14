@@ -4,7 +4,7 @@
 #include <MinHook.h>
 #include <spdlog/fmt/fmt.h>
 #include <stdio.h>
-#include <vector>
+#include <array>
 #ifndef GAMELIB_H
 #define GAMELIB_H
 void doTheHook();

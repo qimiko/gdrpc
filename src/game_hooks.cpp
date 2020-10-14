@@ -195,7 +195,7 @@ void doTheHook() {
                                   (LONG_PTR)nWindowProc);
 
   // wall of hooks
-  std::vector<game_hook> hooks{
+  std::array<game_hook, 7> hooks { {
       {(int *)((int)gd_handle + 0x1907B0),
        reinterpret_cast<void *>(&MenuLayerInitH),
        reinterpret_cast<void **>(&mli), "MenuLayer::init"},
@@ -217,7 +217,7 @@ void doTheHook() {
       {(int *)GetProcAddress(cocos_handle, "?end@CCDirector@cocos2d@@QAEXXZ"),
        reinterpret_cast<void *>(&CCDirectorEndH),
        reinterpret_cast<void **>(&ccde), "CCDirector::end"},
-  };
+  } };
 
   for (const auto& hook: hooks) {
     MH_CreateHook(hook.orig_addr, hook.hook_fn, hook.orig_fn);
