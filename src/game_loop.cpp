@@ -196,9 +196,7 @@ void Game_Loop::initialize() {
   if (output_logging) {
     logger = spdlog::basic_logger_mt("rpclog", "gdrpc.log", true);
     logger->set_level(spdlog::level::trace);
-#ifdef _DEBUG
     logger->flush_on(spdlog::level::debug);
-#endif
     logger->info("gdrpc v{}", 1);
   }
 
