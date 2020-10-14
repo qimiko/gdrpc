@@ -8,6 +8,11 @@ project(gdrpc VERSION 2.0.3)
 add_definitions(-DUNICODE)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 
+find_file(WINDOWS_HEADER windows.h)
+if(NOT WINDOWS_HEADER)
+  message(FATAL_ERROR "Can't find windows.h!")
+endif()
+
 file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
 add_library(gdrpc SHARED ${SOURCE_FILES})
 
