@@ -89,8 +89,6 @@ public:
 
   void close();
 
-  void log();
-
   void register_on_initialize(std::function<void()>);
 };
 
