@@ -24,7 +24,10 @@ target_link_libraries(gdrpc fmt)
 add_subdirectory(libraries/minhook)
 target_link_libraries(gdrpc minhook)
 
+add_definitions(-DSPDLOG_FMT_EXTERNAL)
+set(SPDLOG_FMT_EXTERNAL OFF)
 add_subdirectory(libraries/spdlog)
+target_include_directories(spdlog PRIVATE libraries/fmt/include)
 target_link_libraries(gdrpc spdlog)
 
 set(BUILD_SHARED_LIBS ON)

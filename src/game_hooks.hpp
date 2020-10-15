@@ -3,7 +3,7 @@
 #include "pch.h"
 #include <MinHook.h>
 #include <array>
-#include <spdlog/fmt/fmt.h>
+#include <fmt/format.h>
 #include <stdio.h>
 #ifndef GAMELIB_H
 #define GAMELIB_H
