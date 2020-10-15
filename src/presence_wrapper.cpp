@@ -51,7 +51,7 @@ void Discord_Presence::update(const char *details, const char *largeText,
   DiscordRichPresence discordPresence;
   memset(&discordPresence, 0, sizeof(discordPresence));
 
-  if (statetext != "") {
+  if (strlen(statetext) != 0) {
     discordPresence.state = statetext;
   }
 
@@ -60,7 +60,7 @@ void Discord_Presence::update(const char *details, const char *largeText,
   discordPresence.largeImageKey = "logo";
   discordPresence.largeImageText = largeText;
 
-  if (smallImage != "none") {
+  if (strcmp(smallImage, "none") != 0) {
     discordPresence.smallImageKey = smallImage;
     discordPresence.smallImageText = smallText;
   }
