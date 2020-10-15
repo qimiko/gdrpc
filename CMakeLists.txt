@@ -6,7 +6,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 project(gdrpc VERSION 2.2.0)
 
 add_definitions(-DUNICODE)
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 
 find_file(WINDOWS_HEADER windows.h)
 if(NOT WINDOWS_HEADER)
