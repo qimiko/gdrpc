@@ -26,7 +26,7 @@ static void handleDiscordJoinRequest(const DiscordUser *request) {
   Discord_Respond(request->userId, DISCORD_REPLY_NO);
 }
 
-Discord_Presence::Discord_Presence() { status = -1; }
+Discord_Presence::Discord_Presence() : status(-1) {}
 
 void Discord_Presence::initialize() {
   DiscordEventHandlers handlers;

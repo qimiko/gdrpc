@@ -76,21 +76,14 @@ void Game_Loop::close() {
   if (output_logging) {
     logger->warn("shutdown called!");
   }
-  Discord_Shutdown();
+  discord->shutdown();
 }
 
-Game_Loop::Game_Loop() {
-  player_state = playerState::menu;
-
-  update_presence = false;
-  update_timestamp = false;
-  current_timestamp = time(0);
-  editor_reset_timestamp = false;
-  output_logging = false;
-
-  discord = get_discord();
-  logger = spdlog::stdout_logger_mt("console");
-
+Game_Loop::Game_Loop()
+    : player_state(playerState::menu), current_timestamp(time(0)),
+      gamelevel(nullptr), update_presence(false), update_timestamp(false),
+      editor_reset_timestamp(false), output_logging(false),
+      discord(get_discord()), logger(spdlog::stdout_logger_mt("console")) {
   on_initialize = [] {
   }; // blank function so it doesn't complain about how i don't initialize
 }
@@ -221,6 +214,7 @@ void Game_Loop::initialize() {
   }
 
   update_presence = true;
+  update_timestamp = true;
   on_initialize();
 }
 
