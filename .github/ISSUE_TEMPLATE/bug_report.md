@@ -19,7 +19,7 @@ Describe the steps taken in order to recreate the bug.
 **What was supposed to happen?**
 Explain what you think should have happened.
 
-**Log**
+**Log**  
 Please enable rich presence logging through `gdrpc.toml`.
 Find the section labeled `[settings]` or add one yourself:
 ```
@@ -27,5 +27,5 @@ Find the section labeled `[settings]` or add one yourself:
 file_version = 2
 logging = true
 ```
-make sure logging is set to `true`.  
+Make sure logging is set to `true`.  
 In the game directory, you'll find a `gdrpc.log`. Send that.
