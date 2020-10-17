@@ -56,7 +56,7 @@ void Game_Loop::update_presence_w(std::string &details, std::string &largeText,
                                   std::string &smallText, std::string &state,
                                   std::string &smallImage) {
 
-  if (output_logging) {
+  if (logger) {
     logger->info("setting presence:\n\
 details: `{}` | state: `{}`\n\
 small_text: `{}` | large_text: `{}`\n\
@@ -73,7 +73,7 @@ timestamp_update: {}",
 }
 
 void Game_Loop::close() {
-  if (output_logging) {
+  if (logger) {
     logger->warn("shutdown called!");
   }
   discord->shutdown();
@@ -83,7 +83,10 @@ Game_Loop::Game_Loop()
     : player_state(playerState::menu), current_timestamp(time(0)),
       gamelevel(nullptr), update_presence(false), update_timestamp(false),
       editor_reset_timestamp(false), output_logging(false),
-      discord(get_discord()), logger(spdlog::stdout_logger_mt("console")) {
+      discord(get_discord()), logger(nullptr) {
+#ifndef _NDEBUG
+  logger = spdlog::stdout_logger_mt("console");
+#endif
   on_initialize = [] {
   }; // blank function so it doesn't complain about how i don't initialize
 }
@@ -177,15 +180,19 @@ void Game_Loop::initialize() {
     }
 
   } catch (const std::exception &e) {
-    logger->critical("error found while parsing config\n{}", e.what());
+    if (logger) {
+      logger->critical("error found while parsing config\n{}", e.what());
+    }
     MessageBoxA(0, e.what(), "config parser error", MB_OK);
   } catch (...) {
-    logger->critical("unknown config parsing error");
+    if (logger) {
+      logger->critical("unknown config parsing error");
+    }
     MessageBoxA(0, "unhandled error\r\nthings should continue fine",
                 "config parser", MB_OK);
   }
 
-  // we should still have logging prior to this, if needed
+  // on debug builds, console logging will be enabled
   if (output_logging) {
     logger = spdlog::basic_logger_mt("rpclog", "gdrpc.log", true);
     logger->set_level(spdlog::level::trace);
@@ -230,7 +237,9 @@ void Game_Loop::on_loop() {
       int level_location = *(int *)((int)gamelevel + 0x364);
       int current_best = *(int *)((int)gamelevel + 0x248);
       if (!parseGJGameLevel(gamelevel, level)) {
-        logger->critical("failed to parse gamelevel at {#x}", (int)gamelevel);
+        if (logger) {
+          logger->critical("failed to parse gamelevel at {#x}", (int)gamelevel);
+        }
         details =
             fmt::format(error_level.detail, fmt::arg("best", current_best));
         state = fmt::format(error_level.state, fmt::arg("best", current_best));

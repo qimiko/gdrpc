@@ -35,12 +35,13 @@ int __fastcall MenuLayerInitH(void *menuLayer) {
     get_game_loop()->register_on_initialize([] {
       // now we can log
       auto logger = get_game_loop()->get_logger();
-
-      logger->info(FMT_STRING("initialized:\n\
+      if (logger) {
+        logger->info(FMT_STRING("initialized:\n\
 GD Handle: {:#x}\n\
 MenuLayer::init: {:#x}"),
-                   (int)GetModuleHandleA("GeometryDash.exe"),
-                   reinterpret_cast<int>(&mli));
+                     (int)GetModuleHandleA("GeometryDash.exe"),
+                     reinterpret_cast<int>(&mli));
+      }
     });
 
     CreateThread(NULL, 0, mainThread, GetCurrentModule(), 0, NULL);
@@ -57,11 +58,14 @@ void *__fastcall PlayLayerCreateH(int *gameLevel) {
 
   Game_Loop *game_loop = get_game_loop();
 
-  // funny conversion because fmt likes to just not send the message
-  game_loop->get_logger()->debug(
-      FMT_STRING("PlayLayer::create ({:#x}) called:\n\
+  auto logger = game_loop->get_logger();
+  if (logger) {
+    // funny conversion because fmt likes to just not send the message
+    logger->debug(FMT_STRING("PlayLayer::create ({:#x}) called:\n\
 levelID: {} @ {:#x}"),
-      reinterpret_cast<int>(&plc), levelID, reinterpret_cast<int>(gameLevel));
+                  reinterpret_cast<int>(&plc), levelID,
+                  reinterpret_cast<int>(gameLevel));
+  }
 
   if (game_loop->get_state() != playerState::editor ||
       game_loop->get_reset_timestamp()) {
@@ -81,8 +85,12 @@ PlayLayerOnQuitF ploq;
 void __fastcall PlayLayerOnQuitH(void *playLayer) {
   Game_Loop *game_loop = get_game_loop();
 
-  game_loop->get_logger()->debug(FMT_STRING("PlayLayer::onQuit ({:#x}) called"),
-                                 reinterpret_cast<int>(&ploq));
+  auto logger = game_loop->get_logger();
+  if (logger) {
+    logger->debug(FMT_STRING("PlayLayer::onQuit ({:#x}) called"),
+                  reinterpret_cast<int>(&ploq));
+  }
+
   game_loop->set_state(playerState::menu);
   game_loop->set_update_timestamp(true);
   game_loop->set_update_presence(true);
@@ -104,10 +112,12 @@ void *__fastcall PlayLayerShowNewBestH(void *playLayer, void *_edx, char p1,
   int levelID = *(int *)((int)current_gamelevel + 0xF8);
   int new_best = *(int *)((int)current_gamelevel + 0x248);
 
-  game_loop->get_logger()->debug(
-      FMT_STRING("PlayLayer::showNewBest ({:#x}) called\n\
+  auto logger = game_loop->get_logger();
+  if (logger) {
+    logger->debug(FMT_STRING("PlayLayer::showNewBest ({:#x}) called\n\
 levelID: {}, got {}%"),
-      reinterpret_cast<int>(&plsnb), levelID, new_best);
+                  reinterpret_cast<int>(&plsnb), levelID, new_best);
+  }
 
   game_loop->set_update_presence(true);
 
@@ -124,9 +134,11 @@ void __fastcall EditorPauseLayerOnExitEditorH(void *editorPauseLayer,
 
   Game_Loop *game_loop = get_game_loop();
 
-  game_loop->get_logger()->debug(
-      FMT_STRING("EditorPauseLayer::onExitEditor ({:#x}) called"),
-      reinterpret_cast<int>(&eploee));
+  auto logger = game_loop->get_logger();
+  if (logger) {
+    logger->debug(FMT_STRING("EditorPauseLayer::onExitEditor ({:#x}) called"),
+                  reinterpret_cast<int>(&eploee));
+  }
 
   game_loop->set_state(playerState::menu);
   game_loop->set_update_timestamp(true);
@@ -141,9 +153,11 @@ LevelEditorLayerCreateF lelc;
 void *__fastcall LevelEditorLayerCreateH(int *gameLevel) {
   Game_Loop *game_loop = get_game_loop();
 
-  game_loop->get_logger()->debug("LevelEditorLayer::create ({:#x}) called",
-                                 reinterpret_cast<int>(&lelc));
-
+  auto logger = game_loop->get_logger();
+  if (logger) {
+    logger->debug("LevelEditorLayer::create ({:#x}) called",
+                  reinterpret_cast<int>(&lelc));
+  }
   if (game_loop->get_state() != playerState::level ||
       game_loop->get_reset_timestamp()) {
     game_loop->set_update_timestamp(true);
@@ -161,8 +175,13 @@ CCDirectorEndF ccde;
 
 void __fastcall CCDirectorEndH(void *CCDirector) {
   Game_Loop *game_loop = get_game_loop();
-  game_loop->get_logger()->debug("CCDirector::end ({:#x}) called",
-                                 reinterpret_cast<int>(&ccde));
+
+  auto logger = game_loop->get_logger();
+  if (logger) {
+    logger->debug("CCDirector::end ({:#x}) called",
+                  reinterpret_cast<int>(&ccde));
+  }
+
   game_loop->close();
 
   ccde(CCDirector);
