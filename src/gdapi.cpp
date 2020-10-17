@@ -296,7 +296,7 @@ bool parseGJGameLevel(int *gameLevel, GDlevel &level) {
 
   try {
     level.name = readString((int *)((int)gameLevel + 0xFC));
-  } catch (std::exception &e) {
+  } catch (...) {
     return false;
   }
 

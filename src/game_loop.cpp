@@ -84,9 +84,6 @@ Game_Loop::Game_Loop()
       gamelevel(nullptr), update_presence(false), update_timestamp(false),
       editor_reset_timestamp(false), output_logging(false),
       discord(get_discord()), logger(nullptr) {
-#ifndef _NDEBUG
-  logger = spdlog::stdout_logger_mt("console");
-#endif
   on_initialize = [] {
   }; // blank function so it doesn't complain about how i don't initialize
 }
