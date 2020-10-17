@@ -34,13 +34,10 @@ int __fastcall MenuLayerInitH(void *menuLayer) {
     // logger isn't initialized at this point, all calls go to console
     get_game_loop()->register_on_initialize([] {
       // now we can log
-      auto logger = get_game_loop()->get_logger();
-      if (logger) {
+      if (auto logger = get_game_loop()->get_logger()) {
         logger->info(FMT_STRING("initialized:\n\
-GD Handle: {:#x}\n\
-MenuLayer::init: {:#x}"),
-                     (int)GetModuleHandleA("GeometryDash.exe"),
-                     reinterpret_cast<int>(&mli));
+GD Handle: {:#x}"),
+                     (int)GetModuleHandleA("GeometryDash.exe"));
       }
     });
 
@@ -58,13 +55,10 @@ void *__fastcall PlayLayerCreateH(int *gameLevel) {
 
   Game_Loop *game_loop = get_game_loop();
 
-  auto logger = game_loop->get_logger();
-  if (logger) {
-    // funny conversion because fmt likes to just not send the message
-    logger->debug(FMT_STRING("PlayLayer::create ({:#x}) called:\n\
+  if (auto logger = game_loop->get_logger()) {
+    logger->debug(FMT_STRING("PlayLayer::create called:\n\
 levelID: {} @ {:#x}"),
-                  reinterpret_cast<int>(&plc), levelID,
-                  reinterpret_cast<int>(gameLevel));
+                  levelID, reinterpret_cast<int>(gameLevel));
   }
 
   if (game_loop->get_state() != playerState::editor ||
@@ -85,10 +79,8 @@ PlayLayerOnQuitF ploq;
 void __fastcall PlayLayerOnQuitH(void *playLayer) {
   Game_Loop *game_loop = get_game_loop();
 
-  auto logger = game_loop->get_logger();
-  if (logger) {
-    logger->debug(FMT_STRING("PlayLayer::onQuit ({:#x}) called"),
-                  reinterpret_cast<int>(&ploq));
+  if (auto logger = game_loop->get_logger()) {
+    logger->debug(FMT_STRING("PlayLayer::onQuit called"));
   }
 
   game_loop->set_state(playerState::menu);
@@ -112,11 +104,10 @@ void *__fastcall PlayLayerShowNewBestH(void *playLayer, void *_edx, char p1,
   int levelID = *(int *)((int)current_gamelevel + 0xF8);
   int new_best = *(int *)((int)current_gamelevel + 0x248);
 
-  auto logger = game_loop->get_logger();
-  if (logger) {
-    logger->debug(FMT_STRING("PlayLayer::showNewBest ({:#x}) called\n\
+  if (auto logger = game_loop->get_logger()) {
+    logger->debug(FMT_STRING("PlayLayer::showNewBest called\n\
 levelID: {}, got {}%"),
-                  reinterpret_cast<int>(&plsnb), levelID, new_best);
+                  levelID, new_best);
   }
 
   game_loop->set_update_presence(true);
@@ -134,10 +125,8 @@ void __fastcall EditorPauseLayerOnExitEditorH(void *editorPauseLayer,
 
   Game_Loop *game_loop = get_game_loop();
 
-  auto logger = game_loop->get_logger();
-  if (logger) {
-    logger->debug(FMT_STRING("EditorPauseLayer::onExitEditor ({:#x}) called"),
-                  reinterpret_cast<int>(&eploee));
+  if (auto logger = game_loop->get_logger()) {
+    logger->debug(FMT_STRING("EditorPauseLayer::onExitEditor called"));
   }
 
   game_loop->set_state(playerState::menu);
@@ -153,10 +142,8 @@ LevelEditorLayerCreateF lelc;
 void *__fastcall LevelEditorLayerCreateH(int *gameLevel) {
   Game_Loop *game_loop = get_game_loop();
 
-  auto logger = game_loop->get_logger();
-  if (logger) {
-    logger->debug("LevelEditorLayer::create ({:#x}) called",
-                  reinterpret_cast<int>(&lelc));
+  if (auto logger = game_loop->get_logger()) {
+    logger->debug(FMT_STRING("LevelEditorLayer::create called"));
   }
   if (game_loop->get_state() != playerState::level ||
       game_loop->get_reset_timestamp()) {
@@ -176,10 +163,8 @@ CCDirectorEndF ccde;
 void __fastcall CCDirectorEndH(void *CCDirector) {
   Game_Loop *game_loop = get_game_loop();
 
-  auto logger = game_loop->get_logger();
-  if (logger) {
-    logger->debug("CCDirector::end ({:#x}) called",
-                  reinterpret_cast<int>(&ccde));
+  if (auto logger = game_loop->get_logger()) {
+    logger->debug(FMT_STRING("CCDirector::end called"));
   }
 
   game_loop->close();
