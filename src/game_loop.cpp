@@ -112,6 +112,11 @@ void Game_Loop::initialize_config() {
   user_ranked = "{name} [Rank #{rank}]";
   user_default = "";
 
+  executable_name = "GeometryDash.exe";
+
+  static const int latest_version = 3;
+  int file_version = 1;
+
   try {
     const std::string filename = "gdrpc.toml";
     if (!std::ifstream(filename)) {
@@ -132,8 +137,9 @@ void Game_Loop::initialize_config() {
       const toml::value playtesting(playtesting_level);
       const toml::value error(error_level);
 
-      const toml::value settings{{"file_version", 2},
-                                 {"logging", output_logging}};
+      const toml::value settings{{"file_version", latest_version},
+                                 {"logging", output_logging},
+                                 {"executable_name", executable_name}};
 
       const toml::value level{
           {"saved", saved}, {"playtesting", playtesting}, {"error", error}};
@@ -175,10 +181,17 @@ void Game_Loop::initialize_config() {
 
     // settings is a new key, don't expect people to have it
     if (config.contains("settings")) {
-      // don't parse the file version just yet, it's a just in case thing
       const auto settings_table = toml::find(config, "settings");
       output_logging =
           toml::find_or<bool>(settings_table, "logging", output_logging);
+
+      // we can already assume 2 as 2 has settings table
+      file_version = toml::find_or<int>(settings_table, "file_version", 2);
+
+      if (file_version >= 3) {
+        executable_name = toml::find_or<std::string>(
+            settings_table, "executable_name", executable_name);
+      }
     }
 
   } catch (const std::exception &e) {
@@ -199,7 +212,7 @@ void Game_Loop::initialize_config() {
     logger = spdlog::basic_logger_mt("rpclog", "gdrpc.log", true);
     logger->set_level(spdlog::level::trace);
     logger->flush_on(spdlog::level::debug);
-    logger->info("gdrpc v{}", 2);
+    logger->info("gdrpc v{}", latest_version);
   }
 }
 
@@ -208,7 +221,7 @@ void Game_Loop::initialize_loop() {
 
   large_text = user_default;
 
-  int *gd_base = (int *)GetModuleHandleA("GeometryDash.exe");
+  int *gd_base = (int *)GetModuleHandleA(executable_name.c_str());
 
   int *accountID = get_address(gd_base, {0x3222D8, 0x120});
 
@@ -315,6 +328,8 @@ void Game_Loop::set_state(playerState n_state) { player_state = n_state; }
 playerState Game_Loop::get_state() { return player_state; }
 
 bool Game_Loop::get_reset_timestamp() { return editor_reset_timestamp; }
+
+std::string Game_Loop::get_executable_name() { return executable_name; }
 
 std::shared_ptr<spdlog::logger> Game_Loop::get_logger() { return logger; }
 

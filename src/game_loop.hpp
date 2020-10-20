@@ -55,14 +55,16 @@ private:
 
   configPresence saved_level, playtesting_level, error_level, editor_status,
       menu_status;
+  std::string large_text;
+
   bool editor_reset_timestamp, output_logging, get_rank;
   std::string user_ranked, user_default;
+
+  std::string executable_name;
 
   // wrapper to presence update that allows strings + debug messages
   void update_presence_w(std::string &, std::string &, std::string &,
                          std::string &, std::string &);
-
-  std::string large_text;
 
   std::function<void()> on_initialize;
 
@@ -79,6 +81,8 @@ public:
   void set_update_timestamp(bool);
 
   bool get_reset_timestamp();
+
+  std::string get_executable_name();
 
   std::shared_ptr<spdlog::logger> get_logger();
 

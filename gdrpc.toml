@@ -37,5 +37,6 @@
 
 [settings]
 	# file version is included in case of future file changes
-	file_version = 2
+	file_version = 3
 	logging = false
+	executable_name = "GeometryDash.exe" # change for gdps if needed

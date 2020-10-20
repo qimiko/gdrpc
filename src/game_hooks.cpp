@@ -191,12 +191,30 @@ void doTheHook() {
     return;
   }
 
-  HMODULE gd_handle = GetModuleHandleA("GeometryDash.exe");
-  HMODULE cocos_handle = LoadLibrary(L"libcocos2d.dll");
+  std::string gd_name = game_loop->get_executable_name();
+
+  HMODULE gd_handle = GetModuleHandleA(gd_name.c_str());
+  HMODULE cocos_handle = LoadLibraryA("libcocos2d.dll");
 
   // close button calls this, x button calls wndproc
+  if (!gd_handle) {
+    if (logger) {
+      logger->critical(FMT_STRING("failed to get gd exe by name {}"), gd_name);
+    }
+    MessageBoxA(0, "Failed to get Geometry Dash!", "Error", MB_OK);
+    return;
+  }
+
+  if (logger) {
+    logger->trace(FMT_STRING("found gd at {:#x}"), (int)gd_handle);
+  }
+
   if (!cocos_handle) {
-    MessageBox(0, L"Failed to get libcocos!", L"Error", MB_OK);
+    if (logger) {
+      logger->critical("cocos grabbing error");
+    }
+    MessageBoxA(0, "Failed to get libcocos!", "Error", MB_OK);
+    return;
   }
 
   // setup closes
