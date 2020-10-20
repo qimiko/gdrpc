@@ -31,13 +31,10 @@ MenuLayerInitF mli;
 
 int __fastcall MenuLayerInitH(void *menuLayer) {
   if (!setupDone) {
-    // logger isn't initialized at this point, all calls go to console
     get_game_loop()->register_on_initialize([] {
       // now we can log
       if (auto logger = get_game_loop()->get_logger()) {
-        logger->info(FMT_STRING("initialized:\n\
-GD Handle: {:#x}"),
-                     (int)GetModuleHandleA("GeometryDash.exe"));
+        logger->info(FMT_STRING("initialized"));
       }
     });
 
@@ -181,7 +178,15 @@ struct game_hook {
 };
 
 void doTheHook() {
+  Game_Loop *game_loop = get_game_loop();
+
+  game_loop->initialize_config();
+  auto logger = game_loop->get_logger();
+
   if (MH_Initialize() != MH_OK) {
+    if (logger) {
+      logger->critical("hook init error");
+    }
     MessageBoxA(0, "Hook init error!", "Error", MB_OK);
     return;
   }
@@ -225,10 +230,21 @@ void doTheHook() {
 
   for (const auto &hook : hooks) {
     MH_CreateHook(hook.orig_addr, hook.hook_fn, hook.orig_fn);
+    if (logger) {
+      logger->trace(FMT_STRING("hooking function {} at {:#x}"), hook.fn_name,
+                    reinterpret_cast<int>(hook.orig_addr));
+    }
     if (MH_EnableHook(hook.orig_addr) != MH_OK) {
       auto s =
           fmt::format(FMT_STRING("error hooking function {}"), hook.fn_name);
       MessageBoxA(0, s.c_str(), "gdrpc error", MB_OK);
+      if (logger) {
+        logger->critical(s);
+      }
     }
+  }
+
+  if (logger) {
+    logger->debug("hooks setup");
   }
 }

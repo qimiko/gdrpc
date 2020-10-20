@@ -82,20 +82,16 @@ void Game_Loop::close() {
 Game_Loop::Game_Loop()
     : player_state(playerState::menu), current_timestamp(time(0)),
       gamelevel(nullptr), update_presence(false), update_timestamp(false),
-      editor_reset_timestamp(false), output_logging(false),
+      editor_reset_timestamp(false), output_logging(false), get_rank(true),
       discord(get_discord()), logger(nullptr) {
   on_initialize = [] {
   }; // blank function so it doesn't complain about how i don't initialize
 }
 
-void Game_Loop::initialize() {
-  discord->initialize();
+void Game_Loop::initialize_config() {
   // config time!
 
-  // these must be in scope
-  std::string user_ranked, user_default;
-
-  // next we fill in defaults to aid in creation
+  // we fill in defaults to aid in creation
   saved_level = {"Playing {name}", "by {author} ({best}%)",
                  "{stars}* {diff} ({id})"};
   playtesting_level = {"Editing a level", "", ""};
@@ -105,7 +101,6 @@ void Game_Loop::initialize() {
 
   user_ranked = "{name} [Rank #{rank}]";
   user_default = "";
-  bool get_rank = true;
 
   try {
     const std::string filename = "gdrpc.toml";
@@ -194,8 +189,12 @@ void Game_Loop::initialize() {
     logger = spdlog::basic_logger_mt("rpclog", "gdrpc.log", true);
     logger->set_level(spdlog::level::trace);
     logger->flush_on(spdlog::level::debug);
-    logger->info("gdrpc v{}", 1);
+    logger->info("gdrpc v{}", 2);
   }
+}
+
+void Game_Loop::initialize_loop() {
+  discord->initialize();
 
   large_text = user_default;
 
@@ -312,7 +311,7 @@ void Game_Loop::register_on_initialize(std::function<void()> callback) {
 }
 
 DWORD WINAPI mainThread(LPVOID lpParam) {
-  game_loop.initialize();
+  game_loop.initialize_loop();
   while (true) {
     game_loop.on_loop();
     Sleep(1000);

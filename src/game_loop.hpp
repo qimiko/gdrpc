@@ -48,16 +48,15 @@ private:
 
   std::shared_ptr<spdlog::logger> logger;
 
-  bool update_presence;
-  bool update_timestamp;
+  bool update_presence, update_timestamp;
 
   time_t current_timestamp;
   Discord_Presence *discord;
 
   configPresence saved_level, playtesting_level, error_level, editor_status,
       menu_status;
-  bool editor_reset_timestamp;
-  bool output_logging;
+  bool editor_reset_timestamp, output_logging, get_rank;
+  std::string user_ranked, user_default;
 
   // wrapper to presence update that allows strings + debug messages
   void update_presence_w(std::string &, std::string &, std::string &,
@@ -84,7 +83,9 @@ public:
   std::shared_ptr<spdlog::logger> get_logger();
 
   void on_loop();
-  void initialize();
+
+  void initialize_config();
+  void initialize_loop();
 
   void close();
 
