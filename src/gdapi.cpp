@@ -78,27 +78,44 @@ std::string getDifficultyName(GDlevel &level) {
   }
 }
 
-DWORD makeRequest(std::string data, LPCWSTR url, std::string &response) {
+std::string to_param_list(Params &params) {
+  std::stringstream s;
+
+  // can't use the normal for loop as we need more iterator control!!
+  for (auto it = params.begin(); it != params.end(); ++it) {
+    s << it->first << "=" << it->second;
+    if (std::next(it) != params.end()) {
+      s << "&";
+    }
+  }
+
+  return s.str();
+}
+
+DWORD post_request(const char *url, Params &params, std::string &response) {
   // this function has become magic dust for me lol
+  params.emplace("gameVersion", "21");
+  params.emplace("secret", "Wmfd2893gb7");
 
-  static LPCWSTR hdrs = L"Content-Type: application/x-www-form-urlencoded";
+  static const char *hdrs = "Content-Type: application/x-www-form-urlencoded";
+  static const char *accept[2] = {"*/*", NULL};
 
-  static LPCWSTR accept[2] = {L"*/*", NULL};
+  std::string data = to_param_list(params);
 
   HINTERNET hSession =
-      InternetOpen(L"GDApi/WinInet", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL,
-                   0); // first part is user agent, change it to whatev
+      InternetOpenA("GDApi/WinInet", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL,
+                    0); // first part is user agent, change it to whatev
   HINTERNET hConnect = InternetConnectA(
       hSession, "boomlings.com", // i could explain how web works but no.
                                  // boomlings.com is the host
       INTERNET_DEFAULT_HTTP_PORT, NULL, NULL, INTERNET_SERVICE_HTTP, 0, 1);
   HINTERNET hRequest =
-      HttpOpenRequest(hConnect, L"POST", url, NULL, NULL, accept, 0,
-                      1); // this starts the send something
+      HttpOpenRequestA(hConnect, "POST", url, NULL, NULL, accept, 0,
+                       1); // this starts the send something
 
   // send request
-  if (!HttpSendRequest(hRequest, hdrs, (DWORD)wcslen(hdrs),
-                       (LPVOID)data.c_str(), (DWORD)strlen(data.c_str()))) {
+  if (!HttpSendRequestA(hRequest, hdrs, (DWORD)strlen(hdrs),
+                        (LPVOID)data.c_str(), (DWORD)data.length())) {
     DWORD dwErr = GetLastError(); // no error handling :o
     return dwErr;
   }
@@ -107,17 +124,16 @@ DWORD makeRequest(std::string data, LPCWSTR url, std::string &response) {
   CHAR szBuffer[1025];
   DWORD dwRead = 0;
 
-  while (
-      ::InternetReadFile(hRequest, szBuffer, sizeof(szBuffer) - 1, &dwRead) &&
-      dwRead) { // chunk output i guess
+  while (InternetReadFile(hRequest, szBuffer, sizeof(szBuffer) - 1, &dwRead) &&
+         dwRead) { // chunk output i guess
     szBuffer[dwRead] = 0;
-    OutputDebugStringA(szBuffer);
     responseStringStream << szBuffer;
     dwRead = 0;
   }
 
-  ::InternetCloseHandle(hRequest);
-  ::InternetCloseHandle(hSession); // we done
+  InternetCloseHandle(hRequest);
+  InternetCloseHandle(hConnect);
+  InternetCloseHandle(hSession); // we done
 
   response = responseStringStream.str();
 
@@ -125,147 +141,101 @@ DWORD makeRequest(std::string data, LPCWSTR url, std::string &response) {
 }
 
 bool getUserInfo(int &accID, GDuser &user) {
-  std::string frmdata = "gameVersion=21&secret=Wmfd2893gb7&targetAccountID=";
-  frmdata.append(std::to_string(accID));
+  Params params({{"targetAccountID", std::to_string(accID)}});
 
-  std::string userString;
+  std::string user_string;
   DWORD responseCode =
-      makeRequest(frmdata, L"/database/getGJUserInfo20.php", userString);
+      post_request("/database/getGJUserInfo20.php", params, user_string);
   if (responseCode != 0) {
-    return false;
+    throw std::logic_error("post request fail");
   }
-  std::vector<std::string> splitlist = explode(userString, ':');
 
-  if (splitlist.size() == 1 || splitlist.size() == 0) {
+  try {
+    auto user_map = to_robtop(user_string);
+
+    user.name = user_map[1];
+    user.ID = std::stoi(user_map[2], nullptr);
+    user.accID = std::stoi(user_map[16], nullptr);
+    return true;
+  } catch (const std::exception &e) {
+    // throw the exceptions that will actually have a message
+    throw;
+  } catch (...) {
     user.name = "invalid";
     user.ID = -1;
     user.accID = -1;
-    return false;
   }
-
-  for (unsigned int i = 0; i < splitlist.size(); i++) {
-    if (splitlist[i] == "1") {
-      user.name = splitlist[i + 1];
-    }
-    if (splitlist[i] == "2") {
-      user.ID = atoi(splitlist[i + 1].c_str());
-    }
-    if (splitlist[i] == "16") {
-      user.accID = atoi(splitlist[i + 1].c_str());
-    }
-    i++;
-  }
-
-  return true;
+  return false;
 }
 
 bool getPlayerInfo(int &playerID, GDuser &user) {
-  std::string frmdata = "gameVersion=21&secret=Wmfd2893gb7&str=";
-  frmdata.append(std::to_string(playerID));
+  Params params({{"str", std::to_string(playerID)}});
 
-  std::string playerString;
+  std::string player_string;
   DWORD responseCode =
-      makeRequest(frmdata, L"/database/getGJUsers20.php", playerString);
+      post_request("/database/getGJUsers20.php", params, player_string);
   if (responseCode != 0) {
-    return false;
+    throw std::logic_error("post request fail");
   }
-  std::vector<std::string> splitlist = explode(playerString, ':');
 
-  if (splitlist.size() == 1 || splitlist.size() == 0) {
+  try {
+    auto user_map = to_robtop(player_string);
+
+    user.name = user_map[1];
+    user.ID = std::stoi(user_map[2], nullptr);
+    user.accID = std::stoi(user_map[16], nullptr);
+    return true;
+  } catch (const std::exception &e) {
+    throw;
+  } catch (...) {
     user.name = "invalid";
     user.ID = -1;
     user.accID = -1;
-    return false;
   }
-
-  for (unsigned int i = 0; i < splitlist.size(); i++) {
-    if (splitlist[i] == "1") {
-      user.name = splitlist[i + 1];
-    }
-    if (splitlist[i] == "2") {
-      user.ID = atoi(splitlist[i + 1].c_str());
-    }
-    if (splitlist[i] == "16") {
-      user.accID = atoi(splitlist[i + 1].c_str());
-    }
-    i++;
-  }
-
-  return true;
+  return false;
 }
 
 bool getUserRank(GDuser &user) {
-  std::string frmdata =
-      "gameVersion=21&secret=Wmfd2893gb7&type=relative&count=1&accountID=";
-  frmdata.append(std::to_string(user.accID));
+  Params params(
+      {{"type", "relative"}, {"accountID", std::to_string(user.accID)}});
 
   std::string leaderboardString;
   DWORD responseCode =
-      makeRequest(frmdata, L"/database/getGJScores20.php", leaderboardString);
+      post_request("/database/getGJScores20.php", params, leaderboardString);
   if (responseCode != 0) {
-    return false;
+    throw std::logic_error("post request fail");
   }
 
-  if (leaderboardString == "-1") {
-    return false;
+  auto leaderboard_list = explode(leaderboardString, '|');
+
+  bool found_user = false;
+  Robtop_Map seglist;
+
+  if (leaderboard_list.size() >= 24) {
+    seglist = to_robtop(leaderboard_list[24]);
+    found_user = (std::stoi(seglist[16], nullptr) == user.accID);
   }
 
-  std::vector<std::string> splitlist = explode(leaderboardString, '|');
-
-  if (splitlist.size() == 1 || splitlist.size() == 0) {
-    return false;
-  }
-
-  // testing shows its the 24st element, if its not valid there's going to be
-  // some checks lol
-  bool foundUser = false;
-  std::vector<std::string> seglist;
-
-  if (splitlist.size() >= 24) {
-    seglist = explode(splitlist[24], ':');
-    foundUser = (atoi(seglist[16].c_str()) == user.accID);
-  }
-
-  if (!foundUser) { // hey look its the checks
-
+  if (!found_user) { // hey look its the checks
     // so basically you look for
     // :16:<id>:
-    std::string idLookup = ":16:" + std::to_string(user.accID) + ":";
+    std::string lookup_string = ":16:" + std::to_string(user.accID) + ":";
 
-    unsigned int i;
+    auto player_entry =
+        std::find_if(leaderboard_list.begin(), leaderboard_list.end(),
+                     [&lookup_string](std::string &entry) {
+                       return (entry.find(lookup_string) != std::string::npos);
+                     });
 
-    for (i = 0; i < splitlist.size() - 1; i++) {
-      if (splitlist[i].find(idLookup) != std::string::npos) {
-        break;
-      }
-    }
-    if (i == 0) {
+    if (player_entry == leaderboard_list.end()) {
       user.rank = -1;
-      return false;
+      throw std::runtime_error("could not find player");
     }
 
-    seglist = explode(splitlist[i], ':');
+    seglist = to_robtop(*player_entry);
   }
 
-  for (unsigned int i = 0; i < seglist.size(); i++) {
-    /*if (seglist[i] == "1") {
-            user.name = seglist[i + 1];
-    }
-    // else ifs seem to do weird things
-    if (seglist[i] == "16") {
-            user.accID = atoi(seglist[i + 1].c_str());
-    }*/
-    if ((seglist[i] == "6")) {
-      user.rank =
-          atoi(seglist[i + 1].c_str()); // this one doesn't like string to
-                                        // integer conversion for some reason
-    }
-    /*if (seglist[i] == "2") {
-            user.ID = atoi(seglist[i + 1].c_str());
-    }*/
-    i++;
-  }
-
+  user.rank = std::stoi(seglist[6], nullptr);
   return true;
 }
 
@@ -326,6 +296,25 @@ bool parseGJGameLevel(int *gameLevel, GDlevel &level) {
     }
   }
   return true;
+}
+
+Robtop_Map to_robtop(std::string &string, char delimiter) {
+  std::stringstream segments(string);
+  std::string previous_segment, current_segment;
+  int position = 0;
+
+  Robtop_Map robtop;
+
+  auto split_string = explode(string, delimiter);
+
+  for (auto it = split_string.begin(); it != split_string.end(); ++it) {
+    // get position, check if odd (aka key)
+    if ((it - split_string.begin()) % 2 == 0) {
+      robtop.emplace(std::stoi(*it, nullptr), *std::next(it));
+    }
+  }
+
+  return robtop;
 }
 
 // helper function

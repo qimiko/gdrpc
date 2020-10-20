@@ -211,7 +211,7 @@ void Game_Loop::initialize() {
       if (userInfoSuccess) {
         getUserRank(user);
       }
-    } catch (const std::exception& e) {
+    } catch (const std::exception &e) {
       if (logger) {
         logger->warn("failed to get user info or rank\n{}", e.what());
       }

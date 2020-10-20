@@ -4,8 +4,11 @@
 #include "pch.h"
 #include <sstream>
 #include <string>
-#include <tchar.h>
 #include <vector>
+#include <algorithm>
+#include <exception>
+#include <stdexcept>
+#include <unordered_map>
 #include <wininet.h>
 
 enum class difficulty {
@@ -45,9 +48,10 @@ difficulty getDiffValue(int diff);
 demon_difficulty getDemonDiffValue(int diff);
 std::string getDifficultyName(GDlevel &level);
 
+typedef std::unordered_map<std::string, std::string> Params;
 // makes an internet post request to boomlings.com
 // returns 0 if succeed
-DWORD makeRequest(std::string data, LPCWSTR url, std::string &response);
+DWORD post_request(const char *, Params &, std::string &);
 
 bool getUserInfo(int &accID, GDuser &user);
 bool getPlayerInfo(int &playerID, GDuser &user);
@@ -56,7 +60,11 @@ bool getUserRank(GDuser &user);
 
 bool parseGJGameLevel(int *gameLevel, GDlevel &level);
 
+typedef std::unordered_map<int, std::string> Robtop_Map;
+
+Robtop_Map to_robtop(std::string &, char delimiter = ':');
+
 // splits a string by substring, much like in other languages
-std::vector<std::string> explode(std::string &string, char separator);
+std::vector<std::string> explode(std::string & string, char separator);
 
 #endif // !GDAPI_H
