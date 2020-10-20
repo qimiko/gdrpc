@@ -203,9 +203,18 @@ void Game_Loop::initialize() {
   int *accountID = (int *)(*getBase(0x3222D8) + 0x120);
   GDuser user;
   if (get_rank) {
-    bool userInfoSuccess = getUserInfo(*accountID, user);
-    if (userInfoSuccess) {
-      getUserRank(user);
+    if (logger) {
+      logger->debug("getting infomation for user {}", *accountID);
+    }
+    try {
+      bool userInfoSuccess = getUserInfo(*accountID, user);
+      if (userInfoSuccess) {
+        getUserRank(user);
+      }
+    } catch (const std::exception& e) {
+      if (logger) {
+        logger->warn("failed to get user info or rank\n{}", e.what());
+      }
     }
   }
 
