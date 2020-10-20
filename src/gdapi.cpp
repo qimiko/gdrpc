@@ -92,25 +92,35 @@ std::string to_param_list(Params &params) {
   return s.str();
 }
 
-DWORD post_request(const char *url, Params &params, std::string &response) {
+GD_Client::GD_Client(std::string host)
+    : game_version(21), secret("Wmfd2893gb7"), host(host) {
+  gd_session =
+      InternetOpenA("GDApi/WinInet", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL,
+                    0); // first part is user agent, change it to whatev
+  gd_connect = InternetConnectA(
+      gd_session, host.c_str(), // i could explain how web works but no.
+                                // boomlings.com is the host
+      INTERNET_DEFAULT_HTTP_PORT, NULL, NULL, INTERNET_SERVICE_HTTP, 0, 1);
+}
+
+GD_Client::~GD_Client() {
+  InternetCloseHandle(gd_session);
+  InternetCloseHandle(gd_connect);
+}
+
+DWORD GD_Client::post_request(const char *url, Params &params,
+                              std::string &response) {
   // this function has become magic dust for me lol
-  params.emplace("gameVersion", "21");
-  params.emplace("secret", "Wmfd2893gb7");
+  params.emplace("gameVersion", std::to_string(game_version));
+  params.emplace("secret", secret);
 
   static const char *hdrs = "Content-Type: application/x-www-form-urlencoded";
   static const char *accept[2] = {"*/*", NULL};
 
   std::string data = to_param_list(params);
 
-  HINTERNET hSession =
-      InternetOpenA("GDApi/WinInet", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL,
-                    0); // first part is user agent, change it to whatev
-  HINTERNET hConnect = InternetConnectA(
-      hSession, "boomlings.com", // i could explain how web works but no.
-                                 // boomlings.com is the host
-      INTERNET_DEFAULT_HTTP_PORT, NULL, NULL, INTERNET_SERVICE_HTTP, 0, 1);
   HINTERNET hRequest =
-      HttpOpenRequestA(hConnect, "POST", url, NULL, NULL, accept, 0,
+      HttpOpenRequestA(gd_connect, "POST", url, NULL, NULL, accept, 0,
                        1); // this starts the send something
 
   // send request
@@ -131,16 +141,14 @@ DWORD post_request(const char *url, Params &params, std::string &response) {
     dwRead = 0;
   }
 
-  InternetCloseHandle(hRequest);
-  InternetCloseHandle(hConnect);
-  InternetCloseHandle(hSession); // we done
+  InternetCloseHandle(hRequest); // we done
 
   response = responseStringStream.str();
 
   return 0;
 }
 
-bool getUserInfo(int &accID, GDuser &user) {
+bool GD_Client::get_user_info(int &accID, GDuser &user) {
   Params params({{"targetAccountID", std::to_string(accID)}});
 
   std::string user_string;
@@ -168,7 +176,7 @@ bool getUserInfo(int &accID, GDuser &user) {
   return false;
 }
 
-bool getPlayerInfo(int &playerID, GDuser &user) {
+bool GD_Client::get_player_info(int &playerID, GDuser &user) {
   Params params({{"str", std::to_string(playerID)}});
 
   std::string player_string;
@@ -195,7 +203,7 @@ bool getPlayerInfo(int &playerID, GDuser &user) {
   return false;
 }
 
-bool getUserRank(GDuser &user) {
+bool GD_Client::get_user_rank(GDuser &user) {
   Params params(
       {{"type", "relative"}, {"accountID", std::to_string(user.accID)}});
 

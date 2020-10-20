@@ -49,22 +49,37 @@ demon_difficulty getDemonDiffValue(int diff);
 std::string getDifficultyName(GDlevel &level);
 
 typedef std::unordered_map<std::string, std::string> Params;
-// makes an internet post request to boomlings.com
-// returns 0 if succeed
-DWORD post_request(const char *, Params &, std::string &);
-
-bool getUserInfo(int &accID, GDuser &user);
-bool getPlayerInfo(int &playerID, GDuser &user);
-
-bool getUserRank(GDuser &user);
-
-bool parseGJGameLevel(int *gameLevel, GDlevel &level);
-
 typedef std::unordered_map<int, std::string> Robtop_Map;
+
+class GD_Client {
+  private:
+    std::string host;
+
+    const int game_version;
+    const std::string secret;
+
+    HINTERNET gd_session;
+    HINTERNET gd_connect;
+
+    // makes an internet post request to boomlings.com
+    // returns 0 if succeed
+    DWORD post_request(const char *, Params &, std::string &);
+  public:
+
+    GD_Client(std::string host = "boomlings.com");
+    ~GD_Client();
+
+    bool get_user_info(int &accID, GDuser &user);
+    bool get_player_info(int &playerID, GDuser &user);
+
+    bool get_user_rank(GDuser &user);
+};
 
 Robtop_Map to_robtop(std::string &, char delimiter = ':');
 
 // splits a string by substring, much like in other languages
 std::vector<std::string> explode(std::string & string, char separator);
+
+bool parseGJGameLevel(int *gameLevel, GDlevel &level);
 
 #endif // !GDAPI_H

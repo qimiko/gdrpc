@@ -225,15 +225,17 @@ void Game_Loop::initialize_loop() {
 
   int *accountID = get_address(gd_base, {0x3222D8, 0x120});
 
+  GD_Client client = GD_Client("boomlings.com");
+
   GDuser user;
   if (get_rank) {
     if (logger) {
       logger->debug("getting infomation for user {}", *accountID);
     }
     try {
-      bool userInfoSuccess = getUserInfo(*accountID, user);
+      bool userInfoSuccess = client.get_user_info(*accountID, user);
       if (userInfoSuccess) {
-        getUserRank(user);
+        client.get_user_rank(user);
       }
     } catch (const std::exception &e) {
       if (logger) {
