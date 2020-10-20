@@ -3,8 +3,18 @@
 
 Game_Loop game_loop = Game_Loop();
 
-int *getBase(int pointer) {
-  return (int *)((int)GetModuleHandle(L"GeometryDash.exe") + pointer);
+int *get_address(int *start, std::vector<int> addresses) {
+  // start with value of 1st address
+  auto it = addresses.begin();
+  int *cur_addr = (int *)((int)start + *it);
+  std::advance(it, 1);
+
+  while (it != addresses.end()) {
+    // get next and increment all at once!
+    cur_addr = (int *)(*cur_addr + *it);
+    std::advance(it, 1); // null pointer protection
+  }
+  return cur_addr;
 }
 
 // insane_demon to Insane Demon
@@ -198,8 +208,10 @@ void Game_Loop::initialize_loop() {
 
   large_text = user_default;
 
-  // get user
-  int *accountID = (int *)(*getBase(0x3222D8) + 0x120);
+  int *gd_base = (int *)GetModuleHandleA("GeometryDash.exe");
+
+  int *accountID = get_address(gd_base, {0x3222D8, 0x120});
+
   GDuser user;
   if (get_rank) {
     if (logger) {
@@ -221,7 +233,7 @@ void Game_Loop::initialize_loop() {
     large_text = fmt::format(user_ranked, fmt::arg("name", user.name),
                              fmt::arg("rank", user.rank));
   } else {
-    char *username = (char *)(*getBase(0x3222D8) + 0x108);
+    char *username = (char *)(get_address(gd_base, {0x3222D8, 0x108}));
     large_text = std::string(username); // hopeful fallback
   }
 

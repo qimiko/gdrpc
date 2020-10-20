@@ -3,9 +3,9 @@
 #include "pch.h"
 #include "presence_wrapper.hpp"
 #include <algorithm>
+#include <vector>
 #include <ctime>
 #include <functional>
-#include <stdio.h>
 
 #include <fstream>
 #include <toml.hpp>
