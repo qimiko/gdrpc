@@ -137,10 +137,14 @@ typedef void *(__fastcall *LevelEditorLayerCreateF)(int *gameLevel);
 LevelEditorLayerCreateF lelc;
 
 void *__fastcall LevelEditorLayerCreateH(int *gameLevel) {
+  int levelID = *(int *)((int)gameLevel + 0xF8);
+
   Game_Loop *game_loop = get_game_loop();
 
   if (auto logger = game_loop->get_logger()) {
-    logger->debug(FMT_STRING("LevelEditorLayer::create called"));
+    logger->debug(FMT_STRING("LevelEditorLayer::create called:\n\
+levelID: {} @ {:#x}"),
+                  levelID, reinterpret_cast<int>(gameLevel));
   }
   if (game_loop->get_state() != playerState::level ||
       game_loop->get_reset_timestamp()) {
@@ -238,7 +242,7 @@ void doTheHook() {
       {(int *)((int)gd_handle + 0x75660),
        reinterpret_cast<void *>(&EditorPauseLayerOnExitEditorH),
        reinterpret_cast<void **>(&eploee), "EditorPauseLayer::onExitEditor"},
-      {(int *)((int)gd_handle + 0x76270),
+      {(int *)((int)gd_handle + 0x15ED60),
        reinterpret_cast<void *>(&LevelEditorLayerCreateH),
        reinterpret_cast<void **>(&lelc), "LevelEditorLayer::create"},
       {(int *)GetProcAddress(cocos_handle, "?end@CCDirector@cocos2d@@QAEXXZ"),
