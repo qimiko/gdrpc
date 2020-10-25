@@ -31,6 +31,10 @@ MenuLayerInitF mli;
 
 int __fastcall MenuLayerInitH(void *menuLayer) {
   if (!setupDone) {
+    if (auto logger = get_game_loop()->get_logger()) {
+      logger->trace(FMT_STRING("menu layer setup called"));
+    }
+
     get_game_loop()->register_on_initialize([] {
       // now we can log
       if (auto logger = get_game_loop()->get_logger()) {
@@ -210,7 +214,7 @@ void doTheHook() {
   }
 
   if (logger) {
-    logger->trace(FMT_STRING("found gd at {:#x}"), (int)gd_handle);
+    logger->trace(FMT_STRING("found {} at {:#x}"), gd_name, (int)gd_handle);
   }
 
   if (!cocos_handle) {

@@ -3,9 +3,9 @@
 #include "pch.h"
 #include "presence_wrapper.hpp"
 #include <algorithm>
-#include <vector>
 #include <ctime>
 #include <functional>
+#include <vector>
 
 #include <fstream>
 #include <toml.hpp>
@@ -60,7 +60,7 @@ private:
   bool editor_reset_timestamp, output_logging, get_rank;
   std::string user_ranked, user_default;
 
-  std::string executable_name;
+  std::string executable_name, base_url;
 
   // wrapper to presence update that allows strings + debug messages
   void update_presence_w(std::string &, std::string &, std::string &,

@@ -113,6 +113,7 @@ void Game_Loop::initialize_config() {
   user_default = "";
 
   executable_name = "GeometryDash.exe";
+  base_url = "boomlings.com";
 
   static const int latest_version = 3;
   int file_version = 1;
@@ -191,6 +192,8 @@ void Game_Loop::initialize_config() {
       if (file_version >= 3) {
         executable_name = toml::find_or<std::string>(
             settings_table, "executable_name", executable_name);
+        base_url =
+            toml::find_or<std::string>(settings_table, "base_url", base_url);
       }
     }
 
@@ -217,18 +220,24 @@ void Game_Loop::initialize_config() {
 }
 
 void Game_Loop::initialize_loop() {
+  if (logger) {
+    logger->debug("starting setup");
+  }
+
   discord->initialize();
+
+  if (logger) {
+    logger->trace("discord initialized");
+  }
 
   large_text = user_default;
 
   int *gd_base = (int *)GetModuleHandleA(executable_name.c_str());
-
   int *accountID = get_address(gd_base, {0x3222D8, 0x120});
-
-  GD_Client client = GD_Client("boomlings.com");
 
   GDuser user;
   if (get_rank) {
+    GD_Client client = GD_Client(base_url);
     if (logger) {
       logger->debug("getting infomation for user {}", *accountID);
     }

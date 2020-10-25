@@ -40,3 +40,4 @@
 	file_version = 3
 	logging = false
 	executable_name = "GeometryDash.exe" # change for gdps if needed
+	base_url = "boomlings.com" # this currently does not support https
