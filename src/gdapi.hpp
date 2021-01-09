@@ -45,6 +45,12 @@ struct GDuser {
   int rank = -1;
 };
 
+struct GDUrls {
+  std::string get_user_info = "/database/getGJUserInfo20.php";
+  std::string get_users = "/database/getGJUsers20.php";
+  std::string get_scores = "/database/getGJScores20.php";
+};
+
 difficulty getDiffValue(int diff);
 demon_difficulty getDemonDiffValue(int diff);
 std::string getDifficultyName(GDlevel &level);
@@ -59,10 +65,11 @@ private:
   const int game_version;
   const std::string secret;
 
+  GDUrls urls;
+
   std::shared_ptr<httplib::Client> client;
 
   // makes an internet post request to boomlings.com
-  // returns 0 if succeed
   std::string post_request(const char *, Params &);
 public:
   GD_Client(std::string host = "boomlings.com");
@@ -71,6 +78,8 @@ public:
   bool get_player_info(int &playerID, GDuser &user);
 
   bool get_user_rank(GDuser &user);
+
+  void set_urls(GDUrls);
 };
 
 Robtop_Map to_robtop(std::string &, char delimiter = ':');

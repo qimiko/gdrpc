@@ -114,7 +114,7 @@ std::string GD_Client::post_request(const char *url, Params &params) {
 
 bool GD_Client::get_user_info(int &accID, GDuser &user) {
   Params params({{"targetAccountID", std::to_string(accID)}});
-  auto user_string = post_request("/database/getGJUserInfo20.php", params);
+  auto user_string = post_request(urls.get_user_info.c_str(), params);
 
   try {
     auto user_map = to_robtop(user_string);
@@ -136,7 +136,7 @@ bool GD_Client::get_user_info(int &accID, GDuser &user) {
 
 bool GD_Client::get_player_info(int &playerID, GDuser &user) {
   Params params({{"str", std::to_string(playerID)}});
-  auto player_string = post_request("/database/getGJUsers20.php", params);
+  auto player_string = post_request(urls.get_users.c_str(), params);
 
   try {
     auto user_map = to_robtop(player_string);
@@ -158,7 +158,7 @@ bool GD_Client::get_player_info(int &playerID, GDuser &user) {
 bool GD_Client::get_user_rank(GDuser &user) {
   Params params(
       {{"type", "relative"}, {"accountID", std::to_string(user.accID)}});
-  auto leaderboardString = post_request("/database/getGJScores20.php", params);
+  auto leaderboardString = post_request(urls.get_scores.c_str(), params);
 
   auto leaderboard_list = explode(leaderboardString, '|');
 
@@ -191,6 +191,10 @@ bool GD_Client::get_user_rank(GDuser &user) {
 
   user.rank = std::stoi(seglist[6], nullptr);
   return true;
+}
+
+void GD_Client::set_urls(GDUrls new_urls) {
+  urls = new_urls;
 }
 
 // reads string at address
