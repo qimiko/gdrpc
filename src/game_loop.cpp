@@ -113,7 +113,7 @@ void Game_Loop::initialize_config() {
   user_default = "";
 
   executable_name = "GeometryDash.exe";
-  base_url = "boomlings.com";
+  base_url = "http://boomlings.com";
 
   static const int latest_version = 3;
   int file_version = 1;
@@ -140,7 +140,8 @@ void Game_Loop::initialize_config() {
 
       const toml::value settings{{"file_version", latest_version},
                                  {"logging", output_logging},
-                                 {"executable_name", executable_name}};
+                                 {"executable_name", executable_name},
+                                 {"base_url", base_url}};
 
       const toml::value level{
           {"saved", saved}, {"playtesting", playtesting}, {"error", error}};

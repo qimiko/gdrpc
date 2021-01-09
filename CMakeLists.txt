@@ -15,7 +15,14 @@ endif()
 file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
 add_library(gdrpc SHARED ${SOURCE_FILES})
 
-target_include_directories(gdrpc PRIVATE libraries/fmt/include libraries/toml11 libraries/discord-rpc/include libraries/minhook/include libraries/spdlog/include)
+target_include_directories(gdrpc PRIVATE
+  libraries/fmt/include
+  libraries/toml11
+  libraries/discord-rpc/include
+  libraries/minhook/include
+  libraries/spdlog/include
+  libraries/cpp-httplib
+)
 target_link_libraries(gdrpc wininet)
 
 add_subdirectory(libraries/fmt)
@@ -23,6 +30,9 @@ target_link_libraries(gdrpc fmt)
 
 add_subdirectory(libraries/minhook)
 target_link_libraries(gdrpc minhook)
+
+add_subdirectory(libraries/cpp-httplib)
+target_link_libraries(gdrpc httplib)
 
 add_definitions(-DSPDLOG_FMT_EXTERNAL)
 set(SPDLOG_FMT_EXTERNAL OFF)

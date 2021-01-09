@@ -7,9 +7,10 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <map>
 #include <unordered_map>
 #include <vector>
-#include <wininet.h>
+#include <httplib.h>
 
 enum class difficulty {
   na,
@@ -48,7 +49,7 @@ difficulty getDiffValue(int diff);
 demon_difficulty getDemonDiffValue(int diff);
 std::string getDifficultyName(GDlevel &level);
 
-typedef std::unordered_map<std::string, std::string> Params;
+typedef std::multimap<std::string, std::string> Params;
 typedef std::unordered_map<int, std::string> Robtop_Map;
 
 class GD_Client {
@@ -58,16 +59,13 @@ private:
   const int game_version;
   const std::string secret;
 
-  HINTERNET gd_session;
-  HINTERNET gd_connect;
+  std::shared_ptr<httplib::Client> client;
 
   // makes an internet post request to boomlings.com
   // returns 0 if succeed
-  DWORD post_request(const char *, Params &, std::string &);
-
+  std::string post_request(const char *, Params &);
 public:
   GD_Client(std::string host = "boomlings.com");
-  ~GD_Client();
 
   bool get_user_info(int &accID, GDuser &user);
   bool get_player_info(int &playerID, GDuser &user);

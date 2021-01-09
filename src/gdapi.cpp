@@ -94,69 +94,27 @@ std::string to_param_list(Params &params) {
 
 GD_Client::GD_Client(std::string host)
     : game_version(21), secret("Wmfd2893gb7"), host(host) {
-  gd_session =
-      InternetOpenA("GDApi/WinInet", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL,
-                    0); // first part is user agent, change it to whatev
-  gd_connect = InternetConnectA(
-      gd_session, host.c_str(), // i could explain how web works but no.
-                                // boomlings.com is the host
-      INTERNET_DEFAULT_HTTP_PORT, NULL, NULL, INTERNET_SERVICE_HTTP, 0, 1);
+  client = std::make_shared<httplib::Client>(host.c_str());
 }
 
-GD_Client::~GD_Client() {
-  InternetCloseHandle(gd_session);
-  InternetCloseHandle(gd_connect);
-}
-
-DWORD GD_Client::post_request(const char *url, Params &params,
-                              std::string &response) {
+std::string GD_Client::post_request(const char *url, Params &params) {
   // this function has become magic dust for me lol
   params.emplace("gameVersion", std::to_string(game_version));
   params.emplace("secret", secret);
 
-  static const char *hdrs = "Content-Type: application/x-www-form-urlencoded";
-  static const char *accept[2] = {"*/*", NULL};
+  auto res = client.get()->Post(url, params);
 
-  std::string data = to_param_list(params);
-
-  HINTERNET hRequest =
-      HttpOpenRequestA(gd_connect, "POST", url, NULL, NULL, accept, 0,
-                       1); // this starts the send something
-
-  // send request
-  if (!HttpSendRequestA(hRequest, hdrs, (DWORD)strlen(hdrs),
-                        (LPVOID)data.c_str(), (DWORD)data.length())) {
-    DWORD dwErr = GetLastError(); // no error handling :o
-    return dwErr;
-  }
-  std::stringstream responseStringStream;
-
-  CHAR szBuffer[1025];
-  DWORD dwRead = 0;
-
-  while (InternetReadFile(hRequest, szBuffer, sizeof(szBuffer) - 1, &dwRead) &&
-         dwRead) { // chunk output i guess
-    szBuffer[dwRead] = 0;
-    responseStringStream << szBuffer;
-    dwRead = 0;
+  auto body = res->body;
+  if (body == "-1") {
+    throw std::logic_error("post request failure");
   }
 
-  InternetCloseHandle(hRequest); // we done
-
-  response = responseStringStream.str();
-
-  return 0;
+  return body;
 }
 
 bool GD_Client::get_user_info(int &accID, GDuser &user) {
   Params params({{"targetAccountID", std::to_string(accID)}});
-
-  std::string user_string;
-  DWORD responseCode =
-      post_request("/database/getGJUserInfo20.php", params, user_string);
-  if (responseCode != 0) {
-    throw std::logic_error("post request fail");
-  }
+  auto user_string = post_request("/database/getGJUserInfo20.php", params);
 
   try {
     auto user_map = to_robtop(user_string);
@@ -167,7 +125,7 @@ bool GD_Client::get_user_info(int &accID, GDuser &user) {
     return true;
   } catch (const std::exception &e) {
     // throw the exceptions that will actually have a message
-    throw;
+    throw e;
   } catch (...) {
     user.name = "invalid";
     user.ID = -1;
@@ -178,13 +136,7 @@ bool GD_Client::get_user_info(int &accID, GDuser &user) {
 
 bool GD_Client::get_player_info(int &playerID, GDuser &user) {
   Params params({{"str", std::to_string(playerID)}});
-
-  std::string player_string;
-  DWORD responseCode =
-      post_request("/database/getGJUsers20.php", params, player_string);
-  if (responseCode != 0) {
-    throw std::logic_error("post request fail");
-  }
+  auto player_string = post_request("/database/getGJUsers20.php", params);
 
   try {
     auto user_map = to_robtop(player_string);
@@ -194,7 +146,7 @@ bool GD_Client::get_player_info(int &playerID, GDuser &user) {
     user.accID = std::stoi(user_map[16], nullptr);
     return true;
   } catch (const std::exception &e) {
-    throw;
+    throw e;
   } catch (...) {
     user.name = "invalid";
     user.ID = -1;
@@ -206,13 +158,7 @@ bool GD_Client::get_player_info(int &playerID, GDuser &user) {
 bool GD_Client::get_user_rank(GDuser &user) {
   Params params(
       {{"type", "relative"}, {"accountID", std::to_string(user.accID)}});
-
-  std::string leaderboardString;
-  DWORD responseCode =
-      post_request("/database/getGJScores20.php", params, leaderboardString);
-  if (responseCode != 0) {
-    throw std::logic_error("post request fail");
-  }
+  auto leaderboardString = post_request("/database/getGJScores20.php", params);
 
   auto leaderboard_list = explode(leaderboardString, '|');
 
@@ -261,6 +207,7 @@ std::string readString(int *addr) {
 // i was going to make a joke about this being the better thing like the id
 // parsing but this is _really_ messy no error handling either. good luck
 bool parseGJGameLevel(int *gameLevel, GDlevel &level) {
+  // obj count at 0x1D8
   int newID = *(int *)((int)gameLevel + 0xF8);
   int levelLocation = *(int *)((int)gameLevel + 0x364);
 
