@@ -78,20 +78,6 @@ std::string getDifficultyName(GDlevel &level) {
   }
 }
 
-std::string to_param_list(Params &params) {
-  std::stringstream s;
-
-  // can't use the normal for loop as we need more iterator control!!
-  for (auto it = params.begin(); it != params.end(); ++it) {
-    s << it->first << "=" << it->second;
-    if (std::next(it) != params.end()) {
-      s << "&";
-    }
-  }
-
-  return s.str();
-}
-
 GD_Client::GD_Client(std::string host, std::string prefix)
     : game_version(21), secret("Wmfd2893gb7"), host(host), prefix(prefix) {
   client = std::make_shared<httplib::Client>(host.c_str());
