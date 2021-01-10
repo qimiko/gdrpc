@@ -192,20 +192,11 @@ void Game_Loop::on_loop() {
 
     switch (player_state) {
     case playerState::level: {
+      parseGJGameLevel(gamelevel, level);
       auto level_location = gamelevel->level_type;
       int current_best = gamelevel->current_best;
-      if (!parseGJGameLevel(gamelevel, level)) {
-        if (logger) {
-          logger->critical("failed to parse gamelevel at {#x}",
-                           reinterpret_cast<int>(gamelevel));
-        }
 
-        auto error = this->config.level.error;
-        details = fmt::format(error.detail, fmt::arg("best", current_best));
-        state = fmt::format(error.state, fmt::arg("best", current_best));
-        small_text = error.smalltext;
-        small_image = "";
-      } else if (level_location == GJLevelType::Editor) {
+      if (level_location == GJLevelType::Editor) {
         auto playtesting = this->config.level.playtesting;
 
         details = formatWithLevel(playtesting.detail, level, this->gamelevel);
@@ -225,10 +216,11 @@ void Game_Loop::on_loop() {
     }
     case playerState::editor: {
       auto editor = this->config.editor;
+      parseGJGameLevel(gamelevel, level);
 
-      details = editor.detail;
-      state = editor.state;
-      small_text = editor.smalltext;
+      details = formatWithLevel(editor.detail, level, this->gamelevel);
+      state = formatWithLevel(editor.state, level, this->gamelevel);
+      small_text = formatWithLevel(editor.smalltext, level, this->gamelevel);
       small_image = "creator_point";
       break;
     }
@@ -282,7 +274,13 @@ void Game_Loop::register_on_initialize(std::function<void()> callback) {
 DWORD WINAPI mainThread(LPVOID lpParam) {
   game_loop.initialize_loop();
   while (true) {
+    try {
     game_loop.on_loop();
+    } catch (const std::exception &e) {
+      if (auto logger = game_loop.get_logger()) {
+        logger->critical("unhandled exception thrown in loop\n{}", e.what());
+      }
+    }
     Sleep(1000);
   }
 

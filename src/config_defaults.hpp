@@ -34,18 +34,15 @@ struct Config_Format {
   struct Level {
     Config::Presence saved;
     Config::Presence playtesting;
-    Config::Presence error;
 
     void from_toml(const toml::value &table) {
       this->saved = toml::find<Config::Presence>(table, "saved");
       this->playtesting = toml::find<Config::Presence>(table, "playtesting");
-      this->error = toml::find<Config::Presence>(table, "error");
     }
 
     toml::value into_toml() const {
       return toml::table{{"saved", this->saved},
-                         {"playtesting", this->playtesting},
-                         {"error", this->error}};
+                         {"playtesting", this->playtesting}};
     }
   };
 
@@ -135,8 +132,7 @@ struct Config_Format {
 
   Level level = {
       {"Playing {name}", "by {author} ({best}%)", "{stars}* {diff} ({id})"},
-      {"Editing a level", "", ""},
-      {"Playing a level", "", ""}};
+      {"Editing a level", "", ""}};
   Editor editor = {{"Editing a level", "", ""}, false};
   User user = {"{name} [Rank #{rank}]", "", true};
   Config::Presence menu = {"Idle", "", ""};
