@@ -198,17 +198,6 @@ void GD_Client::set_urls(GDUrls new_urls) {
   urls = new_urls;
 }
 
-// reads string at address
-// does proper length checks
-std::string readString(int *addr) {
-  int length = *(int *)((int)addr + 0x10);
-  if (length >= 16) {
-    return std::string((char *)(*addr));
-  } else {
-    return std::string((char *)addr);
-  }
-}
-
 // i was going to make a joke about this being the better thing like the id
 // parsing but this is _really_ messy no error handling either. good luck
 bool parseGJGameLevel(int *gameLevel, GDlevel &level) {
@@ -225,7 +214,7 @@ bool parseGJGameLevel(int *gameLevel, GDlevel &level) {
   level.stars = *(int *)((int)gameLevel + 0x2AC);
 
   try {
-    level.name = readString((int *)((int)gameLevel + 0xFC));
+    level.name = *(std::string *)((int)gameLevel + 0xFC);
   } catch (...) {
     return false;
   }
@@ -242,7 +231,7 @@ bool parseGJGameLevel(int *gameLevel, GDlevel &level) {
       level.difficulty = getDiffValue(diffValue);
     }
   } else {
-    level.author = readString((int *)((int)gameLevel + 0x144));
+    level.author = *(std::string *)((int *)((int)gameLevel + 0x144));
     level.difficulty = getDiffValue(*(int *)((int)gameLevel + 0x1E4));
 
     // don't have the proper booleans mapped
