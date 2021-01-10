@@ -1,7 +1,6 @@
 #pragma once
 #pragma comment(lib, "discord-rpc.lib")
 
-#include "discord_secret.hpp"
 #include <cstdint>
 #include <cstdlib>
 #include <discord_rpc.h>
@@ -17,7 +16,7 @@ private:
 
 public:
   Discord_Presence();
-  void initialize();
+  void initialize(const char *);
   int get_status();
   void set_status(int);
   void update(const char *details, const char *largeText, const char *smallText,

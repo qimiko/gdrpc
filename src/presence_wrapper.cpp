@@ -28,7 +28,7 @@ static void handleDiscordJoinRequest(const DiscordUser *request) {
 
 Discord_Presence::Discord_Presence() : status(-1) {}
 
-void Discord_Presence::initialize() {
+void Discord_Presence::initialize(const char *application_id) {
   DiscordEventHandlers handlers;
   memset(&handlers, 0, sizeof(handlers));
   handlers.ready = handleDiscordReady;
@@ -38,7 +38,7 @@ void Discord_Presence::initialize() {
   handlers.spectateGame = handleDiscordSpectateGame;
   handlers.joinRequest = handleDiscordJoinRequest;
 
-  Discord_Initialize(APPLICATION_ID, &handlers, 1, "322170");
+  Discord_Initialize(application_id, &handlers, 1, "322170");
 }
 
 int Discord_Presence::get_status() { return status; }

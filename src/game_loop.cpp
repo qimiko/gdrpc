@@ -138,7 +138,7 @@ void Game_Loop::initialize_loop() {
     logger->debug("starting setup");
   }
 
-  discord->initialize();
+  discord->initialize(this->config.settings.application_id.c_str());
 
   if (logger) {
     logger->trace("discord initialized");

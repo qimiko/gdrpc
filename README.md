@@ -12,8 +12,6 @@
 * Autoloads
 * Configuration system
 
-**Note**: This thing might crash if servers go down.
-
 ### Using
 
 #### Manually
@@ -36,9 +34,8 @@ For more details on how to configure, there is a `gdrpc.toml` file located in th
 
 1. import files into Visual Studio as cmake project
 2. download git submodules, `git submodules update --init --recursive`
-3. edit `src/discord_secret.hpp` and add your application id between the quotes
-4. build dll
-5. add the assets in the `assets` folder to discord
+3. build dll
+4. add the assets in the `assets` folder to discord
 
 ### Private servers
 
@@ -57,10 +54,10 @@ The autoloader is based on a modification of the import table of `zlib1.dll`. If
 * smjs for some pointers
 * nekit for the level location thingy
 * cos8o for being cos8o
-* blaze for some hooks
+* shira for some internal details
 * saya for motivation
 * silentzer for being smart
 
 ### Maybe
 
-* gjgamelevel parsing for editor levels
+* object count in levels

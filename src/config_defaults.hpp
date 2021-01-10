@@ -11,6 +11,7 @@ constexpr int LATEST_VERSION = 3;
 constexpr auto DEFAULT_EXECUTABLE = "GeometryDash.exe";
 constexpr auto DEFAULT_URL = "http://boomlings.com";
 constexpr auto DEFAULT_PREFIX = "/database/";
+constexpr auto DEFAULT_APPLICATION_ID = "668228366893056001";
 
 struct Presence {
   std::string detail;
@@ -89,6 +90,7 @@ struct Config_Format {
     std::string executable_name;
     std::string base_url;
     std::string url_prefix;
+    std::string application_id;
 
     void from_toml(const toml::value &table) {
       this->file_version = toml::find<int>(table, "file_version");
@@ -99,6 +101,8 @@ struct Config_Format {
           toml::find_or<std::string>(table, "base_url", DEFAULT_URL);
       this->url_prefix =
           toml::find_or<std::string>(table, "url_prefix", DEFAULT_PREFIX);
+      this->application_id =
+          toml::find_or<std::string>(table, "application_id", DEFAULT_APPLICATION_ID);
     }
 
     toml::value into_toml() const {
@@ -106,7 +110,8 @@ struct Config_Format {
                          {"logging", this->logging},
                          {"executable_name", this->executable_name},
                          {"base_url", this->base_url},
-                         {"url_prefix", this->url_prefix}};
+                         {"url_prefix", this->url_prefix},
+                         {"application_id", this->application_id}};
     }
   };
 
@@ -139,7 +144,7 @@ struct Config_Format {
 
   Settings settings = {Config::LATEST_VERSION, false,
                        Config::DEFAULT_EXECUTABLE, Config::DEFAULT_URL,
-                       Config::DEFAULT_PREFIX};
+                       Config::DEFAULT_PREFIX, Config::DEFAULT_APPLICATION_ID};
 };
 } // namespace Config
 
