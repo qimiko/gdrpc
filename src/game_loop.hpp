@@ -2,6 +2,8 @@
 #include "gdapi.hpp"
 #include "pch.h"
 #include "presence_wrapper.hpp"
+#include "config_defaults.hpp"
+
 #include <algorithm>
 #include <ctime>
 #include <functional>
@@ -22,24 +24,6 @@ enum class playerState {
   menu,
 };
 
-struct configPresence {
-  std::string detail;
-  std::string state;
-  std::string smalltext;
-
-  void from_toml(const toml::value &table) {
-    this->detail = toml::find<std::string>(table, "detail");
-    this->state = toml::find<std::string>(table, "state");
-    this->smalltext = toml::find<std::string>(table, "smalltext");
-  }
-
-  toml::table into_toml() const {
-    return toml::table{{"detail", this->detail},
-                       {"state", this->state},
-                       {"smalltext", this->smalltext}};
-  }
-};
-
 class Game_Loop {
 private:
   playerState player_state;
@@ -53,14 +37,9 @@ private:
   time_t current_timestamp;
   Discord_Presence *discord;
 
-  configPresence saved_level, playtesting_level, error_level, editor_status,
-      menu_status;
+  Config::Config_Format config;
+
   std::string large_text;
-
-  bool editor_reset_timestamp, output_logging, get_rank;
-  std::string user_ranked, user_default;
-
-  std::string executable_name, base_url;
 
   // wrapper to presence update that allows strings + debug messages
   void update_presence_w(std::string &, std::string &, std::string &,
