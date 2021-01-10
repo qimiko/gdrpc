@@ -35,11 +35,11 @@ std::string getTextFromKey(std::string key) {
 }
 
 std::string formatWithLevel(std::string &s, GDlevel &level,
-                            int currentBest = 0) {
+                            GJGameLevel *in_memory) {
   std::string f;
   try {
     f = fmt::format(s, fmt::arg("id", level.levelID),
-                    fmt::arg("name", level.name), fmt::arg("best", currentBest),
+                    fmt::arg("name", level.name), fmt::arg("best", in_memory->current_best),
                     fmt::arg("diff", getTextFromKey(getDifficultyName(level))),
                     fmt::arg("author", level.author),
                     fmt::arg("stars", level.stars));
@@ -207,17 +207,17 @@ void Game_Loop::on_loop() {
       } else if (level_location == 2) {
         auto playtesting = this->config.level.playtesting;
 
-        details = formatWithLevel(playtesting.detail, level, current_best);
-        state = formatWithLevel(playtesting.state, level, current_best);
+        details = formatWithLevel(playtesting.detail, level, this->gamelevel);
+        state = formatWithLevel(playtesting.state, level, this->gamelevel);
         small_text =
-            formatWithLevel(playtesting.smalltext, level, current_best);
+            formatWithLevel(playtesting.smalltext, level, this->gamelevel);
         small_image = "creator_point";
       } else {
         auto saved = this->config.level.saved;
 
-        details = formatWithLevel(saved.detail, level, current_best);
-        state = formatWithLevel(saved.state, level, current_best);
-        small_text = formatWithLevel(saved.smalltext, level, current_best);
+        details = formatWithLevel(saved.detail, level, this->gamelevel);
+        state = formatWithLevel(saved.state, level, this->gamelevel);
+        small_text = formatWithLevel(saved.smalltext, level, this->gamelevel);
         small_image = getDifficultyName(level);
       }
       break;
