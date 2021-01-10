@@ -19,24 +19,6 @@ difficulty getDiffValue(int diff) {
   }
 }
 
-demon_difficulty getDemonDiffValue(int diff) {
-  switch (diff) {
-  case 3:
-    return demon_difficulty::easy;
-  case 4:
-    return demon_difficulty::medium;
-  case 5:
-    return demon_difficulty::insane;
-  case 6:
-    return demon_difficulty::extreme;
-  case 0:
-  case 1:
-  case 2:
-  default:
-    return demon_difficulty::hard;
-  }
-}
-
 std::string getDifficultyName(GDlevel &level) {
   // for some reason auto/demon levels don't have a proper difficulty
   if (level.isAuto) {
@@ -45,19 +27,7 @@ std::string getDifficultyName(GDlevel &level) {
 
   // this is also messy
   if (level.isDemon) {
-    switch (level.demonDifficulty) {
-    case demon_difficulty::easy:
-      return "easy_demon";
-    case demon_difficulty::medium:
-      return "medium_demon";
-    case demon_difficulty::insane:
-      return "insane_demon";
-    case demon_difficulty::extreme:
-      return "extreme_demon";
-    default:
-    case demon_difficulty::hard:
       return "hard_demon";
-    }
   }
 
   // definitely a better way to do this
@@ -186,8 +156,8 @@ void GD_Client::set_urls(GDUrls new_urls) { urls = new_urls; }
 // parsing but this is _really_ messy no error handling either. good luck
 bool parseGJGameLevel(GJGameLevel *in_memory, GDlevel &level) {
 
-  auto newID = in_memory->id;
-  auto levelLocation = in_memory->level_type;
+  auto newID = in_memory->levelID;
+  auto levelLocation = in_memory->levelType;
 
   // don't calculate more than we have to, but the editor keeps id 0
   if (newID == level.levelID && levelLocation != GJLevelType::Editor) {
@@ -197,31 +167,25 @@ bool parseGJGameLevel(GJGameLevel *in_memory, GDlevel &level) {
   level.levelID = newID;
   level.stars = in_memory->stars;
 
-  level.name = in_memory->name;
+  level.name = in_memory->levelName;
 
   if (levelLocation == 1) {
     level.author = "RobTop"; // author is "" on these
-    int diffValue = in_memory->main_difficulty * 10;
+    int diffValue = in_memory->difficulty * 10;
     if (diffValue == 60) {
       level.isDemon = true;
       level.difficulty = difficulty::insane;
-      level.demonDifficulty = demon_difficulty::easy;
     } else {
       level.isDemon = false;
       level.difficulty = getDiffValue(diffValue);
     }
   } else {
-    level.author = in_memory->author;
-    level.difficulty = getDiffValue(in_memory->difficulty);
+    level.author = in_memory->userName;
+    level.difficulty = getDiffValue(in_memory->ratingsSum);
 
     // don't have the proper booleans mapped
-    level.isDemon =
-        (level.stars >= 10); // can't tell if this is more readable or not
-    level.isAuto = (level.stars == 1);
-
-    if (level.isDemon) {
-      level.demonDifficulty = getDemonDiffValue(in_memory->demon_difficulty);
-    }
+    level.isDemon = in_memory->demon;
+    level.isAuto = in_memory->autoLevel;
   }
   return true;
 }

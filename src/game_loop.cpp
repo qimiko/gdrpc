@@ -40,7 +40,7 @@ std::string formatWithLevel(std::string &s, GDlevel &level,
   try {
     f = fmt::format(
         s, fmt::arg("id", level.levelID), fmt::arg("name", level.name),
-        fmt::arg("best", in_memory->current_best),
+        fmt::arg("best", in_memory->normalPercent),
         fmt::arg("diff", getTextFromKey(getDifficultyName(level))),
         fmt::arg("author", level.author), fmt::arg("stars", level.stars));
   } catch (const fmt::format_error &e) {
@@ -148,7 +148,7 @@ void Game_Loop::initialize_loop() {
 
   int *gd_base =
       (int *)GetModuleHandleA(this->config.settings.executable_name.c_str());
-  int *accountID = get_address(gd_base, {0x3222D8, 0x120});
+  int *accountID = get_address(gd_base, {0x16C1CC, 0x11C});
 
   GDuser user;
   if (this->config.user.get_rank) {
@@ -174,7 +174,7 @@ void Game_Loop::initialize_loop() {
         fmt::format(this->config.user.ranked, fmt::arg("name", user.name),
                     fmt::arg("rank", user.rank));
   } else {
-    char *username = (char *)(get_address(gd_base, {0x3222D8, 0x108}));
+    char *username = (char *)(get_address(gd_base, {0x16C1CC, 0x104}));
     large_text = std::string(username); // hopeful fallback
   }
 
@@ -193,8 +193,7 @@ void Game_Loop::on_loop() {
     switch (player_state) {
     case playerState::level: {
       parseGJGameLevel(gamelevel, level);
-      auto level_location = gamelevel->level_type;
-      int current_best = gamelevel->current_best;
+      auto level_location = gamelevel->levelType;
 
       if (level_location == GJLevelType::Editor) {
         auto playtesting = this->config.level.playtesting;

@@ -8,9 +8,9 @@ namespace Config {
 
 constexpr int LATEST_VERSION = 3;
 
-constexpr auto DEFAULT_EXECUTABLE = "GeometryDash.exe";
-constexpr auto DEFAULT_URL = "http://boomlings.com";
-constexpr auto DEFAULT_PREFIX = "/database/";
+constexpr auto DEFAULT_EXECUTABLE = "DontRenameMeThxDash.exe";
+constexpr auto DEFAULT_URL = "http://absolllute.com";
+constexpr auto DEFAULT_PREFIX = "/gdps/gdapi/";
 constexpr auto DEFAULT_APPLICATION_ID = "668228366893056001";
 
 struct Presence {

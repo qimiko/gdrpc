@@ -23,8 +23,6 @@ enum class difficulty {
   insane,
 }; // note that no demon difficulty exists
 
-enum class demon_difficulty { none, easy, medium, hard, insane, extreme };
-
 // thinking about this a bit later
 // probably shouldn't have used structs lol
 
@@ -35,7 +33,6 @@ struct GDlevel {
   int authorID = -1;
   int stars = 0;
   difficulty difficulty = difficulty::na;
-  demon_difficulty demonDifficulty = demon_difficulty::none;
   bool isAuto = false;
   bool isDemon = false;
 }; // this is a really barebones struct btw
@@ -48,13 +45,12 @@ struct GDuser {
 };
 
 struct GDUrls {
-  std::string get_user_info = "getGJUserInfo20.php";
-  std::string get_users = "getGJUsers20.php";
-  std::string get_scores = "getGJScores20.php";
+  std::string get_user_info = "incl/profiles/getGJUserInfo.php";
+  std::string get_users = "incl/profiles/getGJUsers.php";
+  std::string get_scores = "getGJScores19.php";
 };
 
 difficulty getDiffValue(int diff);
-demon_difficulty getDemonDiffValue(int diff);
 std::string getDifficultyName(GDlevel &level);
 
 typedef std::multimap<std::string, std::string> Params;

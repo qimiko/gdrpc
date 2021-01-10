@@ -6,43 +6,74 @@
 enum GJLevelType { Local = 1, Editor = 2, Saved = 3 };
 
 struct GJGameLevel {
-  int8_t padding_0[0xF8];
-
-  int id;
-  std::string name;
-  std::string level_string;
-  std::string description;
-  std::string author;
-  std::string record;
-
-  int8_t padding_2[0x48];
-
-  int main_difficulty;
+  int8_t padding_0[0xE8];
+  void *lastBuildSave; // this is actually a CCDictionary *
+  int levelID;
+  std::string levelName;
+  std::string levelDesc;
+  std::string levelString;
+  std::string userName;
+  std::string recordString;
+  std::string uploadDate;
+  std::string updateDate;
+  int userID;
+  int difficulty;
   int audio_track;
   int song_id;
-
-  int8_t padding_3[0x10];
-
-  int object_count;
+  int levelRev;
+  int objectCount;
   int order;
   int ratings;
-  int difficulty;
-
-  int8_t padding_7[0x60];
-
-  int current_best;
-
-  int8_t padding_4[0x54];
-
-  int demon_difficulty;
-
-  int stars_rand;
-  int stars_seed;
+  int ratingsSum;
+  int downloads;
+  int completes;
+  bool isEditable;
+  bool isVerified;
+  bool isUploaded;
+  bool hasBeenModified;
+  int levelVersion;
+  int gameVersion;
+  int attempts;
+  int jumps;
+  int normalPercent;
+  int practicePercent;
+  int likes;
+  int dislikes;
+  int levelLength;
+  int featured;
+  bool demon;
   int stars;
-
-  int8_t padding_6[0xB4];
-
-  GJLevelType level_type;
+  bool autoLevel;
+  int coins;
+  int password;
+  int originalLevel;
+  bool twoPlayerMode;
+  int failedPasswordAttempts;
+  bool showedSongWarning;
+  int starRatings;
+  int starRatingsSum;
+  int maxStarRatings;
+  int minStarRatings;
+  int demonVotes;
+  int rateStars;
+  int rateFeature;
+  std::string rateUser;
+  bool dontSave;
+  int requiredCoins;
+  bool isUnlocked;
+  void *lastCameraPos; // CCPoint *
+  int unused;
+  float lastEditorZoom;
+  int lastBuildTab;
+  int lastBuildPage;
+  int lastBuildGroupID;
+  GJLevelType levelType;
+  int M_ID;
+  std::string tempName;
+  int capacity001;
+  int capacity002;
+  int capacity003;
+  int capacity004;
 };
 
 #endif

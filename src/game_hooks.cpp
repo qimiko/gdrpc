@@ -52,7 +52,7 @@ typedef void *(__fastcall *PlayLayerCreateF)(GJGameLevel *gameLevel);
 PlayLayerCreateF plc;
 
 void *__fastcall PlayLayerCreateH(GJGameLevel *gameLevel) {
-  int levelID = gameLevel->id;
+  int levelID = gameLevel->levelID;
 
   Game_Loop *game_loop = get_game_loop();
 
@@ -103,8 +103,8 @@ void *__fastcall PlayLayerShowNewBestH(void *playLayer, void *_edx, char p1,
   Game_Loop *game_loop = get_game_loop();
 
   auto current_gamelevel = game_loop->get_gamelevel();
-  int levelID = current_gamelevel->id;
-  int new_best = current_gamelevel->current_best;
+  int levelID = current_gamelevel->levelID;
+  int new_best = current_gamelevel->normalPercent;
 
   if (auto logger = game_loop->get_logger()) {
     logger->debug(FMT_STRING("PlayLayer::showNewBest called\n\
@@ -142,7 +142,7 @@ typedef void *(__fastcall *LevelEditorLayerCreateF)(GJGameLevel *gameLevel);
 LevelEditorLayerCreateF lelc;
 
 void *__fastcall LevelEditorLayerCreateH(GJGameLevel *gameLevel) {
-  int levelID = gameLevel->id;
+  int levelID = gameLevel->levelID;
 
   Game_Loop *game_loop = get_game_loop();
 
@@ -233,22 +233,22 @@ void doTheHook() {
 
   // wall of hooks
   std::array<game_hook, 7> hooks{{
-      {(int *)((int)gd_handle + 0x1907B0),
+      {(int *)((int)gd_handle + 0xAF210),
        reinterpret_cast<void *>(&MenuLayerInitH),
        reinterpret_cast<void **>(&mli), "MenuLayer::init"},
-      {(int *)((int)gd_handle + 0x1FB6D0),
+      {(int *)((int)gd_handle + 0xE3530),
        reinterpret_cast<void *>(&PlayLayerCreateH),
        reinterpret_cast<void **>(&plc), "PlayLayer::create"},
-      {(int *)((int)gd_handle + 0x20D810),
+      {(int *)((int)gd_handle + 0xF3B80),
        reinterpret_cast<void *>(&PlayLayerOnQuitH),
        reinterpret_cast<void **>(&ploq), "PlayLayer::onQuit"},
-      {(int *)((int)gd_handle + 0x1FE3A0),
+      {(int *)((int)gd_handle + 0xE5FF0),
        reinterpret_cast<void *>(&PlayLayerShowNewBestH),
        reinterpret_cast<void **>(&plsnb), "PlayLayer::showNewBest"},
-      {(int *)((int)gd_handle + 0x75660),
+      {(int *)((int)gd_handle + 0x3F380),
        reinterpret_cast<void *>(&EditorPauseLayerOnExitEditorH),
        reinterpret_cast<void **>(&eploee), "EditorPauseLayer::onExitEditor"},
-      {(int *)((int)gd_handle + 0x15ED60),
+      {(int *)((int)gd_handle + 0x8C220),
        reinterpret_cast<void *>(&LevelEditorLayerCreateH),
        reinterpret_cast<void **>(&lelc), "LevelEditorLayer::create"},
       {(int *)GetProcAddress(cocos_handle, "?end@CCDirector@cocos2d@@QAEXXZ"),
