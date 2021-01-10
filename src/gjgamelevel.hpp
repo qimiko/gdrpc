@@ -3,7 +3,6 @@
 #define GJGAMELEVEL_HPP
 
 enum GJLevelType { Local = 1, Editor = 2, Saved = 3 };
-// obj count at 0x1D8
 
 struct GJGameLevel {
   int8_t padding_0[0xF8];
