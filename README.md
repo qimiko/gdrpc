@@ -1,6 +1,10 @@
-# Geometry Dash 2.1 Rich Presence
+# Geometry Dash 1.9 Rich Presence
 
-## A semi recreation and port of my 1.9 rich presence
+## Port of a recreation of my 1.9 rich presence
+
+### Why..?
+
+The purpose of the experiment branch is to test porting to new versions along with testing of GDPS support. 1.9 is used as a simple version that I have high familiarity with.
 
 ### Currently features
 
