@@ -1,6 +1,7 @@
 #pragma once
 #ifndef GJGAMELEVEL_HPP
 #define GJGAMELEVEL_HPP
+#include <string>
 
 enum GJLevelType { Local = 1, Editor = 2, Saved = 3 };
 
@@ -9,12 +10,12 @@ struct GJGameLevel {
 
   int id;
   std::string name;
-
-  int8_t padding_1[0x30];
-
+  std::string level_string;
+  std::string description;
   std::string author;
+  std::string record;
 
-  int8_t padding_2[0x60];
+  int8_t padding_2[0x48];
 
   int main_difficulty;
   int audio_track;
@@ -35,8 +36,8 @@ struct GJGameLevel {
 
   int demon_difficulty;
 
-  int8_t padding_5[0x8];
-
+  int stars_rand;
+  int stars_seed;
   int stars;
 
   int8_t padding_6[0xB4];
