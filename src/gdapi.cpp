@@ -186,8 +186,8 @@ void GD_Client::set_urls(GDUrls new_urls) { urls = new_urls; }
 // parsing but this is _really_ messy no error handling either. good luck
 bool parseGJGameLevel(GJGameLevel *in_memory, GDlevel &level) {
 
-  auto newID = in_memory->id;
-  auto levelLocation = in_memory->level_type;
+  auto newID = in_memory->levelID;
+  auto levelLocation = in_memory->levelType;
 
   // don't calculate more than we have to, but the editor keeps id 0
   if (newID == level.levelID && levelLocation != GJLevelType::Editor) {
@@ -197,11 +197,11 @@ bool parseGJGameLevel(GJGameLevel *in_memory, GDlevel &level) {
   level.levelID = newID;
   level.stars = in_memory->stars;
 
-  level.name = in_memory->name;
+  level.name = in_memory->levelName;
 
   if (levelLocation == 1) {
     level.author = "RobTop"; // author is "" on these
-    int diffValue = in_memory->main_difficulty * 10;
+    int diffValue = in_memory->difficulty * 10;
     if (diffValue == 60) {
       level.isDemon = true;
       level.difficulty = difficulty::insane;
@@ -211,16 +211,15 @@ bool parseGJGameLevel(GJGameLevel *in_memory, GDlevel &level) {
       level.difficulty = getDiffValue(diffValue);
     }
   } else {
-    level.author = in_memory->author;
-    level.difficulty = getDiffValue(in_memory->difficulty);
+    level.author = in_memory->userName;
+    level.difficulty = getDiffValue(in_memory->ratingsSum);
 
-    // don't have the proper booleans mapped
-    level.isDemon =
-        (level.stars >= 10); // can't tell if this is more readable or not
-    level.isAuto = (level.stars == 1);
+    // good robtop security
+    level.isDemon = (bool)(in_memory->demon);
+    level.isAuto = in_memory->autoLevel;
 
     if (level.isDemon) {
-      level.demonDifficulty = getDemonDiffValue(in_memory->demon_difficulty);
+      level.demonDifficulty = getDemonDiffValue(in_memory->demonDifficulty);
     }
   }
   return true;

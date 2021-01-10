@@ -40,7 +40,7 @@ std::string formatWithLevel(std::string &s, GDlevel &level,
   try {
     f = fmt::format(
         s, fmt::arg("id", level.levelID), fmt::arg("name", level.name),
-        fmt::arg("best", in_memory->current_best),
+        fmt::arg("best", in_memory->normalPercent),
         fmt::arg("diff", getTextFromKey(getDifficultyName(level))),
         fmt::arg("author", level.author), fmt::arg("stars", level.stars));
   } catch (const fmt::format_error &e) {
@@ -193,9 +193,7 @@ void Game_Loop::on_loop() {
     switch (player_state) {
     case playerState::level: {
       parseGJGameLevel(gamelevel, level);
-      auto level_location = gamelevel->level_type;
-      int current_best = gamelevel->current_best;
-
+      auto level_location = gamelevel->levelType;
       if (level_location == GJLevelType::Editor) {
         auto playtesting = this->config.level.playtesting;
 
@@ -275,7 +273,7 @@ DWORD WINAPI mainThread(LPVOID lpParam) {
   game_loop.initialize_loop();
   while (true) {
     try {
-    game_loop.on_loop();
+      game_loop.on_loop();
     } catch (const std::exception &e) {
       if (auto logger = game_loop.get_logger()) {
         logger->critical("unhandled exception thrown in loop\n{}", e.what());

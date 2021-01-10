@@ -101,8 +101,8 @@ struct Config_Format {
           toml::find_or<std::string>(table, "base_url", DEFAULT_URL);
       this->url_prefix =
           toml::find_or<std::string>(table, "url_prefix", DEFAULT_PREFIX);
-      this->application_id =
-          toml::find_or<std::string>(table, "application_id", DEFAULT_APPLICATION_ID);
+      this->application_id = toml::find_or<std::string>(table, "application_id",
+                                                        DEFAULT_APPLICATION_ID);
     }
 
     toml::value into_toml() const {
@@ -142,9 +142,10 @@ struct Config_Format {
   User user = {"{name} [Rank #{rank}]", "", true};
   Config::Presence menu = {"Idle", "", ""};
 
-  Settings settings = {Config::LATEST_VERSION, false,
-                       Config::DEFAULT_EXECUTABLE, Config::DEFAULT_URL,
-                       Config::DEFAULT_PREFIX, Config::DEFAULT_APPLICATION_ID};
+  Settings settings = {
+      Config::LATEST_VERSION,     false,
+      Config::DEFAULT_EXECUTABLE, Config::DEFAULT_URL,
+      Config::DEFAULT_PREFIX,     Config::DEFAULT_APPLICATION_ID};
 };
 } // namespace Config
 
