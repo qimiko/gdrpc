@@ -30,7 +30,7 @@
 #### Configuration
 
 The configuration file, `gdrpc.toml` is located in the Geometry Dash directory. It is created automatically on first run.
-For more details on how to configurate, there is a `gdrpc.toml` file located in the root of this repository that details each of the arguments.
+For more details on how to configure, there is a `gdrpc.toml` file located in the root of this repository that details each of the arguments.
 
 ### Compiling
 
@@ -43,8 +43,7 @@ For more details on how to configurate, there is a `gdrpc.toml` file located in 
 ### Private servers
 
 Private servers _might_ be supported by this, however it hasn't been actually tested.
-If you want to try, in `src/game_hooks.cpp` change `"GeometryDash.exe"` to the executable name of the private server.
-The stock binary won't work due to executable name differences breaking the module handle getting.
+In the latest development branch, you can edit the configuration to use a private server's executable and url. Refer to `gdrpc.toml` for more details.
 
 Feel free to use this rich presence on a Geometry Dash private server if wanted, but please don't distribute this rich presence and claim it as yours.
 
