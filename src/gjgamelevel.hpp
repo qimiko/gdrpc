@@ -7,11 +7,12 @@ enum GJLevelType { Local = 1, Editor = 2, Saved = 3 };
 
 struct GJGameLevel {
   int8_t padding_0[0xEC];
-
   void *lastBuildSave;
+
   int levelID_rand; // levelID + seed = levelID_rand
   int levelID_seed;
   int levelID;
+
   std::string levelName;
   std::string levelDesc;
   std::string levelString;
@@ -48,13 +49,13 @@ struct GJGameLevel {
 
   bool isEditable;
   bool gauntletLevel;
-  bool unknown_bool_1;
+  bool unknown_bool_0x162;
 
   int workingTime;
   int workingTime2;
 
   bool lowDetailMode;
-  bool unknown_bool_2;
+  bool lowDetailModeToggled;
 
   int isVerified_rand;
   int isVerified_seed;
@@ -79,11 +80,12 @@ struct GJGameLevel {
 
   int attemptTime_rand;
   int attemptTime_seed;
-  int attemptTimd;
+  int attemptTime;
 
   int chk;
 
-  bool unknown_bool_3;
+  bool unknown_bool_0x1B8;
+  bool unknown_bool_0x1B9;
 
   int normalPercent; // yes, it is out of order
   int normalPercent_seed;
@@ -105,7 +107,7 @@ struct GJGameLevel {
   int featured;
 
   bool isEpic;
-  bool unknown_bool_4;
+  bool unknown_bool_0x1F5;
   int levelFolder;
 
   int dailyID_rand;
@@ -135,7 +137,7 @@ struct GJGameLevel {
 
   bool twoPlayerMode;
 
-  int unknown_int_1;
+  int failedPasswordAttempts;
 
   int firstCoinVerified_rand;
   int firstCoinVerified_seed;
@@ -151,22 +153,22 @@ struct GJGameLevel {
 
   int starsRequested;
 
-  int unknown_int_2;
-  int unknown_int_3;
-  int unknown_int_4;
-  int unknown_int_5;
-  int unknown_int_6;
-  int unknown_int_7;
-  int unknown_int_8;
-  int unknown_int_9;
+  int unknown_int_0x27C;
+  int unknown_int_0x280;
+  int unknown_int_0x284;
+  int unknown_int_0x288;
+  int unknown_int_0x28C;
+  int unknown_int_0x290;
+  int unknown_int_0x294;
+  int unknown_int_0x298;
 
-  std::string unknown_string_1;
+  std::string unknown_string_0x29C;
 
-  bool unknown_bool_5;
-  bool unknown_bool_6;
+  bool unknown_bool_0x2A0;
+  bool unknown_bool_0x2A1;
 
-  int unknown_int_10;
-  bool unknown_bool_7;
+  int requiredCoins;
+  bool isUnlocked;
 
   void *lastCameraPos;
 
@@ -179,11 +181,11 @@ struct GJGameLevel {
 
   GJLevelType levelType;
 
-  int unknown_int_12;
+  int M_ID;
   std::string tempName;
   std::string capacityString;
 
-  bool unknown_bool_8;
+  bool unknown_bool_0x2D4;
   std::string personalBests;
 };
 
