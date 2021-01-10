@@ -92,17 +92,18 @@ std::string to_param_list(Params &params) {
   return s.str();
 }
 
-GD_Client::GD_Client(std::string host)
-    : game_version(21), secret("Wmfd2893gb7"), host(host) {
+GD_Client::GD_Client(std::string host, std::string prefix)
+    : game_version(21), secret("Wmfd2893gb7"), host(host), prefix(prefix) {
   client = std::make_shared<httplib::Client>(host.c_str());
 }
 
-std::string GD_Client::post_request(const char *url, Params &params) {
-  // this function has become magic dust for me lol
+std::string GD_Client::post_request(std::string url, Params &params) {
   params.emplace("gameVersion", std::to_string(game_version));
   params.emplace("secret", secret);
 
-  auto res = client.get()->Post(url, params);
+  std::string full_url = prefix + url;
+
+  auto res = client.get()->Post(full_url.c_str(), params);
 
   auto body = res->body;
   if (body == "-1") {
@@ -114,7 +115,7 @@ std::string GD_Client::post_request(const char *url, Params &params) {
 
 bool GD_Client::get_user_info(int &accID, GDuser &user) {
   Params params({{"targetAccountID", std::to_string(accID)}});
-  auto user_string = post_request(urls.get_user_info.c_str(), params);
+  auto user_string = post_request(urls.get_user_info, params);
 
   try {
     auto user_map = to_robtop(user_string);
@@ -136,7 +137,7 @@ bool GD_Client::get_user_info(int &accID, GDuser &user) {
 
 bool GD_Client::get_player_info(int &playerID, GDuser &user) {
   Params params({{"str", std::to_string(playerID)}});
-  auto player_string = post_request(urls.get_users.c_str(), params);
+  auto player_string = post_request(urls.get_users, params);
 
   try {
     auto user_map = to_robtop(player_string);
@@ -158,7 +159,7 @@ bool GD_Client::get_player_info(int &playerID, GDuser &user) {
 bool GD_Client::get_user_rank(GDuser &user) {
   Params params(
       {{"type", "relative"}, {"accountID", std::to_string(user.accID)}});
-  auto leaderboardString = post_request(urls.get_scores.c_str(), params);
+  auto leaderboardString = post_request(urls.get_scores, params);
 
   auto leaderboard_list = explode(leaderboardString, '|');
 

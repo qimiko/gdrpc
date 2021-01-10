@@ -46,9 +46,9 @@ struct GDuser {
 };
 
 struct GDUrls {
-  std::string get_user_info = "/database/getGJUserInfo20.php";
-  std::string get_users = "/database/getGJUsers20.php";
-  std::string get_scores = "/database/getGJScores20.php";
+  std::string get_user_info = "getGJUserInfo20.php";
+  std::string get_users = "getGJUsers20.php";
+  std::string get_scores = "getGJScores20.php";
 };
 
 difficulty getDiffValue(int diff);
@@ -61,6 +61,7 @@ typedef std::unordered_map<int, std::string> Robtop_Map;
 class GD_Client {
 private:
   std::string host;
+  std::string prefix;
 
   const int game_version;
   const std::string secret;
@@ -70,9 +71,10 @@ private:
   std::shared_ptr<httplib::Client> client;
 
   // makes an internet post request to boomlings.com
-  std::string post_request(const char *, Params &);
+  std::string post_request(std::string, Params &);
 public:
-  GD_Client(std::string host = "boomlings.com");
+  GD_Client(std::string host = "http://boomlings.com",
+            std::string prefix = "/database/");
 
   bool get_user_info(int &accID, GDuser &user);
   bool get_player_info(int &playerID, GDuser &user);
