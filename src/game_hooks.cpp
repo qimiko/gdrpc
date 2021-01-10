@@ -60,7 +60,7 @@ void *__fastcall PlayLayerCreateH(GJGameLevel *gameLevel) {
     logger->debug(FMT_STRING("PlayLayer::create called:\n\
 levelID: {} @ {:#x}"),
                   levelID,
-                  reinterpret_cast<int>(reinterpret_cast<int *>(gameLevel)));
+                  reinterpret_cast<int>(gameLevel));
   }
 
   if (game_loop->get_state() != playerState::editor ||
@@ -150,7 +150,7 @@ void *__fastcall LevelEditorLayerCreateH(GJGameLevel *gameLevel) {
     logger->debug(FMT_STRING("LevelEditorLayer::create called:\n\
 levelID: {} @ {:#x}"),
                   levelID,
-                  reinterpret_cast<int>(reinterpret_cast<int *>(gameLevel)));
+                  reinterpret_cast<int>(gameLevel));
   }
   if (game_loop->get_state() != playerState::level ||
       game_loop->get_reset_timestamp()) {
