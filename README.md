@@ -35,14 +35,15 @@ For more details on how to configure, there is a `gdrpc.toml` file located in th
 1. import files into Visual Studio as cmake project
 2. download git submodules, `git submodules update --init --recursive`
 3. build dll
-4. add the assets in the `assets` folder to discord
 
 ### Private servers
 
 Private servers _might_ be supported by this, however it hasn't been actually tested.
 In the latest development branch, you can edit the configuration to use a private server's executable and url. Refer to `gdrpc.toml` for more details.
 
-Feel free to use this rich presence on a Geometry Dash private server if wanted, but please don't distribute this rich presence and claim it as yours.
+If you want to use your own Discord application (to change the playing name or icon), add the files in the `assets/` folder to ensure the images show properly.
+
+Feel free to use this rich presence on a Geometry Dash private server if wanted, but please give proper credit.
 
 #### Autoloader
 
