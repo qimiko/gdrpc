@@ -59,7 +59,8 @@ void *__fastcall PlayLayerCreateH(GJGameLevel *gameLevel) {
   if (auto logger = game_loop->get_logger()) {
     logger->debug(FMT_STRING("PlayLayer::create called:\n\
 levelID: {} @ {:#x}"),
-                  levelID, reinterpret_cast<int>(reinterpret_cast<int *>(gameLevel)));
+                  levelID,
+                  reinterpret_cast<int>(reinterpret_cast<int *>(gameLevel)));
   }
 
   if (game_loop->get_state() != playerState::editor ||

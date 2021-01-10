@@ -180,9 +180,7 @@ bool GD_Client::get_user_rank(GDuser &user) {
   return true;
 }
 
-void GD_Client::set_urls(GDUrls new_urls) {
-  urls = new_urls;
-}
+void GD_Client::set_urls(GDUrls new_urls) { urls = new_urls; }
 
 // i was going to make a joke about this being the better thing like the id
 // parsing but this is _really_ messy no error handling either. good luck
@@ -222,8 +220,7 @@ bool parseGJGameLevel(GJGameLevel *in_memory, GDlevel &level) {
     level.isAuto = (level.stars == 1);
 
     if (level.isDemon) {
-      level.demonDifficulty =
-          getDemonDiffValue(in_memory->demon_difficulty);
+      level.demonDifficulty = getDemonDiffValue(in_memory->demon_difficulty);
     }
   }
   return true;

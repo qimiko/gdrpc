@@ -1,18 +1,18 @@
 #pragma once
 #ifndef GDAPI_H
 #define GDAPI_H
-#include "pch.h"
 #include "gjgamelevel.hpp"
+#include "pch.h"
 
 #include <algorithm>
 #include <exception>
+#include <httplib.h>
+#include <map>
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <map>
 #include <unordered_map>
 #include <vector>
-#include <httplib.h>
 
 enum class difficulty {
   na,
@@ -74,6 +74,7 @@ private:
 
   // makes an internet post request to boomlings.com
   std::string post_request(std::string, Params &);
+
 public:
   GD_Client(std::string host = "http://boomlings.com",
             std::string prefix = "/database/");

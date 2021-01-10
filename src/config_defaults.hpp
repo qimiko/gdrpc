@@ -143,7 +143,7 @@ struct Config_Format {
 
   Settings settings = {Config::LATEST_VERSION, false,
                        Config::DEFAULT_EXECUTABLE, Config::DEFAULT_URL,
-											 Config::DEFAULT_PREFIX};
+                       Config::DEFAULT_PREFIX};
 };
 } // namespace Config
 

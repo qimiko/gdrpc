@@ -17,14 +17,14 @@ struct GJGameLevel {
   int8_t padding_2[0x60];
 
   int main_difficulty;
-	int audio_track;
-	int song_id;
+  int audio_track;
+  int song_id;
 
-	int8_t padding_3[0x10];
+  int8_t padding_3[0x10];
 
-	int object_count;
-	int order;
-	int ratings;
+  int object_count;
+  int order;
+  int ratings;
   int difficulty;
 
   int8_t padding_7[0x60];
