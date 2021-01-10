@@ -38,11 +38,11 @@ std::string formatWithLevel(std::string &s, GDlevel &level,
                             GJGameLevel *in_memory) {
   std::string f;
   try {
-    f = fmt::format(s, fmt::arg("id", level.levelID),
-                    fmt::arg("name", level.name), fmt::arg("best", in_memory->current_best),
-                    fmt::arg("diff", getTextFromKey(getDifficultyName(level))),
-                    fmt::arg("author", level.author),
-                    fmt::arg("stars", level.stars));
+    f = fmt::format(
+        s, fmt::arg("id", level.levelID), fmt::arg("name", level.name),
+        fmt::arg("best", in_memory->current_best),
+        fmt::arg("diff", getTextFromKey(getDifficultyName(level))),
+        fmt::arg("author", level.author), fmt::arg("stars", level.stars));
   } catch (const fmt::format_error &e) {
 
     std::string error_string =
@@ -192,11 +192,12 @@ void Game_Loop::on_loop() {
 
     switch (player_state) {
     case playerState::level: {
-      int level_location = *(int *)((int)gamelevel + 0x364);
-      int current_best = *(int *)((int)gamelevel + 0x248);
+      auto level_location = gamelevel->level_type;
+      int current_best = gamelevel->current_best;
       if (!parseGJGameLevel(gamelevel, level)) {
         if (logger) {
-          logger->critical("failed to parse gamelevel at {#x}", (int)gamelevel);
+          logger->critical("failed to parse gamelevel at {#x}",
+                           reinterpret_cast<int>(gamelevel));
         }
 
         auto error = this->config.level.error;
@@ -204,7 +205,7 @@ void Game_Loop::on_loop() {
         state = fmt::format(error.state, fmt::arg("best", current_best));
         small_text = error.smalltext;
         small_image = "";
-      } else if (level_location == 2) {
+      } else if (level_location == GJLevelType::Editor) {
         auto playtesting = this->config.level.playtesting;
 
         details = formatWithLevel(playtesting.detail, level, this->gamelevel);
