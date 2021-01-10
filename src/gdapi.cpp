@@ -200,28 +200,24 @@ void GD_Client::set_urls(GDUrls new_urls) {
 
 // i was going to make a joke about this being the better thing like the id
 // parsing but this is _really_ messy no error handling either. good luck
-bool parseGJGameLevel(int *gameLevel, GDlevel &level) {
-  // obj count at 0x1D8
-  int newID = *(int *)((int)gameLevel + 0xF8);
-  int levelLocation = *(int *)((int)gameLevel + 0x364);
+bool parseGJGameLevel(GJGameLevel *in_memory, GDlevel &level) {
+
+  auto newID = in_memory->id;
+  auto levelLocation = in_memory->level_type;
 
   // don't calculate more than we have to, but the editor keeps id 0
-  if (newID == level.levelID && levelLocation != 2) {
+  if (newID == level.levelID && levelLocation != GJLevelType::Editor) {
     return true;
   }
 
   level.levelID = newID;
-  level.stars = *(int *)((int)gameLevel + 0x2AC);
+  level.stars = in_memory->stars;
 
-  try {
-    level.name = *(std::string *)((int)gameLevel + 0xFC);
-  } catch (...) {
-    return false;
-  }
+  level.name = in_memory->name;
 
   if (levelLocation == 1) {
     level.author = "RobTop"; // author is "" on these
-    int diffValue = *(int *)((int)gameLevel + 0x1BC) * 10;
+    int diffValue = in_memory->main_difficulty * 10;
     if (diffValue == 60) {
       level.isDemon = true;
       level.difficulty = difficulty::insane;
@@ -231,8 +227,8 @@ bool parseGJGameLevel(int *gameLevel, GDlevel &level) {
       level.difficulty = getDiffValue(diffValue);
     }
   } else {
-    level.author = *(std::string *)((int *)((int)gameLevel + 0x144));
-    level.difficulty = getDiffValue(*(int *)((int)gameLevel + 0x1E4));
+    level.author = in_memory->author;
+    level.difficulty = getDiffValue(in_memory->difficulty);
 
     // don't have the proper booleans mapped
     level.isDemon =
@@ -241,7 +237,7 @@ bool parseGJGameLevel(int *gameLevel, GDlevel &level) {
 
     if (level.isDemon) {
       level.demonDifficulty =
-          getDemonDiffValue(*(int *)((int)gameLevel + 0x2A0));
+          getDemonDiffValue(in_memory->demon_difficulty);
     }
   }
   return true;

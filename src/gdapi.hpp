@@ -2,6 +2,8 @@
 #ifndef GDAPI_H
 #define GDAPI_H
 #include "pch.h"
+#include "gjgamelevel.hpp"
+
 #include <algorithm>
 #include <exception>
 #include <sstream>
@@ -89,6 +91,6 @@ Robtop_Map to_robtop(std::string &, char delimiter = ':');
 // splits a string by substring, much like in other languages
 std::vector<std::string> explode(std::string &string, char separator);
 
-bool parseGJGameLevel(int *gameLevel, GDlevel &level);
+bool parseGJGameLevel(GJGameLevel *in_memory, GDlevel &level);
 
 #endif // !GDAPI_H

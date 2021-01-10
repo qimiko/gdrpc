@@ -1,6 +1,8 @@
 #pragma once
 #include "game_loop.hpp"
 #include "pch.h"
+#include "gjgamelevel.hpp"
+
 #include <MinHook.h>
 #include <array>
 #include <fmt/format.h>

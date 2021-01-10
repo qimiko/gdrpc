@@ -254,9 +254,9 @@ void Game_Loop::set_update_timestamp(bool n_timestamp) {
   update_timestamp = n_timestamp;
 }
 
-void Game_Loop::set_gamelevel(int *n_gamelevel) { gamelevel = n_gamelevel; }
+void Game_Loop::set_gamelevel(GJGameLevel *n_gamelevel) { gamelevel = n_gamelevel; }
 
-int *Game_Loop::get_gamelevel() { return gamelevel; }
+GJGameLevel *Game_Loop::get_gamelevel() { return gamelevel; }
 
 void Game_Loop::set_state(playerState n_state) { player_state = n_state; }
 

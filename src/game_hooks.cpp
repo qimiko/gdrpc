@@ -48,18 +48,18 @@ int __fastcall MenuLayerInitH(void *menuLayer) {
   return mli(menuLayer);
 }
 
-typedef void *(__fastcall *PlayLayerCreateF)(int *gameLevel);
+typedef void *(__fastcall *PlayLayerCreateF)(GJGameLevel *gameLevel);
 PlayLayerCreateF plc;
 
-void *__fastcall PlayLayerCreateH(int *gameLevel) {
-  int levelID = *(int *)((int)gameLevel + 0xF8);
+void *__fastcall PlayLayerCreateH(GJGameLevel *gameLevel) {
+  int levelID = gameLevel->id;
 
   Game_Loop *game_loop = get_game_loop();
 
   if (auto logger = game_loop->get_logger()) {
     logger->debug(FMT_STRING("PlayLayer::create called:\n\
 levelID: {} @ {:#x}"),
-                  levelID, reinterpret_cast<int>(gameLevel));
+                  levelID, reinterpret_cast<int>(reinterpret_cast<int *>(gameLevel)));
   }
 
   if (game_loop->get_state() != playerState::editor ||
@@ -101,9 +101,9 @@ void *__fastcall PlayLayerShowNewBestH(void *playLayer, void *_edx, char p1,
                                        char p6) {
   Game_Loop *game_loop = get_game_loop();
 
-  int *current_gamelevel = game_loop->get_gamelevel();
-  int levelID = *(int *)((int)current_gamelevel + 0xF8);
-  int new_best = *(int *)((int)current_gamelevel + 0x248);
+  auto current_gamelevel = game_loop->get_gamelevel();
+  int levelID = current_gamelevel->id;
+  int new_best = current_gamelevel->current_best;
 
   if (auto logger = game_loop->get_logger()) {
     logger->debug(FMT_STRING("PlayLayer::showNewBest called\n\
@@ -137,18 +137,19 @@ void __fastcall EditorPauseLayerOnExitEditorH(void *editorPauseLayer,
   return eploee(editorPauseLayer, p1);
 }
 
-typedef void *(__fastcall *LevelEditorLayerCreateF)(int *gameLevel);
+typedef void *(__fastcall *LevelEditorLayerCreateF)(GJGameLevel *gameLevel);
 LevelEditorLayerCreateF lelc;
 
-void *__fastcall LevelEditorLayerCreateH(int *gameLevel) {
-  int levelID = *(int *)((int)gameLevel + 0xF8);
+void *__fastcall LevelEditorLayerCreateH(GJGameLevel *gameLevel) {
+  int levelID = gameLevel->id;
 
   Game_Loop *game_loop = get_game_loop();
 
   if (auto logger = game_loop->get_logger()) {
     logger->debug(FMT_STRING("LevelEditorLayer::create called:\n\
 levelID: {} @ {:#x}"),
-                  levelID, reinterpret_cast<int>(gameLevel));
+                  levelID,
+                  reinterpret_cast<int>(reinterpret_cast<int *>(gameLevel)));
   }
   if (game_loop->get_state() != playerState::level ||
       game_loop->get_reset_timestamp()) {

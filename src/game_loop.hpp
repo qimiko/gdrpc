@@ -3,6 +3,7 @@
 #include "pch.h"
 #include "presence_wrapper.hpp"
 #include "config_defaults.hpp"
+#include "gjgamelevel.hpp"
 
 #include <algorithm>
 #include <ctime>
@@ -27,7 +28,7 @@ enum class playerState {
 class Game_Loop {
 private:
   playerState player_state;
-  int *gamelevel;
+  GJGameLevel *gamelevel;
   GDlevel level;
 
   std::shared_ptr<spdlog::logger> logger;
@@ -53,8 +54,8 @@ public:
   playerState get_state();
   void set_state(playerState);
 
-  int *get_gamelevel();
-  void set_gamelevel(int *);
+  GJGameLevel *get_gamelevel();
+  void set_gamelevel(GJGameLevel *);
 
   void set_update_presence(bool);
   void set_update_timestamp(bool);
