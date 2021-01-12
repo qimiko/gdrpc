@@ -45,17 +45,10 @@ std::string formatWithLevel(std::string &s, GDlevel &level,
         fmt::arg("author", level.author), fmt::arg("stars", level.stars),
         fmt::arg("objects", in_memory->objectCount));
   } catch (const fmt::format_error &e) {
-
     std::string error_string =
-        fmt::format("error found while parsing {}\n{}", s, e.what());
+        fmt::format("Error found while parsing {}\n{}", s, e.what());
 
-    get_game_loop()->get_logger()->critical(error_string);
-    MessageBoxA(0, error_string.c_str(), "formatter error", MB_OK);
-    f = s;
-  } catch (...) {
-    get_game_loop()->get_logger()->critical(
-        "unknown error found while trying to parse {}", s);
-    MessageBoxA(0, "idk", "unknown format error", MB_OK);
+    get_game_loop()->display_error(error_string);
     f = s;
   }
   return f;
@@ -94,7 +87,7 @@ Game_Loop::Game_Loop()
     : player_state(playerState::menu), current_timestamp(time(0)),
       gamelevel(nullptr), update_presence(false), update_timestamp(false),
       discord(get_discord()), logger(nullptr) {
-  on_initialize = [] {
+  on_initialize = [](auto _loop) {
   }; // blank function so it doesn't complain about how i don't initialize
 }
 
@@ -113,16 +106,9 @@ void Game_Loop::initialize_config() {
     this->config.from_toml(config);
 
   } catch (const std::exception &e) {
-    if (logger) {
-      logger->critical("error found while parsing config\n{}", e.what());
-    }
-    MessageBoxA(0, e.what(), "config parser error", MB_OK);
-  } catch (...) {
-    if (logger) {
-      logger->critical("unknown config parsing error");
-    }
-    MessageBoxA(0, "unhandled error\r\nthings should continue fine",
-                "config parser", MB_OK);
+    auto message = fmt::format(
+        FMT_STRING("Error found while trying to load config:\n{}"), e.what());
+    this->display_error(message);
   }
 
   // on debug builds, console logging will be enabled
@@ -181,7 +167,7 @@ void Game_Loop::initialize_loop() {
 
   update_presence = true;
   update_timestamp = true;
-  on_initialize();
+  on_initialize(this);
 }
 
 void Game_Loop::on_loop() {
@@ -195,6 +181,12 @@ void Game_Loop::on_loop() {
     case playerState::level: {
       parseGJGameLevel(gamelevel, level);
       auto level_location = gamelevel->levelType;
+
+      if (logger) {
+        logger->debug("playing level of type {} in folder {}",
+                      gamelevel->levelType, gamelevel->levelFolder);
+      }
+
       if (level_location == GJLevelType::Editor) {
         auto playtesting = this->config.level.playtesting;
 
@@ -266,8 +258,16 @@ std::string Game_Loop::get_executable_name() {
 
 std::shared_ptr<spdlog::logger> Game_Loop::get_logger() { return logger; }
 
-void Game_Loop::register_on_initialize(std::function<void()> callback) {
+void Game_Loop::register_on_initialize(
+    std::function<void(Game_Loop *)> callback) {
   on_initialize = callback;
+}
+
+void Game_Loop::display_error(std::string message) {
+  MessageBoxA(0, message.c_str(), "GDRPC Error", MB_OK | MB_ICONEXCLAMATION);
+  if (logger) {
+    logger->critical(message);
+  }
 }
 
 DWORD WINAPI mainThread(LPVOID lpParam) {

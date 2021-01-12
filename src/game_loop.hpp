@@ -46,7 +46,7 @@ private:
   void update_presence_w(std::string &, std::string &, std::string &,
                          std::string &, std::string &);
 
-  std::function<void()> on_initialize;
+  std::function<void(Game_Loop *)> on_initialize;
 
 public:
   Game_Loop();
@@ -73,7 +73,9 @@ public:
 
   void close();
 
-  void register_on_initialize(std::function<void()>);
+  void register_on_initialize(std::function<void(Game_Loop *)>);
+
+  void display_error(std::string message);
 };
 
 DWORD WINAPI mainThread(LPVOID lpParam);
