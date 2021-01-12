@@ -26,6 +26,10 @@ HMODULE GetCurrentModule() {
   return hModule;
 }
 
+template <typename T> T *offset_from_base(void *struct_ptr, int addr) {
+  return reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(struct_ptr) + addr);
+}
+
 typedef int(__thiscall *MenuLayerInitF)(void *menuLayer);
 MenuLayerInitF mli;
 
@@ -162,6 +166,66 @@ levelID: {} @ {:#x}"),
   return lelc(gameLevel);
 }
 
+void fix_object_count(void *LevelEditorLayer, GJGameLevel *level) {
+  level->objectCount = *offset_from_base<int>(LevelEditorLayer, 0x3A0);
+  level->objectCount_seed = *offset_from_base<int>(LevelEditorLayer, 0x39C);
+  level->objectCount_rand = *offset_from_base<int>(LevelEditorLayer, 0x398);
+}
+
+typedef void(__thiscall *LevelEditorLayerAddSpecialF)(void *LevelEditorLayer,
+                                                      void *object);
+LevelEditorLayerAddSpecialF lelas;
+
+void __fastcall LevelEditorLayerAddSpecialH(void *self, void *_edx,
+                                            void *object) {
+  lelas(self, object);
+
+  auto game_loop = get_game_loop();
+  auto gamelevel = game_loop->get_gamelevel();
+
+  // this should hopefully prevent spam upon level loading
+  auto new_object_count = *offset_from_base<int>(self, 0x3A0);
+  if (gamelevel->objectCount >= new_object_count)
+    return;
+
+  fix_object_count(self, gamelevel);
+  game_loop->set_update_presence(true);
+
+  if (auto logger = game_loop->get_logger()) {
+    logger->debug("LevelEditorLayer::addSpecial called\nnew obj count: {}",
+                  gamelevel->objectCount);
+  }
+
+  return;
+}
+
+typedef void(__thiscall *LevelEditorLayerRemoveSpecialF)(void *LevelEditorLayer,
+                                                         void *object);
+LevelEditorLayerRemoveSpecialF lelrs;
+
+void __fastcall LevelEditorLayerRemoveSpecialH(void *self, void *_edx,
+                                               void *object) {
+  lelrs(self, object);
+
+  auto game_loop = get_game_loop();
+  auto gamelevel = game_loop->get_gamelevel();
+
+  // same thing but with level closing
+  auto new_object_count = *offset_from_base<int>(self, 0x3A0);
+  if (gamelevel->objectCount < new_object_count)
+    return;
+
+  fix_object_count(self, gamelevel);
+  game_loop->set_update_presence(true);
+
+  if (auto logger = game_loop->get_logger()) {
+    logger->debug("LevelEditorLayer::removeSpecial called\nnew obj count: {}",
+                  gamelevel->objectCount);
+  }
+
+  return;
+}
+
 typedef void(__thiscall *CCDirectorEndF)(void *CCDirector);
 CCDirectorEndF ccde;
 
@@ -179,7 +243,7 @@ void __fastcall CCDirectorEndH(void *CCDirector) {
 
 // no need to export this, not putting in .h
 struct game_hook {
-  int *orig_addr;
+  void *orig_addr;
   void *hook_fn;
   void **orig_fn;
   std::string fn_name;
@@ -230,26 +294,32 @@ void doTheHook() {
                                   (LONG_PTR)nWindowProc);
 
   // wall of hooks
-  std::array<game_hook, 7> hooks{{
-      {(int *)((int)gd_handle + 0x1907B0),
+  std::array<game_hook, 9> hooks{{
+      {offset_from_base<void>(gd_handle, 0x1907B0),
        reinterpret_cast<void *>(&MenuLayerInitH),
        reinterpret_cast<void **>(&mli), "MenuLayer::init"},
-      {(int *)((int)gd_handle + 0x1FB6D0),
+      {offset_from_base<void>(gd_handle, 0x1FB6D0),
        reinterpret_cast<void *>(&PlayLayerCreateH),
        reinterpret_cast<void **>(&plc), "PlayLayer::create"},
-      {(int *)((int)gd_handle + 0x20D810),
+      {offset_from_base<void>(gd_handle, 0x20D810),
        reinterpret_cast<void *>(&PlayLayerOnQuitH),
        reinterpret_cast<void **>(&ploq), "PlayLayer::onQuit"},
-      {(int *)((int)gd_handle + 0x1FE3A0),
+      {offset_from_base<void>(gd_handle, 0x1FE3A0),
        reinterpret_cast<void *>(&PlayLayerShowNewBestH),
        reinterpret_cast<void **>(&plsnb), "PlayLayer::showNewBest"},
-      {(int *)((int)gd_handle + 0x75660),
+      {offset_from_base<void>(gd_handle, 0x75660),
        reinterpret_cast<void *>(&EditorPauseLayerOnExitEditorH),
        reinterpret_cast<void **>(&eploee), "EditorPauseLayer::onExitEditor"},
-      {(int *)((int)gd_handle + 0x15ED60),
+      {offset_from_base<void>(gd_handle, 0x15ED60),
        reinterpret_cast<void *>(&LevelEditorLayerCreateH),
        reinterpret_cast<void **>(&lelc), "LevelEditorLayer::create"},
-      {(int *)GetProcAddress(cocos_handle, "?end@CCDirector@cocos2d@@QAEXXZ"),
+      {offset_from_base<void>(gd_handle, 0x162650),
+       reinterpret_cast<void *>(&LevelEditorLayerAddSpecialH),
+       reinterpret_cast<void **>(&lelas), "LevelEditorLayer::addSpecial"},
+      {offset_from_base<void>(gd_handle, 0x162FF0),
+       reinterpret_cast<void *>(&LevelEditorLayerRemoveSpecialH),
+       reinterpret_cast<void **>(&lelrs), "LevelEditorLayer::removeSpecial"},
+      {GetProcAddress(cocos_handle, "?end@CCDirector@cocos2d@@QAEXXZ"),
        reinterpret_cast<void *>(&CCDirectorEndH),
        reinterpret_cast<void **>(&ccde), "CCDirector::end"},
   }};

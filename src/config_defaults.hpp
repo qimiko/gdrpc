@@ -137,8 +137,8 @@ struct Config_Format {
 
   Level level = {
       {"Playing {name}", "by {author} ({best}%)", "{stars}* {diff} ({id})"},
-      {"Editing a level", "", ""}};
-  Editor editor = {{"Editing a level", "", ""}, false};
+      {"Playtesting a level", "", ""}};
+  Editor editor = {{"Editing a level", "{objects} objects", ""}, false};
   User user = {"{name} [Rank #{rank}]", "", true};
   Config::Presence menu = {"Idle", "", ""};
 

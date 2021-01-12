@@ -107,7 +107,7 @@ struct GJGameLevel {
   int featured;
 
   bool isEpic;
-  bool unknown_bool_0x1F5;
+  bool levelFavorited;
   int levelFolder;
 
   int dailyID_rand;
@@ -164,8 +164,8 @@ struct GJGameLevel {
 
   std::string unknown_string_0x29C;
 
-  bool unknown_bool_0x2A0;
-  bool unknown_bool_0x2A1;
+  bool dontSave;
+  bool levelDownloaded;
 
   int requiredCoins;
   bool isUnlocked;
@@ -185,7 +185,7 @@ struct GJGameLevel {
   std::string tempName;
   std::string capacityString;
 
-  bool unknown_bool_0x2D4;
+  bool highObjectsEnabled;
   std::string personalBests;
 };
 

@@ -42,7 +42,8 @@ std::string formatWithLevel(std::string &s, GDlevel &level,
         s, fmt::arg("id", level.levelID), fmt::arg("name", level.name),
         fmt::arg("best", in_memory->normalPercent),
         fmt::arg("diff", getTextFromKey(getDifficultyName(level))),
-        fmt::arg("author", level.author), fmt::arg("stars", level.stars));
+        fmt::arg("author", level.author), fmt::arg("stars", level.stars),
+        fmt::arg("objects", in_memory->objectCount));
   } catch (const fmt::format_error &e) {
 
     std::string error_string =

@@ -1,20 +1,20 @@
 # default config for gdrpc - this should be automatically generated on first launch
 # this one will look nicer though :)
 
+# supported parameters - id, name, best, diff, author, stars, objects
 [level]
-	# parameters - id, name, best, diff, author, stars
 	[level.saved]
 		detail = "Playing {name}"
 		state = "by {author} ({best}%)"
 		smalltext = "{stars}* {diff} ({id})"
 	[level.playtesting]
-		detail = "Editing a level"
+		detail = "Playtesting a level"
 		state = ""
 		smalltext = ""
 
 [editor]
 	detail = "Editing a level"
-	state = ""
+	state = "{objects} objects"
 	smalltext = ""
 	reset_timestamp = false # resets timestamp between going from editor to playtest
 
