@@ -6,7 +6,7 @@
 
 namespace Config {
 
-constexpr int LATEST_VERSION = 3;
+constexpr int LATEST_VERSION = 4;
 
 constexpr auto DEFAULT_EXECUTABLE = "GeometryDash.exe";
 constexpr auto DEFAULT_URL = "http://boomlings.com";
@@ -116,8 +116,20 @@ struct Config_Format {
   };
 
   void from_toml(const toml::value &table) {
-    this->level = toml::find<Config_Format::Level>(table, "level");
-    this->editor = toml::find<Config_Format::Editor>(table, "editor");
+    if (table.at("level").type() == toml::value_t::array) {
+      this->level =
+          toml::find<std::vector<Config_Format::Level>>(table, "level");
+    } else {
+      this->level.at(0) = toml::find<Config_Format::Level>(table, "level");
+    }
+
+    if (table.at("editor").type() == toml::value_t::array) {
+      this->editor =
+          toml::find<std::vector<Config_Format::Editor>>(table, "editor");
+    } else {
+      this->editor.at(0) = toml::find<Config_Format::Editor>(table, "editor");
+    }
+
     this->user = toml::find<Config_Format::User>(table, "user");
     this->menu = toml::find<Config::Presence>(table, "menu");
 
@@ -135,10 +147,11 @@ struct Config_Format {
                        {"settings", this->settings}};
   }
 
-  Level level = {
-      {"Playing {name}", "by {author} ({best}%)", "{stars}* {diff} ({id})"},
-      {"Playtesting a level", "", ""}};
-  Editor editor = {{"Editing a level", "{objects} objects", ""}, false};
+  std::vector<Level> level{
+      {{"Playing {name}", "by {author} ({best}%)", "{stars}* {diff} ({id})"},
+       {"Playtesting a level", "", ""}}};
+  std::vector<Editor> editor{
+      {{"Editing a level", "{objects} objects", ""}, false}};
   User user = {"{name} [Rank #{rank}]", "", true};
   Config::Presence menu = {"Idle", "", ""};
 

@@ -2,7 +2,7 @@
 # this one will look nicer though :)
 
 # supported parameters - id, name, best, diff, author, stars, objects
-[level]
+[[level]]
 	[level.saved]
 		detail = "Playing {name}"
 		state = "by {author} ({best}%)"
@@ -12,11 +12,29 @@
 		state = ""
 		smalltext = ""
 
-[editor]
+# uncomment the following lines to try out the folder-based presence feature
+#[[level]] # folder 1
+#	[level.saved]
+#		detail = "Attempting {name}"
+#		state = "by {author} ({best}%)"
+#		smalltext = "{stars}* {diff} ({id})"
+#	[level.playtesting]
+#		detail = "Practicing {name}"
+#		state = "{best}%"
+#		smalltext = "{objects} objects"
+
+[[editor]]
 	detail = "Editing a level"
 	state = "{objects} objects"
 	smalltext = ""
 	reset_timestamp = false # resets timestamp between going from editor to playtest
+
+# uncomment the following lines to see folder-based presence on the editor
+#[[editor]] # also folder 1
+#	detail = "Playtesting {name}"
+#	state = "{objects} objects"
+#	smalltext = ""
+#	reset_timestamp = true
 
 [menu]
 	detail = "Idle"

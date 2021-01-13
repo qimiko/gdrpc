@@ -180,15 +180,21 @@ void Game_Loop::on_loop() {
     switch (player_state) {
     case playerState::level: {
       parseGJGameLevel(gamelevel, level);
+
       auto level_location = gamelevel->levelType;
 
+      // since the folder will never be negative casting should be okay
+      auto folder = static_cast<size_t>(gamelevel->levelFolder);
+      if (folder >= this->config.level.size())
+        folder = 0;
+
       if (logger) {
-        logger->debug("playing level of type {} in folder {}",
-                      gamelevel->levelType, gamelevel->levelFolder);
+        logger->debug("playing level of type {} in folder {}", level_location,
+                      folder);
       }
 
       if (level_location == GJLevelType::Editor) {
-        auto playtesting = this->config.level.playtesting;
+        auto playtesting = this->config.level.at(folder).playtesting;
 
         details = formatWithLevel(playtesting.detail, level, this->gamelevel);
         state = formatWithLevel(playtesting.state, level, this->gamelevel);
@@ -196,7 +202,7 @@ void Game_Loop::on_loop() {
             formatWithLevel(playtesting.smalltext, level, this->gamelevel);
         small_image = "creator_point";
       } else {
-        auto saved = this->config.level.saved;
+        auto saved = this->config.level.at(folder).saved;
 
         details = formatWithLevel(saved.detail, level, this->gamelevel);
         state = formatWithLevel(saved.state, level, this->gamelevel);
@@ -206,8 +212,13 @@ void Game_Loop::on_loop() {
       break;
     }
     case playerState::editor: {
-      auto editor = this->config.editor;
       parseGJGameLevel(gamelevel, level);
+
+      auto folder = static_cast<size_t>(gamelevel->levelFolder);
+      if (folder >= this->config.editor.size())
+        folder = 0;
+
+      auto editor = this->config.editor.at(folder);
 
       details = formatWithLevel(editor.detail, level, this->gamelevel);
       state = formatWithLevel(editor.state, level, this->gamelevel);
@@ -248,8 +259,11 @@ void Game_Loop::set_state(playerState n_state) { player_state = n_state; }
 
 playerState Game_Loop::get_state() { return player_state; }
 
-bool Game_Loop::get_reset_timestamp() {
-  return this->config.editor.reset_timestamp;
+bool Game_Loop::get_reset_timestamp(int folder) {
+  if (static_cast<size_t>(folder) >= this->config.editor.size())
+    folder = 0;
+
+  return this->config.editor.at(folder).reset_timestamp;
 }
 
 std::string Game_Loop::get_executable_name() {

@@ -63,7 +63,7 @@ levelID: {} @ {:#x}"),
   }
 
   if (game_loop->get_state() != playerState::editor ||
-      game_loop->get_reset_timestamp()) {
+      game_loop->get_reset_timestamp(gameLevel->levelFolder)) {
     game_loop->set_update_timestamp(true);
   }
 

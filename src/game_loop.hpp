@@ -60,7 +60,7 @@ public:
   void set_update_presence(bool);
   void set_update_timestamp(bool);
 
-  bool get_reset_timestamp();
+  bool get_reset_timestamp(int folder = 0);
 
   std::string get_executable_name();
 

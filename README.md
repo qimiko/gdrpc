@@ -30,6 +30,8 @@
 The configuration file, `gdrpc.toml` is located in the Geometry Dash directory. It is created automatically on first run.
 For more details on how to configure, there is a `gdrpc.toml` file located in the root of this repository that details each of the arguments.
 
+To change the presence based on the folder of the current level, add additional tables that correspond with the index of the folder that you would like to have a specific presence. `gdrpc.toml` should show more details.
+
 ### Compiling
 
 1. import files into Visual Studio as cmake project
@@ -58,7 +60,3 @@ The autoloader is based on a modification of the import table of `zlib1.dll`. If
 * shira for some internal details
 * saya for motivation
 * silentzer for being smart
-
-### Maybe
-
-* object count in levels
