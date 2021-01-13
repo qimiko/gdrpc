@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <ctime>
+#include <cctype>
 #include <functional>
 #include <vector>
 

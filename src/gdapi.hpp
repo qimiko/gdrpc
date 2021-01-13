@@ -13,16 +13,17 @@
 #include <unordered_map>
 #include <vector>
 
-enum class difficulty {
-  na,
-  easy,
-  normal,
-  hard,
-  harder,
-  insane,
-}; // note that no demon difficulty exists
+enum class Difficulty {
+  Na,
+  Easy,
+  Normal,
+  Hard,
+  Harder,
+  Insane,
+  Demon
+};
 
-enum class demon_difficulty { none, easy, medium, hard, insane, extreme };
+enum class Demon_Difficulty { None, Easy, Medium, Hard, Insane, Extreme };
 
 // thinking about this a bit later
 // probably shouldn't have used structs lol
@@ -33,8 +34,8 @@ struct GDlevel {
   std::string author = "-";
   int authorID = -1;
   int stars = 0;
-  difficulty difficulty = difficulty::na;
-  demon_difficulty demonDifficulty = demon_difficulty::none;
+  Difficulty difficulty = Difficulty::Na;
+  Demon_Difficulty demonDifficulty = Demon_Difficulty::None;
   bool isAuto = false;
   bool isDemon = false;
 }; // this is a really barebones struct btw
@@ -52,8 +53,7 @@ struct GDUrls {
   std::string get_scores = "getGJScores20.php";
 };
 
-difficulty getDiffValue(int diff);
-demon_difficulty getDemonDiffValue(int diff);
+Demon_Difficulty getDemonDiffValue(int diff);
 std::string getDifficultyName(GDlevel &level);
 
 typedef std::multimap<std::string, std::string> Params;

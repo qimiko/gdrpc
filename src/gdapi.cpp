@@ -1,38 +1,20 @@
 #include "gdapi.hpp"
 
-difficulty getDiffValue(int diff) {
-  switch (diff) {
-  case 10:
-    return difficulty::easy;
-  case 20:
-    return difficulty::normal;
-  case 30:
-    return difficulty::hard;
-  case 40:
-    return difficulty::harder;
-  case 50:
-    return difficulty::insane;
-  case 0:
-  default:
-    return difficulty::na;
-  }
-}
-
-demon_difficulty getDemonDiffValue(int diff) {
+Demon_Difficulty getDemonDiffValue(int diff) {
   switch (diff) {
   case 3:
-    return demon_difficulty::easy;
+    return Demon_Difficulty::Easy;
   case 4:
-    return demon_difficulty::medium;
+    return Demon_Difficulty::Medium;
   case 5:
-    return demon_difficulty::insane;
+    return Demon_Difficulty::Insane;
   case 6:
-    return demon_difficulty::extreme;
+    return Demon_Difficulty::Extreme;
   case 0:
   case 1:
   case 2:
   default:
-    return demon_difficulty::hard;
+    return Demon_Difficulty::Hard;
   }
 }
 
@@ -45,33 +27,35 @@ std::string getDifficultyName(GDlevel &level) {
   // this is also messy
   if (level.isDemon) {
     switch (level.demonDifficulty) {
-    case demon_difficulty::easy:
+    case Demon_Difficulty::Easy:
       return "easy_demon";
-    case demon_difficulty::medium:
+    case Demon_Difficulty::Medium:
       return "medium_demon";
-    case demon_difficulty::insane:
+    case Demon_Difficulty::Insane:
       return "insane_demon";
-    case demon_difficulty::extreme:
+    case Demon_Difficulty::Extreme:
       return "extreme_demon";
     default:
-    case demon_difficulty::hard:
+    case Demon_Difficulty::Hard:
       return "hard_demon";
     }
   }
 
   // definitely a better way to do this
   switch (level.difficulty) {
-  case difficulty::easy:
+  case Difficulty::Easy:
     return "easy";
-  case difficulty::normal:
+  case Difficulty::Normal:
     return "normal";
-  case difficulty::hard:
+  case Difficulty::Hard:
     return "hard";
-  case difficulty::harder:
+  case Difficulty::Harder:
     return "harder";
-  case difficulty::insane:
+  case Difficulty::Insane:
     return "insane";
-  case difficulty::na:
+  case Difficulty::Demon:
+    return "hard_demon";
+  case Difficulty::Na:
   default:
     return "na";
   }
@@ -187,24 +171,20 @@ bool parseGJGameLevel(GJGameLevel *in_memory, GDlevel &level) {
 
   level.name = in_memory->levelName;
 
+  // good robtop security
+  level.isDemon = static_cast<bool>(in_memory->demon);
+  level.isAuto = in_memory->autoLevel;
+
   if (levelLocation == 1) {
     level.author = "RobTop"; // author is "" on these
-    int diffValue = in_memory->difficulty * 10;
-    if (diffValue == 60) {
-      level.isDemon = true;
-      level.difficulty = difficulty::insane;
-      level.demonDifficulty = demon_difficulty::easy;
-    } else {
-      level.isDemon = false;
-      level.difficulty = getDiffValue(diffValue);
+    level.difficulty = static_cast<Difficulty>(in_memory->difficulty);
+
+    if (level.difficulty == Difficulty::Demon) {
+      level.demonDifficulty = Demon_Difficulty::Easy;
     }
   } else {
     level.author = in_memory->userName;
-    level.difficulty = getDiffValue(in_memory->ratingsSum);
-
-    // good robtop security
-    level.isDemon = static_cast<bool>(in_memory->demon);
-    level.isAuto = in_memory->autoLevel;
+    level.difficulty = static_cast<Difficulty>(in_memory->ratingsSum / 10);
 
     if (level.isDemon) {
       level.demonDifficulty = getDemonDiffValue(in_memory->demonDifficulty);

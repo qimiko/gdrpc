@@ -18,13 +18,13 @@ int *get_address(int *start, std::vector<int> addresses) {
 
 // insane_demon to Insane Demon
 std::string getTextFromKey(std::string key) {
-  key[0] = toupper(key[0]); // uppercase first letter
+  key.at(0) = std::toupper(key.at(0)); // uppercase first letter
   int index = 1; // start from 1 because we start string from 1, and also
                  // because you can't get an index at -1 like it'll try to do..
   std::for_each(key.begin() + 1, key.end(), [&index, &key](char &letter) {
     // in any case, this checks if it's a space before
-    if (key[index - 1] == ' ') {
-      letter = toupper(letter); // then capitalizes
+    if (key.at(index - 1) == ' ') {
+      letter = std::toupper(letter); // then capitalizes
     } else if (letter == '_') { // if underscore it goes and remoes it
       letter = ' ';
     }
