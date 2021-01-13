@@ -146,9 +146,16 @@ levelID: {} @ {:#x}"),
 }
 
 void fix_object_count(void *LevelEditorLayer, GJGameLevel *level) {
-  level->objectCount = *offset_from_base<int>(LevelEditorLayer, 0x3A0);
-  level->objectCount_seed = *offset_from_base<int>(LevelEditorLayer, 0x39C);
-  level->objectCount_rand = *offset_from_base<int>(LevelEditorLayer, 0x398);
+  const auto LevelEditorLayer_objectCount_offset = 0x3A0;
+  const auto size_of_int = sizeof(int);
+
+  level->objectCount_rand = *offset_from_base<int>(
+      LevelEditorLayer,
+      LevelEditorLayer_objectCount_offset - (size_of_int * 2));
+  level->objectCount_seed = *offset_from_base<int>(
+      LevelEditorLayer, LevelEditorLayer_objectCount_offset - size_of_int);
+  level->objectCount = *offset_from_base<int>(
+      LevelEditorLayer, LevelEditorLayer_objectCount_offset);
 }
 
 void(__thiscall *LevelEditorLayer_addSpecial_O)(void *LevelEditorLayer,
