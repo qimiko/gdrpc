@@ -2,7 +2,6 @@
 #include "config_defaults.hpp"
 #include "gdapi.hpp"
 #include "gjgamelevel.hpp"
-#include "pch.h"
 #include "presence_wrapper.hpp"
 
 #include <algorithm>
@@ -34,8 +33,8 @@ private:
   std::shared_ptr<spdlog::logger> logger;
 
   bool update_presence, update_timestamp;
+  std::time_t current_timestamp;
 
-  time_t current_timestamp;
   Discord_Presence *discord;
 
   Config::Config_Format config;

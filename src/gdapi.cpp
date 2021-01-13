@@ -1,5 +1,4 @@
 #include "gdapi.hpp"
-#include "pch.h"
 
 difficulty getDiffValue(int diff) {
   switch (diff) {

@@ -1,11 +1,9 @@
 #pragma once
 #pragma comment(lib, "discord-rpc.lib")
 
-#include <cstdint>
-#include <cstdlib>
 #include <discord_rpc.h>
-#include <iostream>
-#include <time.h>
+#include <ctime>
+#include <cstring>
 
 #ifndef DRPWRAP
 #define DRPWRAP

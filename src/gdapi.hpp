@@ -2,7 +2,6 @@
 #ifndef GDAPI_H
 #define GDAPI_H
 #include "gjgamelevel.hpp"
-#include "pch.h"
 
 #include <algorithm>
 #include <exception>

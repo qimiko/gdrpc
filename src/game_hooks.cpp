@@ -1,5 +1,4 @@
 #include "game_hooks.hpp"
-#include "pch.h"
 
 bool setupDone = false;
 

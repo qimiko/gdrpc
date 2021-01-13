@@ -1,5 +1,4 @@
 #include "game_loop.hpp"
-#include "pch.h"
 
 Game_Loop game_loop = Game_Loop();
 
@@ -69,7 +68,7 @@ timestamp_update: {}",
   }
 
   if (update_timestamp) {
-    current_timestamp = time(0);
+    time(&current_timestamp);
     update_timestamp = false;
   }
   discord->update(details.c_str(), largeText.c_str(), smallText.c_str(),
@@ -84,7 +83,7 @@ void Game_Loop::close() {
 }
 
 Game_Loop::Game_Loop()
-    : player_state(playerState::menu), current_timestamp(time(0)),
+    : player_state(playerState::menu), current_timestamp(time(nullptr)),
       gamelevel(nullptr), update_presence(false), update_timestamp(false),
       discord(get_discord()), logger(nullptr) {
   on_initialize = [](auto _loop) {

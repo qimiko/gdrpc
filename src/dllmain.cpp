@@ -1,5 +1,5 @@
 #include "game_hooks.hpp"
-#include "pch.h"
+#include <windows.h>
 
 bool hook_done = false;
 

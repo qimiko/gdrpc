@@ -1,5 +1,4 @@
 #include "presence_wrapper.hpp"
-#include "pch.h"
 
 Discord_Presence global_discord = Discord_Presence();
 
@@ -30,7 +29,7 @@ Discord_Presence::Discord_Presence() : status(-1) {}
 
 void Discord_Presence::initialize(const char *application_id) {
   DiscordEventHandlers handlers;
-  memset(&handlers, 0, sizeof(handlers));
+  std::memset(&handlers, 0, sizeof(handlers));
   handlers.ready = handleDiscordReady;
   handlers.errored = handleDiscordError;
   handlers.disconnected = handleDiscordDisconnected;
@@ -47,11 +46,11 @@ void Discord_Presence::set_status(int n_status) { status = n_status; }
 
 void Discord_Presence::update(const char *details, const char *largeText,
                               const char *smallText, const char *statetext,
-                              const char *smallImage, time_t timestamp) {
+                              const char *smallImage, std::time_t timestamp) {
   DiscordRichPresence discordPresence;
-  memset(&discordPresence, 0, sizeof(discordPresence));
+  std::memset(&discordPresence, 0, sizeof(discordPresence));
 
-  if (strlen(statetext) != 0) {
+  if (std::strlen(statetext) != 0) {
     discordPresence.state = statetext;
   }
 
@@ -60,7 +59,7 @@ void Discord_Presence::update(const char *details, const char *largeText,
   discordPresence.largeImageKey = "logo";
   discordPresence.largeImageText = largeText;
 
-  if (strcmp(smallImage, "none") != 0) {
+  if (std::strcmp(smallImage, "none") != 0) {
     discordPresence.smallImageKey = smallImage;
     discordPresence.smallImageText = smallText;
   }
