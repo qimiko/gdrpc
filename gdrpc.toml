@@ -49,7 +49,7 @@
 
 [settings]
 	# file version is included in case of future file changes
-	file_version = 3
+	file_version = 4
 	logging = false
 	executable_name = "GeometryDash.exe" # change for gdps if needed
 	base_url = "http://boomlings.com" # this currently does not support https
