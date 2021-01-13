@@ -10,10 +10,9 @@
 [submodule "libraries/rapidjson"]
 	path = libraries/rapidjson
 	url = https://github.com/Tencent/rapidjson
-	branch = v1.1.0
 [submodule "libraries/minhook"]
 	path = libraries/minhook
-	url = https://github.com/mumble-voip/minhook
+	url = https://github.com/TsudaKageyu/minhook
 [submodule "libraries/spdlog"]
 	path = libraries/spdlog
 	url = https://github.com/gabime/spdlog
