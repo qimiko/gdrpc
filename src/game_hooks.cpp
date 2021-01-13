@@ -227,7 +227,15 @@ struct game_hook {
 void doTheHook() {
   Game_Loop *game_loop = get_game_loop();
 
-  game_loop->initialize_config();
+  try {
+    game_loop->initialize_config();
+  } catch (const std::exception &e) {
+    auto message = fmt::format(
+        FMT_STRING("Initialization of config failed with\n{}."), e.what());
+    game_loop->display_error(message);
+    return;
+  }
+
   auto logger = game_loop->get_logger();
 
   if (auto status = MH_Initialize(); status != MH_OK) {
