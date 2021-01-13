@@ -23,7 +23,6 @@ target_include_directories(gdrpc PRIVATE
   libraries/spdlog/include
   libraries/cpp-httplib
 )
-target_link_libraries(gdrpc wininet)
 
 add_subdirectory(libraries/fmt)
 target_link_libraries(gdrpc fmt)
