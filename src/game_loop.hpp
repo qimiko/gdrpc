@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <ctime>
 #include <cctype>
-#include <functional>
 #include <vector>
 
 #include <fstream>
@@ -46,8 +45,6 @@ private:
   void update_presence_w(std::string &, std::string &, std::string &,
                          std::string &, std::string &);
 
-  std::function<void(Game_Loop *)> on_initialize;
-
 public:
   Game_Loop();
 
@@ -72,8 +69,6 @@ public:
   void initialize_loop();
 
   void close();
-
-  void register_on_initialize(std::function<void(Game_Loop *)>);
 
   void display_error(std::string message);
 };

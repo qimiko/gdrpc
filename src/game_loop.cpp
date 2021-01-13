@@ -86,8 +86,6 @@ Game_Loop::Game_Loop()
     : player_state(playerState::menu), current_timestamp(time(nullptr)),
       gamelevel(nullptr), update_presence(false), update_timestamp(false),
       discord(get_discord()), logger(nullptr) {
-  on_initialize = [](auto _loop) {
-  }; // blank function so it doesn't complain about how i don't initialize
 }
 
 void Game_Loop::initialize_config() {
@@ -166,7 +164,6 @@ void Game_Loop::initialize_loop() {
 
   update_presence = true;
   update_timestamp = true;
-  on_initialize(this);
 }
 
 void Game_Loop::on_loop() {
@@ -270,11 +267,6 @@ std::string Game_Loop::get_executable_name() {
 }
 
 std::shared_ptr<spdlog::logger> Game_Loop::get_logger() { return logger; }
-
-void Game_Loop::register_on_initialize(
-    std::function<void(Game_Loop *)> callback) {
-  on_initialize = callback;
-}
 
 void Game_Loop::display_error(std::string message) {
   MessageBoxA(0, message.c_str(), "GDRPC Error", MB_OK | MB_ICONEXCLAMATION);

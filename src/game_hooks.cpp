@@ -36,13 +36,6 @@ int __fastcall MenuLayer_init_H(void *menuLayer) {
       logger->trace(FMT_STRING("menu layer setup called"));
     }
 
-    get_game_loop()->register_on_initialize([](auto loop) {
-      // now we can log
-      if (auto logger = loop->get_logger()) {
-        logger->info(FMT_STRING("gdrpc has been successfully initialized"));
-      }
-    });
-
     CreateThread(NULL, 0, mainThread, GetCurrentModule(), 0, NULL);
     setupDone = true;
   }
