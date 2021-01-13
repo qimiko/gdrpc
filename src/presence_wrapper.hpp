@@ -18,7 +18,7 @@ public:
   int get_status();
   void set_status(int);
   void update(const char *details, const char *largeText, const char *smallText,
-              const char *statetext, const char *smallImage, time_t timestamp);
+              const char *statetext, const char *smallImage, std::time_t timestamp);
   void run_callbacks();
   void shutdown();
 };

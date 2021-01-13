@@ -105,17 +105,13 @@ bool GD_Client::get_user_info(int &accID, GDuser &user) {
   try {
     auto user_map = to_robtop(user_string);
 
-    user.name = user_map[1];
-    user.ID = std::stoi(user_map[2], nullptr);
-    user.accID = std::stoi(user_map[16], nullptr);
+    user.name = user_map.at(1);
+    user.ID = std::stoi(user_map.at(2), nullptr);
+    user.accID = std::stoi(user_map.at(16), nullptr);
     return true;
   } catch (const std::exception &e) {
     // throw the exceptions that will actually have a message
     throw e;
-  } catch (...) {
-    user.name = "invalid";
-    user.ID = -1;
-    user.accID = -1;
   }
   return false;
 }
@@ -127,16 +123,12 @@ bool GD_Client::get_player_info(int &playerID, GDuser &user) {
   try {
     auto user_map = to_robtop(player_string);
 
-    user.name = user_map[1];
-    user.ID = std::stoi(user_map[2], nullptr);
-    user.accID = std::stoi(user_map[16], nullptr);
+    user.name = user_map.at(1);
+    user.ID = std::stoi(user_map.at(2), nullptr);
+    user.accID = std::stoi(user_map.at(16), nullptr);
     return true;
   } catch (const std::exception &e) {
     throw e;
-  } catch (...) {
-    user.name = "invalid";
-    user.ID = -1;
-    user.accID = -1;
   }
   return false;
 }
@@ -152,8 +144,8 @@ bool GD_Client::get_user_rank(GDuser &user) {
   Robtop_Map seglist;
 
   if (leaderboard_list.size() >= 24) {
-    seglist = to_robtop(leaderboard_list[24]);
-    found_user = (std::stoi(seglist[16], nullptr) == user.accID);
+    seglist = to_robtop(leaderboard_list.at(24));
+    found_user = (std::stoi(seglist.at(16), nullptr) == user.accID);
   }
 
   if (!found_user) { // hey look its the checks
@@ -175,16 +167,13 @@ bool GD_Client::get_user_rank(GDuser &user) {
     seglist = to_robtop(*player_entry);
   }
 
-  user.rank = std::stoi(seglist[6], nullptr);
+  user.rank = std::stoi(seglist.at(6), nullptr);
   return true;
 }
 
 void GD_Client::set_urls(GDUrls new_urls) { urls = new_urls; }
 
-// i was going to make a joke about this being the better thing like the id
-// parsing but this is _really_ messy no error handling either. good luck
 bool parseGJGameLevel(GJGameLevel *in_memory, GDlevel &level) {
-
   auto newID = in_memory->levelID;
   auto levelLocation = in_memory->levelType;
 
@@ -214,7 +203,7 @@ bool parseGJGameLevel(GJGameLevel *in_memory, GDlevel &level) {
     level.difficulty = getDiffValue(in_memory->ratingsSum);
 
     // good robtop security
-    level.isDemon = (bool)(in_memory->demon);
+    level.isDemon = static_cast<bool>(in_memory->demon);
     level.isAuto = in_memory->autoLevel;
 
     if (level.isDemon) {

@@ -292,7 +292,12 @@ DWORD WINAPI mainThread(LPVOID lpParam) {
       if (auto logger = game_loop.get_logger()) {
         logger->critical("unhandled exception thrown in loop\n{}", e.what());
       }
+    } catch (...) {
+      if (auto logger = game_loop.get_logger()) {
+        logger->critical("unknown exception thrown");
+      }
     }
+
     Sleep(1000);
   }
 
