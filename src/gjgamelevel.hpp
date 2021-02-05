@@ -5,6 +5,11 @@
 
 enum GJLevelType { Local = 1, Editor = 2, Saved = 3 };
 
+struct CCPoint {
+  float x;
+  float y;
+};
+
 struct GJGameLevel {
   int8_t padding_0[0xEC];
   void *lastBuildSave;
@@ -170,9 +175,7 @@ struct GJGameLevel {
   int requiredCoins;
   bool isUnlocked;
 
-  void *lastCameraPos;
-
-  int unknown_int_11;
+  CCPoint lastCameraPos_x;
 
   float lastEditorZoom;
   int lastBuildTab;

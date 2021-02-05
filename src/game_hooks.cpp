@@ -231,6 +231,15 @@ struct game_hook {
   void **orig_fn;
 };
 
+#define CREATE_HOOK(ADDRESS, NAME)                                             \
+  {                                                                            \
+    reinterpret_cast<void *>(ADDRESS), reinterpret_cast<void *>(&(NAME##_H)),  \
+        reinterpret_cast<void **>(&(NAME##_O))                                 \
+  }
+
+#define CREATE_GD_HOOK(ADDRESS, NAME)                                          \
+  CREATE_HOOK(offset_from_base<void>(gd_handle, ADDRESS), NAME)
+
 void doTheHook() {
   Game_Loop *game_loop = get_game_loop();
 
@@ -281,33 +290,17 @@ void doTheHook() {
 
   // wall of hooks
   std::array<game_hook, 9> hooks{{
-      {offset_from_base<void>(gd_handle, 0x1907B0),
-       reinterpret_cast<void *>(&MenuLayer_init_H),
-       reinterpret_cast<void **>(&MenuLayer_init_O)},
-      {offset_from_base<void>(gd_handle, 0x1FB6D0),
-       reinterpret_cast<void *>(&PlayLayer_create_H),
-       reinterpret_cast<void **>(&PlayLayer_create_O)},
-      {offset_from_base<void>(gd_handle, 0x20D810),
-       reinterpret_cast<void *>(&PlayLayer_onQuit_H),
-       reinterpret_cast<void **>(&PlayLayer_onQuit_O)},
-      {offset_from_base<void>(gd_handle, 0x1FE3A0),
-       reinterpret_cast<void *>(&PlayLayer_showNewBest_H),
-       reinterpret_cast<void **>(&PlayLayer_showNewBest_O)},
-      {offset_from_base<void>(gd_handle, 0x75660),
-       reinterpret_cast<void *>(&EditorPauseLayer_onExitEditor_H),
-       reinterpret_cast<void **>(&EditorPauseLayer_onExitEditor_O)},
-      {offset_from_base<void>(gd_handle, 0x15ED60),
-       reinterpret_cast<void *>(&LevelEditorLayer_create_H),
-       reinterpret_cast<void **>(&LevelEditorLayer_create_O)},
-      {offset_from_base<void>(gd_handle, 0x162650),
-       reinterpret_cast<void *>(&LevelEditorLayer_addSpecial_H),
-       reinterpret_cast<void **>(&LevelEditorLayer_addSpecial_O)},
-      {offset_from_base<void>(gd_handle, 0x162FF0),
-       reinterpret_cast<void *>(&LevelEditorLayer_removeSpecial_H),
-       reinterpret_cast<void **>(&LevelEditorLayer_removeSpecial_O)},
-      {GetProcAddress(cocos_handle, "?end@CCDirector@cocos2d@@QAEXXZ"),
-       reinterpret_cast<void *>(&CCDirector_end_H),
-       reinterpret_cast<void **>(&CCDirector_end_O)},
+      CREATE_GD_HOOK(0x1907B0, MenuLayer_init),
+      CREATE_GD_HOOK(0x1FB6D0, PlayLayer_create),
+      CREATE_GD_HOOK(0x20D810, PlayLayer_onQuit),
+      CREATE_GD_HOOK(0x1FE3A0, PlayLayer_showNewBest),
+      CREATE_GD_HOOK(0x75660, EditorPauseLayer_onExitEditor),
+      CREATE_GD_HOOK(0x15ED60, LevelEditorLayer_create),
+      CREATE_GD_HOOK(0x162650, LevelEditorLayer_addSpecial),
+      CREATE_GD_HOOK(0x162FF0, LevelEditorLayer_removeSpecial),
+      CREATE_HOOK(
+        GetProcAddress(cocos_handle, "?end@CCDirector@cocos2d@@QAEXXZ"),
+        CCDirector_end)
   }};
 
   for (const auto &hook : hooks) {
