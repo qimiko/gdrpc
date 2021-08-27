@@ -42,7 +42,9 @@ std::string formatWithLevel(std::string &s, GDlevel &level,
         fmt::arg("best", in_memory->normalPercent),
         fmt::arg("diff", getTextFromKey(getDifficultyName(level))),
         fmt::arg("author", level.author), fmt::arg("stars", level.stars),
-        fmt::arg("objects", in_memory->objectCount));
+        fmt::arg("objects", in_memory->objectCount), fmt::arg("attempts", in_memory->attempts),
+        fmt::arg("jumps", in_memory->jumps), fmt::arg("clicks", in_memory->clicks),
+        fmt::arg("best_percent", in_memory->normalPercent));
   } catch (const fmt::format_error &e) {
     std::string error_string =
         fmt::format("Error found while parsing {}\n{}", s, e.what());
