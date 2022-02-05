@@ -38,6 +38,15 @@ To change the presence based on the folder of the current level, add additional 
 2. download git submodules, `git submodules update --init --recursive`
 3. build dll
 
+### Development Builds
+
+Development builds are built through a GitHub Actions job and can be found in the [actions tab](https://github.com/qimiko/gdrpc/actions).
+
+These builds are not tested for stability, and may crash or generally not function.  
+The options format may change between commits, and could be incompatible from one commit to the next.  
+
+Stick to [full releases](https://github.com/qimiko/gdrpc/releases) if you're unsure, as these receive more testing and a guaranteed upgrade route.
+
 ### Private servers
 
 Private servers _might_ be supported by this, however it hasn't been actually tested.
