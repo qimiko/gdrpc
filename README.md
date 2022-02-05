@@ -22,8 +22,9 @@
 
 #### Automatically
 
-1. copy `zlib1.dll`, `gdrpc.dll` and `discord-rpc.dll` to the Geometry Dash directory
-2. start GD
+1. Setup loader. See the [autoloader section](#autoloader) for more details.
+2. Copy `gdrpc.dll` and `discord-rpc.dll` to the directory that your loader loads DLLs from.
+3. start GD
 
 #### Configuration
 
@@ -56,7 +57,13 @@ If you want to use your own Discord application (to change the playing name or i
 
 Feel free to use this rich presence on a Geometry Dash private server if wanted, but please give proper credit.
 
-#### Autoloader
+### Autoloader
+
+At the time the project was created, automatically loading mods was not common. However, things have changed in recent years.
+
+This project is compatible with any mod loader for Geometry Dash, from [Mega Hack v7](https://absolllute.com/store/view_mega_hack_pro) to [GDDLLLoader](https://github.com/adafcaefc/GDDLLLoader). See their instructions regarding the placement of DLLs. Note that `discord-rpc.dll` must be located in Geometry Dash's directory, alongside `GeometryDash.exe`. The mod's configuration files will also be placed in the game's directory.
+
+Each release comes with a `zlib1.dll` based loader, which will only load the rich presence. It can be found through the releases tab or at [this link](https://github.com/qimiko/gdrpc/releases/download/2.0.0/zlib1.dll). Put both files in the directory of the game. It should replace `zlib1.dll`.
 
 The autoloader is based on a modification of the import table of `zlib1.dll`. If you want to do it yourself, just grab any generic PE header editor.
 
