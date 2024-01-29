@@ -1,5 +1,9 @@
 # Geometry Dash 2.1 Rich Presence
 
+> [!IMPORTANT]
+> this mod is no longer maintained and **does not** support 2.2!  
+> if you still want a rich presence mod, check out [this mod](https://geode-sdk.org/mods/techstudent10.discord_rich_presence/) for geode.
+
 ## A semi recreation and port of my 1.9 rich presence
 
 ### Currently features
